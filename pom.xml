@@ -55,11 +55,6 @@
     </dependency>
     <dependency>
       <groupId>com.oneandone.devel</groupId>
-      <artifactId>devreg</artifactId>
-      <version>2.1.2</version>
-    </dependency>
-    <dependency>
-      <groupId>com.oneandone.devel</groupId>
       <artifactId>change</artifactId>
       <version>1.0.1</version>
     </dependency>

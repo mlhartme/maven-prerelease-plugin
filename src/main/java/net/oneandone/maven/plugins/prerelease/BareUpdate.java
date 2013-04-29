@@ -15,8 +15,6 @@
  */
 package net.oneandone.maven.plugins.prerelease;
 
-import com.oneandone.devel.devreg.model.Registry;
-import com.oneandone.devel.devreg.model.UnknownUserException;
 import com.oneandone.devel.maven.Maven;
 import net.oneandone.maven.plugins.prerelease.core.Descriptor;
 import net.oneandone.maven.plugins.prerelease.core.Prerelease;
@@ -35,18 +33,11 @@ public class BareUpdate extends BareBase {
     /**
      * Email of the user invoking this goal. Determined via devreg when not specified.
      */
-    @Parameter(property = "prerelease.user", defaultValue = "")
+    @Parameter(property = "prerelease.user", required = true)
     private String user;
 
-    public String getUser() throws IOException, UnknownUserException {
-        Registry registry;
-
-        if (user == null || user.isEmpty()) {
-            registry = Registry.loadCached(world);
-            return registry.whoAmI().getEmail();
-        } else {
-            return user;
-        }
+    public String getUser() {
+        return user;
     }
 
     public void doExecute(Maven maven, MavenProject project, Target target, Descriptor descriptor) throws Exception {

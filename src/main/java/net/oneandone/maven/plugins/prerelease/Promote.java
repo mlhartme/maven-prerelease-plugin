@@ -15,8 +15,6 @@
  */
 package net.oneandone.maven.plugins.prerelease;
 
-import com.oneandone.devel.devreg.model.Registry;
-import com.oneandone.devel.devreg.model.UnknownUserException;
 import net.oneandone.maven.plugins.prerelease.core.Archive;
 import net.oneandone.maven.plugins.prerelease.core.Prerelease;
 import net.oneandone.maven.plugins.prerelease.core.WorkingCopy;
@@ -49,18 +47,11 @@ public class Promote extends ProjectBase {
     /**
      * Email of the user invoking this goal. Determined via devreg when not specified.
      */
-    @Parameter(property = "prerelease.user", defaultValue = "")
+    @Parameter(property = "prerelease.user", required = true)
     private String user;
 
-    public String getUser() throws IOException, UnknownUserException {
-        Registry registry;
-
-        if (user == null || user.isEmpty()) {
-            registry = Registry.loadCached(world);
-            return registry.whoAmI().getEmail();
-        } else {
-            return user;
-        }
+    public String getUser() {
+        return user;
     }
 
     public void doExecute(Archive archive) throws Exception {
@@ -75,7 +66,7 @@ public class Promote extends ProjectBase {
         if (prerelease == null) {
             throw new MojoExecutionException("no prerelease for revision " + revision);
         }
-        prerelease.promote(getLog(), problemEmail, maven(), getUser(), true, session.getUserProperties());
+        prerelease.promote(getLog(), problemEmail, maven(), user, true, session.getUserProperties());
         workingCopy.update(getLog());
     }
 }
