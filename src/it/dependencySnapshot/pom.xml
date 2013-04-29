@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <parent>
+    <groupId>de.ui.devel.maven.poms</groupId>
+    <artifactId>ui</artifactId>
+    <!-- not the latest version! -->
+    <version>4.2.9</version>
+  </parent>
+
+  <groupId>com.oneandone.devel.maven.plugins.prerelease</groupId>
+  <artifactId>minimal</artifactId>
+  <version>1.0.0-SNAPSHOT</version>
+  <scm>
+    <connection>scm:svn:@@SVNURL@@</connection>
+    <developerConnection>scm:svn:@@SVNURL@@</developerConnection>
+    <url>@@SVNURL@@</url>
+  </scm>
+
+  <distributionManagement>
+    <repository>
+      <id>it-releases</id>
+      <url>file://@@TARGET@@/it/maven-release-repository</url>
+    </repository>
+    <snapshotRepository>
+      <id>it-snapshots</id>
+      <url>file://@@TARGET@@/it/maven-snapshot-repository</url>
+    </snapshotRepository>
+  </distributionManagement>
+
+  <dependencies>
+    <dependency>
+      <groupId>de.schlund.maven.poms</groupId>
+      <artifactId>schlund</artifactId>
+      <version>1.1-SNAPSHOT</version>
+    </dependency>
+  </dependencies>
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>com.oneandone.devel.maven.plugins</groupId>
+        <artifactId>prerelease</artifactId>
+        <version>@@VERSION@@</version>
+      </plugin>
+    </plugins>
+  </build>
+</project>

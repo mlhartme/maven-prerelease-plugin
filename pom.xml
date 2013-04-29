@@ -1,0 +1,139 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <parent>
+    <groupId>com.oneandone.devel.maven.poms</groupId>
+    <artifactId>wsd-plugin</artifactId>
+    <version>2.1.2</version>
+    <relativePath/>
+  </parent>
+  <groupId>com.oneandone.devel.maven.plugins</groupId>
+  <artifactId>prerelease</artifactId>
+  <version>1.4.3-SNAPSHOT</version>
+  <packaging>maven-plugin</packaging>
+  <name>Maven Pre-Release Plug-in</name>
+  <description>Creates and promotes pre-releases. Alternative to Maven's release plugins that's more atomic, faster and suitable
+    for continuous delivery</description>
+  <url>http://wiki.intranet.1and1.com/bin/view/UE/MavenPrereleasePlugin</url>
+  <properties>
+    <wsd.ypid>20236</wsd.ypid>
+  </properties>
+  <developers>
+    <developer>
+      <id>mhm</id>
+      <name>Michael Hartmeier</name>
+      <roles>
+        <role>lead</role>
+      </roles>
+    </developer>
+  </developers>
+  <scm>
+    <connection>scm:svn:https://svn.1and1.org/svn/PFX/devel/maven/plugins/prerelease/trunk</connection>
+    <developerConnection>scm:svn:https://svn.1and1.org/svn/PFX/devel/maven/plugins/prerelease/trunk</developerConnection>
+    <url>https://svn.1and1.org/svn/PFX/devel/maven/plugins/prerelease/trunk</url>
+  </scm>
+  <dependencies>
+    <dependency>
+      <groupId>net.oneandone</groupId>
+      <artifactId>sushi</artifactId>
+      <version>2.8.7</version>
+    </dependency>
+    <dependency>
+      <groupId>com.oneandone.devel.maven</groupId>
+      <artifactId>utils</artifactId>
+      <version>3.2.2</version>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.httpcomponents</groupId>
+      <artifactId>httpcore</artifactId>
+      <version>4.1.3</version>
+    </dependency>
+    <dependency>
+      <groupId>com.oneandone.devel</groupId>
+      <artifactId>devreg</artifactId>
+      <version>2.1.2</version>
+    </dependency>
+    <dependency>
+      <groupId>com.oneandone.devel</groupId>
+      <artifactId>change</artifactId>
+      <version>1.0.1</version>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.maven</groupId>
+      <artifactId>maven-plugin-api</artifactId>
+      <version>3.0.4</version>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.maven</groupId>
+      <artifactId>maven-artifact</artifactId>
+      <version>3.0.4</version>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.maven</groupId>
+      <artifactId>maven-model</artifactId>
+      <version>3.0.4</version>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.maven</groupId>
+      <artifactId>maven-core</artifactId>
+      <version>3.0.4</version>
+    </dependency>
+    <dependency>
+      <groupId>javax.mail</groupId>
+      <artifactId>mail</artifactId>
+      <version>1.4.5</version>
+    </dependency>
+    <dependency>
+      <groupId>junit</groupId>
+      <artifactId>junit</artifactId>
+      <version>4.11</version>
+      <scope>test</scope>
+    </dependency>
+    <!-- CAUTION: this has to be behind "normal" maven deps, otherwise I get out-dated transitive library versions -->
+    <dependency>
+      <groupId>org.apache.maven.plugins</groupId>
+      <artifactId>maven-changes-plugin</artifactId>
+      <version>2.8</version>
+      <exclusions>
+        <!-- TODO: without this, promote fails for wsd-app parent, complaining
+
+                     "Caused by org.apache.commons.logging.LogConfigurationException: Invalid class loader hierarchy.
+                     You have more than one version of 'org.apache.commons.logging.Log' visible, which is not allowed."
+
+              Seems like commons-logging 1.1.1 from the changes-plugin is too new for the other components.-->
+        <exclusion>
+          <groupId>commons-httpclient</groupId>
+          <artifactId>commons-httpclient</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>commons-logging</groupId>
+          <artifactId>commons-logging</artifactId>
+        </exclusion>
+        <!-- because it's still on 1.4, other deps are newer -->
+        <exclusion>
+          <groupId>commons-io</groupId>
+          <artifactId>commons-io</artifactId>
+        </exclusion>
+      </exclusions>
+    </dependency>
+  </dependencies>
+  <build>
+    <plugins>
+      <plugin>
+        <artifactId>maven-invoker-plugin</artifactId>
+        <version>1.7</version>
+        <configuration>
+          <localRepositoryPath>${basedir}/target/it/maven-local-repository</localRepositoryPath>
+        </configuration>
+        <executions>
+          <execution>
+            <id>integration-test</id>
+            <goals>
+              <goal>install</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+    </plugins>
+  </build>
+</project>

@@ -1,0 +1,389 @@
+<?xml version="1.0" encoding="UTF-8"?><document xmlns="http://maven.apache.org/changes/1.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/changes/1.0.0 http://maven.apache.org/xsd/changes-1.0.0.xsd">
+  <body>
+    <release date="2013-04-09" version="1.4.2">
+      <action date="2013-04-09" dev="mhm" type="fix">
+        Fix bare-update: it always assumed a following release.
+      </action>
+    </release>
+    <release date="2013-03-22" version="1.4.1">
+      <action date="2013-03-22" dev="mhm" type="fix">
+        Fix bare goals to work without project.
+      </action>
+    </release>
+    <release date="2013-03-22" version="1.4.0">
+      <action date="2013-03-20" dev="mhm" type="add">
+        Added checkoutLink parameter for bare and project commands.
+      </action>
+      <action date="2013-03-19" dev="mhm" type="update">
+        Un-promotable prereleases (e.g. if create failed, if promoted failed, but also if promote succeeded) are moved
+        to a REMOVE directory now, to allow later inspection. The old BROKEN directory and the promotedPath for promotion
+        have been dumped.
+      </action>
+      <action date="2013-03-18" dev="mhm" type="add">
+        Added bare-update goal.
+      </action>
+      <action date="2013-03-18" dev="mhm" type="add">
+        Added LAST_CHANGED for revisions of base goals.
+      </action>
+      <action date="2013-02-27" dev="mhm" type="fix">
+        Fix console output when flush is called.
+      </action>
+    </release>
+    <release date="2013-02-27" version="1.3.11">
+      <action date="2013-02-27" dev="mhm" type="fix">
+        Fix empty lines in console output.
+      </action>
+    </release>
+    <release date="2013-02-27" version="1.3.10">
+      <action date="2013-02-27" dev="mhm" type="update">
+        Update devreg 2.1.0 to 2.1.2 to switch from svn.schlund.de to svn.1and1.org.
+      </action>
+      <action date="2013-02-27" dev="mhm" type="update">
+        Update Sushi 2.8.2 to 2.8.7 with console writers.
+      </action>
+    </release>
+    <release date="2013-02-01" version="1.3.9">
+      <action date="2013-01-31" dev="mhm" type="update">
+        prerelease.revision support LATEST_PRERELEASE now.
+      </action>
+      <action date="2013-01-31" dev="mhm" type="update">
+        Don't remove broken releases, move them to a separate directory.
+      </action>
+      <action date="2013-01-31" dev="mhm" type="update">
+        Generalized verify and bare-verify goals into build and bare-build goals.
+      </action>
+    </release>
+    <release date="2012-12-13" version="1.3.8">
+      <action date="2012-12-13" dev="mhm" type="add">
+        Add locksmith goal.
+      </action>
+      <action date="2012-12-13" dev="mhm" type="update">
+        Store process id in every lock file.
+      </action>
+      <action date="2012-12-12" dev="mhm" type="fix">
+        Fix lost exception when deployment failed.
+      </action>
+      <action date="2012-12-12" dev="mhm" type="fix">
+        Fix hole in svn locking: it was possible to commit change between checkout and lock.
+      </action>
+    </release>
+    <release date="2012-12-06" version="1.3.7">
+      <action date="2012-12-06" dev="mhm" type="fix">
+        Update utils 3.2.1 to 3.2.2 to fix deploy problem for large artefacts.
+      </action>
+      <action date="2012-12-06" dev="mhm" type="fix">
+        Fix unlocking on Out-Of-Memory.
+      </action>
+      <action date="2012-12-04" dev="mhm" type="update">
+        Build with -U when prerelease was called with -U.
+      </action>
+    </release>
+    <release date="2012-12-04" version="1.3.6">
+      <action date="2012-12-04" dev="mhm" type="fix">
+        Fix namespace prefix problem.
+      </action>
+      <action date="2012-12-04" dev="mhm" type="fix">
+        Fix lock-delete problem.
+      </action>
+      <action date="2012-12-04" dev="mhm" type="fix">
+        Fix lock problem when containing directory was removed.
+      </action>
+      <action date="2012-12-03" dev="mhm" type="update">
+        Reduce default lock timeout from 2 to 1 hour.
+      </action>
+      <action date="2012-11-28" dev="mhm" type="fix">
+        Svn Locks to protect concurrent releases.
+      </action>
+    </release>
+    <release date="2012-11-10" version="1.3.5">
+      <action date="2012-11-10" dev="mhm" type="fix">
+        Fix feeds url.
+      </action>
+      <action date="2012-10-31" dev="mhm" type="add">
+        Add bare-verify command.
+      </action>
+      <action date="2012-10-31" dev="mhm" type="add">
+        Add verify goal.
+      </action>
+    </release>
+    <release date="2012-10-31" version="1.3.4">
+      <action date="2012-10-31" dev="mhm" type="fix">
+        Fix duplicate execution of beforePromote goals during update-promote.
+      </action>
+      <action date="2012-10-31" dev="mhm" type="fix">
+        Fix missing user name for Jenkins builds.
+      </action>
+    </release>
+    <release date="2012-10-30" version="1.3.3">
+      <action date="2012-10-30" dev="mhm" type="fix">
+        Fix missing changes-check before promote.
+      </action>
+    </release>
+    <release date="2012-10-30" version="1.3.2">
+      <action date="2012-10-30" dev="mhm" type="fix">
+        Fix duplicate frischfleisch mail.
+      </action>
+    </release>
+    <release date="2012-10-30" version="1.3.1">
+      <action date="2012-10-30" dev="mhm" type="fix">
+        Fix No changes so far message, plugin schedule provide a better solution.
+      </action>
+      <action date="2012-10-30" dev="mhm" type="fix">
+        Fix missing frischfleisch mails.
+      </action>
+    </release>
+    <release date="2012-10-30" version="1.3.0">
+      <action date="2012-10-26" dev="mhm" type="add">
+        Add plugin schedule to properly handle plugins like Frischfleisch and ChangesCheck.
+      </action>
+      <action date="2012-10-26" dev="mhm" type="update">
+        Update goal tolerates SNAPSHOT dependencies now.
+      </action>
+      <action date="2012-10-26" dev="mhm" type="fix">
+        Detect Snapshot Plugins.
+      </action>
+      <action date="2012-10-11" dev="mhm" type="update">
+        Update wsd parent 2.0.2 to 2.0.4.
+      </action>
+    </release>
+    <release date="2012-10-11" version="1.2.3">
+      <action date="2012-10-11" dev="mhm" type="fix">
+        Fix webdav deployments.
+      </action>
+    </release>
+    <release date="2012-10-10" version="1.2.2">
+      <action date="2012-10-10" dev="mhm" type="update">
+        Problem mails with empty default.
+      </action>
+      <action date="2012-10-10" dev="mhm" type="fix">
+        update tolerates 'tag already exists' exception now.
+      </action>
+      <action date="2012-10-10" dev="mhm" type="fix">
+        Fix missing parent problem in bare-update-promote.
+      </action>
+    </release>
+    <release date="2012-10-10" version="1.2.1">
+      <action date="2012-10-10" dev="mhm" type="remove">
+        Remove promoteRelease property when building.
+      </action>
+      <action date="2012-10-10" dev="mhm" type="fix">
+        Fixed Frischfleisch notification in bare-update-promote.
+      </action>
+      <action date="2012-10-09" dev="mhm" type="fix">
+        Removed promotedPath from bare-update-promote, there is no target directory.
+      </action>
+      <action date="2012-10-09" dev="mhm" type="fix">
+        Fix archive directory.
+      </action>
+    </release>
+    <release date="2012-10-07" version="1.2.0">
+      <action date="2012-09-14" dev="mhm" type="add">
+        Added bare-update-promote goal.
+      </action>
+    </release>
+    <release date="2012-09-14" version="1.1.5">
+      <action date="2012-09-14" dev="mhm" type="fix">
+        Fix promote for projects without changes.xml.
+      </action>
+    </release>
+    <release date="2012-09-12" version="1.1.4">
+      <action date="2012-09-12" dev="mhm" type="fix">
+        Fix problem with modified artifacts in local repository.
+      </action>
+    </release>
+    <release date="2012-08-16" version="1.1.3">
+      <action date="2012-08-16" dev="mhm" type="update">
+        Clean after deploy to save disk space.
+      </action>
+    </release>
+    <release date="2012-08-14" version="1.1.2">
+      <action date="2012-08-14" dev="mhm" type="update">
+        Prereleases are stored in /home/mhm/.m2/prereleases now, the created directory is gone noe. Promoted prereleases are moved to target/promoted now.
+      </action>
+      <action date="2012-08-14" dev="mhm" type="fix">
+        Fix artifact deployment for plugins: plugin metadata was not updated.
+      </action>
+      <action date="2012-08-13" dev="mhm" type="remove">
+        Remove check if plugin is configured in pom.
+      </action>
+      <action date="2012-08-13" dev="mhm" type="fix">
+        Fix infinite connection timeout in frischfleisch mails.
+      </action>
+    </release>
+    <release date="2012-08-01" version="1.1.1">
+      <action date="2012-08-01" dev="mhm" type="update">
+        Interface tweaks for Jenkins plugin.
+      </action>
+    </release>
+    <release date="2012-08-01" version="1.1.0">
+      <action date="2012-08-01" dev="mhm" type="remove">
+        Dump site generation form release.
+      </action>
+    </release>
+    <release date="2012-07-31" version="1.0.11">
+      <action date="2012-07-31" dev="mhm" type="update">
+        Promote with configurable user.
+      </action>
+      <action date="2012-07-31" dev="mhm" type="update">
+        Invoke mvn with batch option.
+      </action>
+      <action date="2012-07-31" dev="mhm" type="add">
+        Add prerelease revision check.
+      </action>
+      <action date="2012-07-31" dev="mhm" type="update">
+        Update skips the build now when there a no changes yet.
+      </action>
+    </release>
+    <release date="2012-07-13" version="1.0.10">
+      <action date="2012-07-13" dev="mhm" type="update">
+        Update pom.xml and changes.xml in a single commit.
+      </action>
+      <action date="2012-07-13" dev="mhm" type="fix">
+        Fix missing newline at the end of modified pom.xml files.
+      </action>
+      <action date="2012-07-13" dev="mhm" type="fix">
+        Always remove prerelease when create fails.
+      </action>
+      <action date="2012-07-13" dev="mhm" type="fix">
+        Remove prerelease when tag is reverted, because it is no longer committable.
+      </action>
+      <action date="2012-07-13" dev="mhm" type="Update">
+        reject prerelease:create when tag already exists.
+      </action>
+      <action date="2012-06-18" dev="mhm" type="add">
+        Add check for pom/workspace svn url mismatch.
+      </action>
+      <action date="2012-06-14" dev="mhm" type="update">
+        Update Sushi 2.6.3 to 2.7.0.
+      </action>
+      <action date="2012-06-14" dev="mhm" type="update">
+        Send automatic problem mails.
+      </action>
+      <action date="2012-06-14" dev="mhm" type="update">
+        Improved error reporting
+      </action>
+    </release>
+    <release date="2012-06-11" version="1.0.9">
+      <action date="2012-06-11" dev="mhm" type="fix">
+        Properly detect tagbase in branches.
+      </action>
+      <action date="2012-06-11" dev="mhm" type="add">
+        Keep last promoted prereleases in ~/.m2/prereleases/promoted.
+      </action>
+      <action date="2012-06-11" dev="mhm" type="update">
+        Store prereleases in ~/.m2/prereleases/created (instead of ~/.m2/prereleases).
+      </action>
+    </release>
+    <release date="2012-05-29" version="1.0.8">
+      <action date="2012-05-29" dev="mhm" type="fix">
+        Fix removeIgnores for svn 1.6.
+      </action>
+    </release>
+    <release date="2012-05-25" version="1.0.7">
+      <action date="2012-05-25" dev="mhm" type="fix">
+        Fix Svn Authentication problem when gnome-keyring was used.
+      </action>
+      <action date="2012-05-25" dev="mhm" type="fix">
+        Fix frischfleisch exception for actions with newline.
+      </action>
+      <action date="2012-05-25" dev="mhm" type="update">
+        Improved output.
+      </action>
+      <action date="2012-05-25" dev="mhm" type="fix">
+        Fixed off-by-one error in check for pending updates.
+      </action>
+    </release>
+    <release date="2012-05-24" version="1.0.6">
+      <action date="2012-05-24" dev="mhm" type="update">
+        Improved commit messages.
+      </action>
+      <action date="2012-05-24" dev="mhm" type="update">
+        Improved status.
+      </action>
+      <action date="2012-05-21" dev="mhm" type="fix">
+        Do not wipe svn-ignores files if they are committed.
+      </action>
+      <action date="2012-05-21" dev="mhm" type="update">
+        Support patterns in svn ignores.
+      </action>
+      <action date="2012-05-21" dev="mhm" type="update">
+        Warn about invalid svn:ignores.
+      </action>
+    </release>
+    <release date="2012-05-21" version="1.0.5">
+      <action date="2012-05-21" dev="mhm" type="fix">
+        Fix copy-from revision of svn tags.
+      </action>
+      <action date="2012-05-21" dev="mhm" type="fix">
+        Fix scm modification when svn url does not end with trunk.
+      </action>
+      <action date="2012-05-21" dev="mhm" type="fix">
+        Fix Prerelease.load problem when tests create additions directories under tags.
+      </action>
+    </release>
+    <release date="2012-05-21" version="1.0.4">
+      <action date="2012-05-20" dev="mhm" type="update">
+        Revert svn commit when deployment failed.
+      </action>
+      <action date="2012-05-20" dev="mhm" type="fix">
+        Work-around for wsd-app promote problem.
+      </action>
+    </release>
+    <release date="2012-05-18" version="1.0.3">
+      <action date="2012-05-18" dev="mhm" type="fix">
+        pom.xml no longer re-formatted.
+      </action>
+      <action date="2012-05-18" dev="mhm" type="update">
+        Fix check for pending updates.
+      </action>
+    </release>
+    <release date="2012-05-18" version="1.0.2">
+      <action date="2012-05-18" dev="mhm" type="update">
+        Improved check for pending update.
+      </action>
+      <action date="2012-05-18" dev="mhm" type="add">
+        Add property to configure archive directory.
+      </action>
+      <action date="2012-05-18" dev="mhm" type="fix">
+        Promote updates changes.xml now.
+      </action>
+      <action date="2012-05-18" dev="mhm" type="fix">
+        Fix Artifact Version sent in promote emails.
+      </action>
+      <action date="2012-05-16" dev="mhm" type="add">
+        Add check if plugin is defined properly in parent pom.
+      </action>
+    </release>
+    <release date="2012-05-16" version="1.0.1">
+      <action date="2012-05-16" dev="mhm" type="add">
+        Add Marker configuration property.
+      </action>
+      <action date="2012-05-16" dev="mhm" type="update">
+        rename frischfleisch skip property to prerelease.frischfleisch.skip.
+      </action>
+      <action date="2012-05-15" dev="mhm" type="fix">
+        Fix pending changes detection.
+      </action>
+      <action date="2012-05-15" dev="mhm" type="update">
+        Improved build output.
+      </action>
+      <action date="2012-05-15" dev="mhm" type="fix">
+        Remove ignores in tag working copy.
+      </action>
+      <action date="2012-05-15" dev="mhm" type="fix">
+        Fix NPE for projects without parent.
+      </action>
+      <action date="2012-05-15" dev="mhm" type="fix">
+        Fix update-promote goal name.
+      </action>
+      <action date="2012-05-15" dev="mhm" type="update">
+        Included Frischfleisch 1.6.1 here.
+      </action>
+    </release>
+    <release date="2012-05-14" version="1.0.0">
+      <action date="2012-05-14" dev="mhm" type="add">
+        Initial Release.
+      </action>
+    </release>
+  </body>
+</document>

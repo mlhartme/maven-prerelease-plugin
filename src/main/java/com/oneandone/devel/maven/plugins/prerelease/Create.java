@@ -1,0 +1,46 @@
+/* Copyright (c) 1&1. All Rights Reserved. */
+
+package com.oneandone.devel.maven.plugins.prerelease;
+
+import com.oneandone.devel.maven.plugins.prerelease.core.Archive;
+import com.oneandone.devel.maven.plugins.prerelease.core.Descriptor;
+import com.oneandone.devel.maven.plugins.prerelease.core.Prerelease;
+import com.oneandone.devel.maven.plugins.prerelease.core.WorkingCopy;
+import org.apache.maven.plugin.MojoExecutionException;
+import org.apache.maven.plugins.annotations.Mojo;
+
+/**
+ * Creates a pre-release with an uncommitted tag and undeployed artifacts. Creating a pre-release is the first step to create a release;
+ * once you have a pre-release, you can quicky get a release by promoting the pre-release.
+ *
+ * Execute this in the svn working directory of your project. Basically, this goal runs checks, creates an uncommitted tag of your working
+ * directory and invokes "mvn clean deploy" in it. Maven is invoked with an alternative deployment repository pointing into a subdirectory
+ * of this prerelease. In addition, the "performRelease" property is defined to get the same profiles activation you get during a
+ * "release:promote" call,
+ *
+ * When successfull, pre-releases are stored in the configured archive directory, previous pre-release are wiped.
+ *
+ * Checks executed by this goal:
+ *
+ * 1) no uncommitted changes in your working directory.
+ *
+ * 2) no pending updates up to the last modified revision
+ *
+ * 3) no snapshot dependencies or snapshot parent pom.
+ */
+@Mojo(name = "create")
+public class Create extends ProjectBase {
+    @Override
+    public void doExecute(Archive archive) throws Exception {
+        WorkingCopy workingCopy;
+        Descriptor descriptor;
+
+        workingCopy = checkedWorkingCopy();
+        setTarget(archive.target(workingCopy.revision()));
+        if (target.exists()) {
+            throw new MojoExecutionException("prerelease already exists: " + workingCopy.revision());
+        }
+        descriptor = checkedDescriptor(workingCopy);
+        Prerelease.create(getLog(), descriptor, target, alwaysUpdate, false, session.getUserProperties());
+    }
+}

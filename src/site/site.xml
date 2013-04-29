@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="Maven Pre-Release Plugin">
+  <version position="left"/>
+  <bannerLeft>
+    <name>Maven Pre-Release Plugin</name>
+  </bannerLeft>
+  <bannerRight>
+    <src>http://www1.schlund.de/img-fl/header/logo.gif</src>
+  </bannerRight>
+
+  <body>
+    <menu name="Documentation">
+      <item name="Home" href="index.html"/>
+      <item name="Goals" href="plugin-info.html"/>
+    </menu>
+
+    ${reports}
+
+  </body>
+</project>
+
