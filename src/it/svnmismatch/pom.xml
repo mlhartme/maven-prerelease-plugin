@@ -8,7 +8,7 @@
     <version>4.2.9</version>
   </parent>
 
-  <groupId>com.oneandone.devel.maven.plugins.prerelease</groupId>
+  <groupId>net.oneandone.maven.plugins.prerelease</groupId>
   <artifactId>svnmissmatch</artifactId>
   <version>1.0.0-SNAPSHOT</version>
   <scm>
@@ -31,7 +31,7 @@
   <build>
     <plugins>
       <plugin>
-        <groupId>com.oneandone.devel.maven.plugins</groupId>
+        <groupId>net.oneandone.maven.plugins</groupId>
         <artifactId>prerelease</artifactId>
         <version>@@VERSION@@</version>
       </plugin>
