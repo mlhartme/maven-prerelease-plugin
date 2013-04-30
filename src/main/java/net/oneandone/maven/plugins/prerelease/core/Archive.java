@@ -15,7 +15,7 @@
  */
 package net.oneandone.maven.plugins.prerelease.core;
 
-import com.oneandone.devel.cli.change.File;
+import net.oneandone.maven.plugins.prerelease.change.File;
 import net.oneandone.maven.plugins.prerelease.OnShutdown;
 import net.oneandone.sushi.fs.DirectoryNotFoundException;
 import net.oneandone.sushi.fs.FileNotFoundException;

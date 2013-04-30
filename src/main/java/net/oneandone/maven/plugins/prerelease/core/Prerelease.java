@@ -15,7 +15,7 @@
  */
 package net.oneandone.maven.plugins.prerelease.core;
 
-import com.oneandone.devel.cli.change.File;
+import net.oneandone.maven.plugins.prerelease.change.File;
 import com.oneandone.devel.maven.Maven;
 import net.oneandone.maven.plugins.prerelease.util.Mailer;
 import net.oneandone.maven.plugins.prerelease.util.Subversion;
