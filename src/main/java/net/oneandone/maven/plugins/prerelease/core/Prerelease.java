@@ -17,7 +17,6 @@ package net.oneandone.maven.plugins.prerelease.core;
 
 import net.oneandone.maven.plugins.prerelease.change.File;
 import com.oneandone.devel.maven.Maven;
-import net.oneandone.maven.plugins.prerelease.util.Mailer;
 import net.oneandone.maven.plugins.prerelease.util.Subversion;
 import net.oneandone.maven.plugins.prerelease.util.Transform;
 import net.oneandone.sushi.fs.FileNotFoundException;
@@ -25,7 +24,6 @@ import net.oneandone.sushi.fs.file.FileNode;
 import net.oneandone.sushi.launcher.Failure;
 import net.oneandone.sushi.launcher.Launcher;
 import net.oneandone.sushi.util.Strings;
-import net.oneandone.sushi.util.Util;
 import net.oneandone.sushi.xml.XmlException;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.logging.Log;
@@ -34,7 +32,6 @@ import org.sonatype.aether.deployment.DeploymentException;
 import org.sonatype.aether.util.artifact.DefaultArtifact;
 import org.xml.sax.SAXException;
 
-import javax.mail.MessagingException;
 import java.io.IOException;
 import java.io.Writer;
 import java.util.ArrayList;
@@ -330,7 +327,7 @@ public class Prerelease {
      * @param beforePromotePhase true to include the beforePromotePhase, false when it was already included as part of the normal build
      * @param userProperties is mandatory for Jenkins builds, because the user name is passed as a property
      */
-    public void promote(Log log, String problemMails, Maven maven, String user, boolean beforePromotePhase, Properties userProperties)
+    public void promote(Log log, Maven maven, String user, boolean beforePromotePhase, Properties userProperties)
             throws Exception {
         FileNode origCommit;
 
@@ -340,7 +337,7 @@ public class Prerelease {
         }
         origCommit = prepareOrigCommit(log);
         try {
-            promoteLocked(log, problemMails, maven, user, userProperties, origCommit);
+            promoteLocked(log, maven, user, userProperties, origCommit);
         } catch (Throwable e) { // CAUTION: catching exceptions is not enough -- in particular, out-of-memory during upload is an error!
             try {
                 origUnlock(origCommit);
@@ -360,8 +357,8 @@ public class Prerelease {
         }
     }
 
-    private void promoteLocked(Log log, String problemMails, Maven maven, String user, Properties userProperties,
-                               FileNode origCommit) throws IOException, DeploymentException, MessagingException {
+    private void promoteLocked(Log log, Maven maven, String user, Properties userProperties,
+                               FileNode origCommit) throws IOException, DeploymentException {
         commit(log, user);
         try {
             deploy(maven);
@@ -378,7 +375,6 @@ public class Prerelease {
             log.warn("However, after-promote jobs failed with this exception: ");
             log.warn(e);
             log.warn("Thus, you can use your release, but someone expecienced should have a look.");
-            email(problemMails, e, descriptor.project.toString(), user);
         }
         try {
             log.info("Update pom and changes ...");
@@ -393,17 +389,8 @@ public class Prerelease {
             log.warn("Promote succeeded: your artifacts have been deployed, and your svn tag was created. ");
             log.warn("However, some post-release step failed with this exception:");
             log.warn(e);
-            log.warn("Thus, you can use your release, but " + problemMails + " should have a look at this exception.");
-            email(problemMails, e, descriptor.project.toString(), user);
+            log.warn("Thus, you can use your release, but someone should have a look at this exception.");
         }
     }
 
-    private static void email(String problemMails, Exception e, String name, String from) throws MessagingException {
-        Mailer mailer;
-
-        if (problemMails != null) {
-            mailer = new Mailer();
-            mailer.send(from, problemMails, "[prerelease failure] " + name, Util.toString(e));
-        }
-    }
 }

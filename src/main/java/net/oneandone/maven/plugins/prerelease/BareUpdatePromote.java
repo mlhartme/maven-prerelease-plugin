@@ -39,6 +39,6 @@ public class BareUpdatePromote extends BareUpdate {
         } else {
             existing = true;
         }
-        prerelease.promote(getLog(), problemEmail, maven, getUser(), existing, session.getUserProperties());
+        prerelease.promote(getLog(), maven, getUser(), existing, session.getUserProperties());
     }
 }

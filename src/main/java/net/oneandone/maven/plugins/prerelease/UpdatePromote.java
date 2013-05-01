@@ -42,7 +42,7 @@ public class UpdatePromote extends Promote {
         } else {
             existing = true;
         }
-        prerelease.promote(getLog(), problemEmail, maven(), getUser(), existing, session.getUserProperties());
+        prerelease.promote(getLog(), maven(), getUser(), existing, session.getUserProperties());
         workingCopy.update(getLog());
     }
 

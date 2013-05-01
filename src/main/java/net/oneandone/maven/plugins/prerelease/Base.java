@@ -43,12 +43,6 @@ public abstract class Base extends AbstractMojo {
     @Parameter(property = "prerelease.lockTimeout", defaultValue = "3600", required = true)
     protected int lockTimeout;
 
-    /**
-     * Where to send problem mails. Leave empty to switch off.
-     */
-    @Parameter
-    protected String problemEmail;
-
     @Component
     private ProjectBuilder projectBuilder;
 
