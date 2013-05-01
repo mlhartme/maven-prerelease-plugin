@@ -15,7 +15,7 @@
  */
 package net.oneandone.maven.plugins.prerelease;
 
-import com.oneandone.devel.maven.Maven;
+import net.oneandone.maven.plugins.prerelease.maven.Maven;
 import net.oneandone.sushi.fs.World;
 import org.apache.maven.artifact.repository.ArtifactRepository;
 import org.apache.maven.execution.MavenSession;

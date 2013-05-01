@@ -16,7 +16,7 @@
 package net.oneandone.maven.plugins.prerelease.core;
 
 import net.oneandone.maven.plugins.prerelease.change.File;
-import com.oneandone.devel.maven.Maven;
+import net.oneandone.maven.plugins.prerelease.maven.Maven;
 import net.oneandone.maven.plugins.prerelease.util.Subversion;
 import net.oneandone.maven.plugins.prerelease.util.Transform;
 import net.oneandone.sushi.fs.FileNotFoundException;

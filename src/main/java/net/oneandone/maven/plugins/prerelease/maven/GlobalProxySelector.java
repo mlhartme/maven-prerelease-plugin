@@ -1,4 +1,4 @@
-package com.oneandone.devel.maven;
+package net.oneandone.maven.plugins.prerelease.maven;
 
 import org.sonatype.aether.repository.Proxy;
 import org.sonatype.aether.repository.ProxySelector;

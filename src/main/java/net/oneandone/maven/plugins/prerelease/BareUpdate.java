@@ -15,15 +15,13 @@
  */
 package net.oneandone.maven.plugins.prerelease;
 
-import com.oneandone.devel.maven.Maven;
+import net.oneandone.maven.plugins.prerelease.maven.Maven;
 import net.oneandone.maven.plugins.prerelease.core.Descriptor;
 import net.oneandone.maven.plugins.prerelease.core.Prerelease;
 import net.oneandone.maven.plugins.prerelease.core.Target;
 import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.project.MavenProject;
-
-import java.io.IOException;
 
 /**
  * Perform update without a working copy. Svn url and revision are passed as arguments, not determined from a working copy.
