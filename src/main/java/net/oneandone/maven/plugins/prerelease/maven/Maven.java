@@ -2,15 +2,12 @@ package net.oneandone.maven.plugins.prerelease.maven;
 
 import net.oneandone.sushi.fs.World;
 import net.oneandone.sushi.fs.file.FileNode;
-import net.oneandone.sushi.util.Separator;
 import org.apache.maven.artifact.repository.ArtifactRepository;
 import org.apache.maven.artifact.repository.ArtifactRepositoryPolicy;
 import org.apache.maven.artifact.repository.DefaultArtifactRepository;
 import org.apache.maven.artifact.repository.layout.DefaultRepositoryLayout;
 import org.apache.maven.artifact.repository.metadata.GroupRepositoryMetadata;
 import org.apache.maven.artifact.repository.metadata.MetadataBridge;
-import org.apache.maven.execution.DefaultMavenExecutionRequest;
-import org.apache.maven.execution.MavenExecutionRequest;
 import org.apache.maven.model.building.ModelBuildingRequest;
 import org.apache.maven.project.DefaultProjectBuildingRequest;
 import org.apache.maven.project.MavenProject;
@@ -20,12 +17,6 @@ import org.apache.maven.project.ProjectBuildingRequest;
 import org.apache.maven.project.ProjectBuildingResult;
 import org.apache.maven.repository.internal.MavenRepositorySystemSession;
 import org.sonatype.aether.RepositorySystemSession;
-import org.apache.maven.settings.DefaultMavenSettingsBuilder;
-import org.apache.maven.settings.MavenSettingsBuilder;
-import org.apache.maven.settings.Mirror;
-import org.apache.maven.settings.Profile;
-import org.apache.maven.settings.Proxy;
-import org.apache.maven.settings.Settings;
 import org.codehaus.plexus.DefaultContainerConfiguration;
 import org.codehaus.plexus.DefaultPlexusContainer;
 import org.codehaus.plexus.PlexusContainerException;
@@ -33,12 +24,9 @@ import org.codehaus.plexus.classworlds.ClassWorld;
 import org.codehaus.plexus.classworlds.realm.ClassRealm;
 import org.codehaus.plexus.component.repository.exception.ComponentLookupException;
 import org.codehaus.plexus.logging.Logger;
-import org.codehaus.plexus.util.xml.pull.XmlPullParserException;
-import org.sonatype.aether.RepositoryException;
 import org.sonatype.aether.RepositoryListener;
 import org.sonatype.aether.RepositorySystem;
 import org.sonatype.aether.artifact.Artifact;
-import org.sonatype.aether.artifact.ArtifactType;
 import org.sonatype.aether.deployment.DeployRequest;
 import org.sonatype.aether.deployment.DeploymentException;
 import org.sonatype.aether.graph.Dependency;
@@ -47,23 +35,10 @@ import org.sonatype.aether.repository.LocalRepository;
 import org.sonatype.aether.repository.ProxySelector;
 import org.sonatype.aether.repository.RemoteRepository;
 import org.sonatype.aether.repository.RepositoryPolicy;
-import org.sonatype.aether.resolution.ArtifactRequest;
 import org.sonatype.aether.resolution.ArtifactResolutionException;
-import org.sonatype.aether.resolution.ArtifactResult;
-import org.sonatype.aether.resolution.VersionRangeRequest;
-import org.sonatype.aether.resolution.VersionRangeResolutionException;
-import org.sonatype.aether.resolution.VersionRangeResult;
-import org.sonatype.aether.resolution.VersionRequest;
-import org.sonatype.aether.resolution.VersionResolutionException;
-import org.sonatype.aether.resolution.VersionResult;
 import org.sonatype.aether.transfer.TransferListener;
-import org.sonatype.aether.util.artifact.DefaultArtifact;
-import org.sonatype.aether.util.repository.DefaultMirrorSelector;
-import org.sonatype.aether.util.repository.DefaultProxySelector;
-import org.sonatype.aether.version.Version;
 
 import java.io.File;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -153,8 +128,6 @@ public class Maven {
 
     //--
 
-    //--
-
     private final World world;
     private final RepositorySystem repositorySystem;
     private final RepositorySystemSession repositorySession;
@@ -175,38 +148,10 @@ public class Maven {
         this.remoteLegacy = remoteLegacy;
     }
 
-    public World getWorld() {
-        return world;
-    }
-
-    public RepositorySystem getRepositorySystem() {
-        return repositorySystem;
-    }
-
-    public RepositorySystemSession getRepositorySession() {
-        return repositorySession;
-    }
-
-    public List<ArtifactRepository> remoteRepositoriesLegacy() {
-        return remoteLegacy;
-    }
-
-    public List<RemoteRepository> remoteRepositories() {
-        return remote;
-    }
-
-    public FileNode getLocalRepositoryDir() {
-        return world.file(repositorySession.getLocalRepository().getBasedir());
-    }
-
-    public FileNode getLocalRepositoryFile(Artifact artifact) {
-        return getLocalRepositoryDir().join(repositorySession.getLocalRepositoryManager().getPathForLocalArtifact(artifact));
-    }
-
     public List<FileNode> files(List<Artifact> artifacts) {
         List<FileNode> result;
 
-        result = new ArrayList<FileNode>();
+        result = new ArrayList<>();
         for (Artifact a : artifacts) {
             result.add(file(a));
         }
@@ -217,41 +162,7 @@ public class Maven {
         return world.file(artifact.getFile());
     }
 
-    //-- resolve
-
-    public FileNode resolve(String groupId, String artifactId, String version) throws ArtifactResolutionException {
-        return resolve(groupId, artifactId, "jar", version);
-    }
-
-    public FileNode resolve(String groupId, String artifactId, String extension, String version) throws ArtifactResolutionException {
-        return resolve(new DefaultArtifact(groupId, artifactId, extension, version));
-    }
-
-    public FileNode resolve(String gav) throws ArtifactResolutionException {
-        return resolve(new DefaultArtifact(gav));
-    }
-
-    public FileNode resolve(Artifact artifact) throws ArtifactResolutionException {
-        return resolve(artifact, remote);
-    }
-
-    public FileNode resolve(Artifact artifact, List<RemoteRepository> remoteRepositories) throws ArtifactResolutionException {
-        ArtifactRequest request;
-        ArtifactResult result;
-
-        request = new ArtifactRequest(artifact, remoteRepositories, null);
-        result = repositorySystem.resolveArtifact(repositorySession, request);
-        if (!result.isResolved()) {
-            throw new ArtifactResolutionException(new ArrayList<ArtifactResult>()); // TODO
-        }
-        return world.file(result.getArtifact().getFile());
-    }
-
     //-- load poms
-
-    public MavenProject loadPom(Artifact artifact) throws ArtifactResolutionException, ProjectBuildingException {
-        return loadPom(resolve(new DefaultArtifact(artifact.getGroupId(), artifact.getArtifactId(), "pom", artifact.getVersion())), false);
-    }
 
     public MavenProject loadPom(FileNode file) throws ProjectBuildingException {
         try {
@@ -295,83 +206,6 @@ public class Maven {
             dependencies.addAll(result.getDependencyResolutionResult().getDependencies());
         }
         return result.getProject();
-    }
-
-    //-- versions
-
-    /** @return Latest version field from metadata.xml of the repository that was last modified. Never null */
-    public String latestVersion(Artifact artifact) throws VersionRangeResolutionException, VersionResolutionException {
-        Artifact range;
-        VersionRangeRequest request;
-        VersionRangeResult result;
-        List<Version> versions;
-        String version;
-
-        // CAUTION: do not use version "LATEST" because the respective field in metadata.xml is not set reliably:
-        range = artifact.setVersion("[,]");
-        request = new VersionRangeRequest(range, remote, null);
-        result = repositorySystem.resolveVersionRange(repositorySession, request);
-        versions = result.getVersions();
-        if (versions.size() == 0) {
-            throw new VersionRangeResolutionException(result, "no version found");
-        }
-        version = versions.get(versions.size() - 1).toString();
-        if (version.endsWith("-SNAPSHOT")) {
-            version = latestSnapshot(artifact.setVersion(version));
-        }
-        return version;
-    }
-
-    /** @return a timestamp version if a deploy artifact wins; a SNAPSHOT if a location artifact wins */
-    private String latestSnapshot(Artifact artifact) throws VersionResolutionException {
-        VersionRequest request;
-        VersionResult result;
-
-        request = new VersionRequest(artifact, remote, null);
-        result = repositorySystem.resolveVersion(repositorySession, request);
-        return result.getVersion();
-    }
-
-    public String nextVersion(Artifact artifact) throws RepositoryException {
-        if (artifact.isSnapshot()) {
-            return latestSnapshot(artifact.setVersion(artifact.getBaseVersion()));
-        } else {
-            return latestRelease(artifact);
-        }
-    }
-
-    public String latestRelease(Artifact artifact) throws VersionRangeResolutionException {
-        List<Version> versions;
-        Version version;
-
-        versions = availableVersions(artifact.setVersion("[" + artifact.getVersion() + ",]"));
-
-        // ranges also return SNAPSHOTS. The elease/compatibility notes say they don't, but the respective bug
-        // was re-opened: http://jira.codehaus.org/browse/MNG-3092
-        for (int i = versions.size() - 1; i >= 0; i--) {
-            version = versions.get(i);
-            if (!version.toString().endsWith("SNAPSHOT")) {
-                return version.toString();
-            }
-        }
-        return artifact.getVersion();
-    }
-
-    public List<Version> availableVersions(String groupId, String artifactId) throws VersionRangeResolutionException {
-        return availableVersions(groupId, artifactId, null);
-    }
-
-    public List<Version> availableVersions(String groupId, String artifactId, ArtifactType type) throws VersionRangeResolutionException {
-        return availableVersions(new DefaultArtifact(groupId, artifactId, null, null, "[0,)", type));
-    }
-
-    public List<Version> availableVersions(Artifact artifact) throws VersionRangeResolutionException {
-        VersionRangeRequest request;
-        VersionRangeResult rangeResult;
-
-        request = new VersionRangeRequest(artifact, remote, null);
-        rangeResult = repositorySystem.resolveVersionRange(repositorySession, request);
-        return rangeResult.getVersions();
     }
 
     //-- deploy
@@ -422,101 +256,6 @@ public class Maven {
     }
 
     //-- utils
-
-    public static Settings loadSettings(World world, DefaultPlexusContainer container)
-            throws IOException, XmlPullParserException, ComponentLookupException {
-        DefaultMavenSettingsBuilder builder;
-        MavenExecutionRequest request;
-
-        builder = (DefaultMavenSettingsBuilder) container.lookup(MavenSettingsBuilder.ROLE);
-        request = new DefaultMavenExecutionRequest();
-        request.setGlobalSettingsFile(locateMaven(world).join("conf/settings.xml").toPath().toFile());
-        request.setUserSettingsFile(((FileNode) world.getHome().join(".m2/settings.xml")).toPath().toFile());
-        return builder.buildSettings(request);
-    }
-
-    private static String localRepositoryPathFromMavenOpts() {
-        String value;
-
-        value = System.getenv("MAVEN_OPTS");
-        if (value != null) {
-            for (String entry : Separator.SPACE.split(value)) {
-                if (entry.startsWith("-Dmaven.repo.local=")) {
-                    return entry.substring(entry.indexOf('=') + 1);
-                }
-            }
-        }
-        return null;
-    }
-
-    private static FileNode locateMaven(World world) throws IOException {
-        String home;
-        FileNode mvn;
-
-        mvn = which(world, "mvn");
-        if (mvn != null) {
-            mvn = mvn.getParent().getParent();
-            if (mvn.join("conf").isDirectory()) {
-                return mvn;
-            }
-        }
-
-        home = System.getenv("MAVEN_HOME");
-        if (home != null) {
-            return world.file(home);
-        }
-        throw new IOException("cannot locate maven");
-    }
-
-    // TODO: sushi
-    private static FileNode which(World world, String cmd) throws IOException {
-        String path;
-        FileNode file;
-
-        path = System.getenv("PATH");
-        if (path != null) {
-            for (String entry : Separator.on(':').trim().split(path)) {
-                file = world.file(entry).join(cmd);
-                if (file.isFile()) {
-                    while (file.isLink()) {
-                        file = (FileNode) file.resolveLink();
-                    }
-                    return file;
-                }
-            }
-        }
-        return null;
-    }
-
-    private static List<RemoteRepository> remoteRepositories(Settings settings) {
-        List<RemoteRepository> result;
-        List<String> actives;
-        RemoteRepository remote;
-
-        result = new ArrayList<RemoteRepository>();
-        actives = settings.getActiveProfiles();
-        for (Profile profile : settings.getProfiles()) {
-            if (actives.contains(profile.getId())) { // TODO: proxy config?
-                for (org.apache.maven.settings.Repository configured : profile.getRepositories()) {
-                    remote = new RemoteRepository(configured.getId(), "default", configured.getUrl());
-                    remote = setPolicy(remote, true, configured.getSnapshots());
-                    remote = setPolicy(remote, false, configured.getReleases());
-                    result.add(remote);
-                }
-            }
-        }
-        return result;
-    }
-
-    private static RemoteRepository setPolicy(RemoteRepository remote, boolean snapshots,
-                                              org.apache.maven.settings.RepositoryPolicy policy) {
-        if (policy == null) {
-            return remote;
-        }
-        return remote.setPolicy(snapshots, new RepositoryPolicy(policy.isEnabled(), policy.getUpdatePolicy(), policy.getChecksumPolicy()));
-    }
-
-    //--
 
     private static List<ArtifactRepository> convert(List<RemoteRepository> remoteRepositories) {
         List<ArtifactRepository> result;
