@@ -42,7 +42,7 @@ public class DescriptorIT extends IntegrationBase {
         assertEquals(revision, descriptor.revision);
         assertEquals("1.0.0-SNAPSHOT", descriptor.previous);
         assertEquals("minimal", descriptor.project.artifactId);
-        assertEquals("com.oneandone.devel.maven.plugins.prerelease", descriptor.project.groupId);
+        assertEquals("net.oneandone.maven.plugins.prerelease", descriptor.project.groupId);
         assertEquals("1.0.0", descriptor.project.version);
         assertEquals("1.0.1-SNAPSHOT", descriptor.next);
         assertEquals(REPOSITORY_URL + "/minimal/trunk", descriptor.svnOrig);

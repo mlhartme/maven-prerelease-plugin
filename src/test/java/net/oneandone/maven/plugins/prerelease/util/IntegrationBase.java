@@ -134,18 +134,6 @@ public class IntegrationBase {
     protected static final FileNode SETTINGS = TARGET.join("settings.xml");
     protected static final FileNode MAVEN_LOCAL_REPOSITORY = TARGET.join("it/maven-local-repository");
     protected static final FileNode SVN_REPOSITORY = TARGET.join("it/svn-repository");
-    protected static final String VERSION;
-
-    static {
-        try {
-            VERSION = TARGET.join("classes/META-INF/wsd.properties").readProperties().getProperty("version");
-        } catch (IOException e) {
-            throw new IllegalStateException(e);
-        }
-        if (VERSION == null) {
-            throw new IllegalStateException("unknown version");
-        }
-    }
 
     protected static final String REPOSITORY_URL = "file://" + SVN_REPOSITORY.getAbsolute();
 
@@ -171,7 +159,7 @@ public class IntegrationBase {
         pom = tmp.join("pom.xml");
         str = pom.readString();
         str = str.replace("@@TARGET@@", TARGET.getAbsolute());
-        str = str.replace("@@VERSION@@", VERSION);
+        str = str.replace("@@VERSION@@", "1.2.3");
         str = str.replace("@@SVNURL@@", REPOSITORY_URL + "/" + name + "/trunk");
         pom.writeString(str);
         svnImport(URI.create(REPOSITORY_URL + "/" + name + "/trunk"), tmp);
