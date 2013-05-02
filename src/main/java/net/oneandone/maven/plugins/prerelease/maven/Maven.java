@@ -46,11 +46,27 @@ import java.util.Properties;
 
 public class Maven {
     public static Maven withDefaults(World world) {
-        return withDefaults(world, false);
-    }
+        RemoteRepository repository;
+        DefaultPlexusContainer container;
+        RepositorySystem system;
+        MavenRepositorySystemSession session;
+        LocalRepository localRepository;
 
-    public static Maven withDefaults(World world, boolean offline) {
-        return create(world, container(), null, null, offline, Repositories.STANDARD_READ, null);
+        container = container();
+        repository = new RemoteRepository("central", "default", "http://repo1.maven.org/maven2");
+        repository.setPolicy(true, new RepositoryPolicy(false, null, RepositoryPolicy.CHECKSUM_POLICY_WARN));
+        repository.setPolicy(false, new RepositoryPolicy(true, RepositoryPolicy.UPDATE_POLICY_NEVER, RepositoryPolicy.CHECKSUM_POLICY_WARN));
+        try {
+            localRepository = new LocalRepository(defaultLocalRepositoryDir(world).getAbsolute());
+            system = container.lookup(RepositorySystem.class);
+            session = new MavenRepositorySystemSession();
+            session.setOffline(false);
+            session.setLocalRepositoryManager(system.newLocalRepositoryManager(localRepository));
+            session.setProxySelector(null);
+            return create(world, container, system, session, Arrays.asList(repository), null, null, null);
+        } catch (ComponentLookupException e) {
+            throw new IllegalStateException(e);
+        }
     }
 
     //--
