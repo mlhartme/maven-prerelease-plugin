@@ -16,6 +16,7 @@
 package net.oneandone.maven.plugins.prerelease.core;
 
 import net.oneandone.maven.plugins.prerelease.Plugin;
+import net.oneandone.maven.plugins.prerelease.maven.Maven;
 import net.oneandone.sushi.fs.file.FileNode;
 import net.oneandone.sushi.launcher.Failure;
 import net.oneandone.sushi.launcher.Launcher;
@@ -118,7 +119,7 @@ public class Schedule {
             }
         }
         if (!goals.isEmpty()) {
-            mvn = net.oneandone.maven.plugins.prerelease.util.Maven.mvn(workingCopy, userProperties);
+            mvn = Maven.launcher(workingCopy, userProperties);
             mvn.args(goals);
             log.info("executing " + phase  + " goals: " + mvn.toString());
             log.info(mvn.exec());

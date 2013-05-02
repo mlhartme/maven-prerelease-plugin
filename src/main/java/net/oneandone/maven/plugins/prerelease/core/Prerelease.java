@@ -245,7 +245,7 @@ public class Prerelease {
     public void build(final Log log, boolean alwaysUpdate, boolean promoting, Properties userProperties) throws Exception {
         Launcher mvn;
 
-        mvn = net.oneandone.maven.plugins.prerelease.util.Maven.mvn(checkout, userProperties);
+        mvn = Maven.launcher(checkout, userProperties);
         mvn.arg("-DaltDeploymentRepository=prerelease::default::" + artifacts().toPath().toFile().toURI(),
                 // do not install release artifacts because we do not necessarily deploy them
                 "-Dmaven.install.skip",
@@ -312,7 +312,7 @@ public class Prerelease {
     public void build(final Log log, Properties userProperties, String ... goals) throws Exception {
         Launcher mvn;
 
-        mvn = net.oneandone.maven.plugins.prerelease.util.Maven.mvn(checkout, userProperties);
+        mvn = Maven.launcher(checkout, userProperties);
         mvn.arg(goals);
         log.info(mvn.toString());
         mvn.exec(new LogWriter(log));
@@ -323,7 +323,6 @@ public class Prerelease {
     //-- promote
 
     /**
-     * @param problemMails may be null
      * @param beforePromotePhase true to include the beforePromotePhase, false when it was already included as part of the normal build
      * @param userProperties is mandatory for Jenkins builds, because the user name is passed as a property
      */

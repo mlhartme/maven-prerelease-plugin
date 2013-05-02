@@ -2,6 +2,7 @@ package net.oneandone.maven.plugins.prerelease.maven;
 
 import net.oneandone.sushi.fs.World;
 import net.oneandone.sushi.fs.file.FileNode;
+import net.oneandone.sushi.launcher.Launcher;
 import org.apache.maven.artifact.repository.ArtifactRepository;
 import org.apache.maven.artifact.repository.ArtifactRepositoryPolicy;
 import org.apache.maven.artifact.repository.DefaultArtifactRepository;
@@ -29,7 +30,6 @@ import org.sonatype.aether.artifact.Artifact;
 import org.sonatype.aether.deployment.DeployRequest;
 import org.sonatype.aether.deployment.DeploymentException;
 import org.sonatype.aether.graph.Dependency;
-import org.sonatype.aether.repository.Authentication;
 import org.sonatype.aether.repository.LocalRepository;
 import org.sonatype.aether.repository.RemoteRepository;
 import org.sonatype.aether.repository.RepositoryPolicy;
@@ -39,9 +39,23 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 import java.util.Properties;
 
 public class Maven {
+    /** @param userProperties properties specified by the user with -D command line args. */
+    public static Launcher launcher(FileNode basedir, Properties userProperties) {
+        Launcher mvn;
+
+        mvn = new Launcher(basedir, "mvn", "-B", /* same as mvn release plugin: */ "-DperformRelease");
+        for (Map.Entry<Object, Object> entry : userProperties.entrySet()) {
+            mvn.arg("-D" + entry.getKey() + "=" + entry.getValue());
+        }
+        return mvn;
+    }
+
+    //--
+
     public static Maven withDefaults(World world) {
         DefaultPlexusContainer container;
         RepositorySystem system;
@@ -49,7 +63,7 @@ public class Maven {
         LocalRepository localRepository;
         ArtifactRepository repository;
 
-        container = container();
+        container = container(null, null, Logger.LEVEL_DISABLED);
         repository = new DefaultArtifactRepository("central", "http://repo1.maven.org/maven2", new DefaultRepositoryLayout(),
                 new ArtifactRepositoryPolicy(false, RepositoryPolicy.UPDATE_POLICY_DAILY, RepositoryPolicy.CHECKSUM_POLICY_WARN),
                 new ArtifactRepositoryPolicy(true, RepositoryPolicy.UPDATE_POLICY_NEVER, RepositoryPolicy.CHECKSUM_POLICY_WARN)
@@ -71,10 +85,6 @@ public class Maven {
 
     public static FileNode defaultLocalRepositoryDir(World world) {
         return world.file(new File(System.getProperty("user.home"))).join(".m2/repository");
-    }
-
-    public static DefaultPlexusContainer container() {
-        return container(null, null, Logger.LEVEL_DISABLED);
     }
 
     public static DefaultPlexusContainer container(ClassWorld classWorld, ClassRealm realm, int loglevel) {
