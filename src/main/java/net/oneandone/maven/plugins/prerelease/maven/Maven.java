@@ -24,7 +24,6 @@ import org.codehaus.plexus.classworlds.ClassWorld;
 import org.codehaus.plexus.classworlds.realm.ClassRealm;
 import org.codehaus.plexus.component.repository.exception.ComponentLookupException;
 import org.codehaus.plexus.logging.Logger;
-import org.sonatype.aether.RepositoryListener;
 import org.sonatype.aether.RepositorySystem;
 import org.sonatype.aether.artifact.Artifact;
 import org.sonatype.aether.deployment.DeployRequest;
@@ -32,11 +31,9 @@ import org.sonatype.aether.deployment.DeploymentException;
 import org.sonatype.aether.graph.Dependency;
 import org.sonatype.aether.repository.Authentication;
 import org.sonatype.aether.repository.LocalRepository;
-import org.sonatype.aether.repository.ProxySelector;
 import org.sonatype.aether.repository.RemoteRepository;
 import org.sonatype.aether.repository.RepositoryPolicy;
 import org.sonatype.aether.resolution.ArtifactResolutionException;
-import org.sonatype.aether.transfer.TransferListener;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -46,16 +43,17 @@ import java.util.Properties;
 
 public class Maven {
     public static Maven withDefaults(World world) {
-        RemoteRepository repository;
         DefaultPlexusContainer container;
         RepositorySystem system;
         MavenRepositorySystemSession session;
         LocalRepository localRepository;
+        ArtifactRepository repository;
 
         container = container();
-        repository = new RemoteRepository("central", "default", "http://repo1.maven.org/maven2");
-        repository.setPolicy(true, new RepositoryPolicy(false, null, RepositoryPolicy.CHECKSUM_POLICY_WARN));
-        repository.setPolicy(false, new RepositoryPolicy(true, RepositoryPolicy.UPDATE_POLICY_NEVER, RepositoryPolicy.CHECKSUM_POLICY_WARN));
+        repository = new DefaultArtifactRepository("central", "http://repo1.maven.org/maven2", new DefaultRepositoryLayout(),
+                new ArtifactRepositoryPolicy(false, RepositoryPolicy.UPDATE_POLICY_DAILY, RepositoryPolicy.CHECKSUM_POLICY_WARN),
+                new ArtifactRepositoryPolicy(true, RepositoryPolicy.UPDATE_POLICY_NEVER, RepositoryPolicy.CHECKSUM_POLICY_WARN)
+            );
         try {
             localRepository = new LocalRepository(defaultLocalRepositoryDir(world).getAbsolute());
             system = container.lookup(RepositorySystem.class);
@@ -63,53 +61,10 @@ public class Maven {
             session.setOffline(false);
             session.setLocalRepositoryManager(system.newLocalRepositoryManager(localRepository));
             session.setProxySelector(null);
-            return create(world, container, system, session, Arrays.asList(repository), null, null, null);
+            return new Maven(world, system, session, container.lookup(ProjectBuilder.class), Arrays.asList(repository));
         } catch (ComponentLookupException e) {
             throw new IllegalStateException(e);
         }
-    }
-
-    //--
-
-    public static Maven create(World world, DefaultPlexusContainer container,
-                               TransferListener transferListener, RepositoryListener repositoryListener,
-                               boolean offline, List<RemoteRepository> remoteRepositories, ProxySelector proxySelector) {
-        RepositorySystem system;
-        MavenRepositorySystemSession session;
-        LocalRepository localRepository;
-
-        try {
-            localRepository = new LocalRepository(defaultLocalRepositoryDir(world).getAbsolute());
-            system = container.lookup(RepositorySystem.class);
-            session = new MavenRepositorySystemSession();
-            session.setOffline(offline);
-            session.setLocalRepositoryManager(system.newLocalRepositoryManager(localRepository));
-            session.setProxySelector(proxySelector);
-            return create(world, container, system, session, remoteRepositories, proxySelector, transferListener, repositoryListener);
-        } catch (ComponentLookupException e) {
-            throw new IllegalStateException(e);
-        }
-    }
-
-    public static Maven create(World world, DefaultPlexusContainer container, RepositorySystem system,
-                               MavenRepositorySystemSession session, List<RemoteRepository> remoteRepositories, ProxySelector proxySelector,
-                               TransferListener transferListener, RepositoryListener repositoryListener) throws ComponentLookupException {
-        RemoteRepository repository;
-
-        if (transferListener != null) {
-            session.setTransferListener(transferListener);
-        }
-        if (repositoryListener != null) {
-            session.setRepositoryListener(repositoryListener);
-        }
-        if (proxySelector != null) {
-            for (int i = 0, max = remoteRepositories.size(); i < max; i++) {
-                repository = remoteRepositories.get(i);
-                repository = repository.setProxy(proxySelector.getProxy(repository));
-                remoteRepositories.set(i, repository);
-            }
-        }
-        return new Maven(world, system, session, container.lookup(ProjectBuilder.class), convert(remoteRepositories));
     }
 
     //--
@@ -267,57 +222,5 @@ public class Maven {
         } else {
             return artifactId.replaceAll("-?maven-?", "").replaceAll("-?plugin-?", "");
         }
-    }
-
-    //-- utils
-
-    private static List<ArtifactRepository> convert(List<RemoteRepository> remoteRepositories) {
-        List<ArtifactRepository> result;
-
-        result = new ArrayList<ArtifactRepository>(remoteRepositories.size());
-        for (RemoteRepository repository : remoteRepositories) {
-            result.add(convert(repository));
-        }
-        return result;
-    }
-
-    private static ArtifactRepository convert(RemoteRepository repository) {
-        RepositoryPolicy sp;
-        RepositoryPolicy rp;
-        ArtifactRepository result;
-
-        sp = repository.getPolicy(true);
-        rp = repository.getPolicy(false);
-        result = new DefaultArtifactRepository(repository.getId(), repository.getUrl(), new DefaultRepositoryLayout(),
-                new ArtifactRepositoryPolicy(sp.isEnabled(), sp.getUpdatePolicy(), sp.getChecksumPolicy()),
-                new ArtifactRepositoryPolicy(rp.isEnabled(), rp.getUpdatePolicy(), rp.getChecksumPolicy())
-            );
-        result.setProxy(convert(repository.getProxy()));
-        return result;
-    }
-
-    private static org.apache.maven.repository.Proxy convert(org.sonatype.aether.repository.Proxy proxy) {
-        org.apache.maven.repository.Proxy result;
-        Authentication auth;
-
-        if (proxy == null) {
-            return null;
-        }
-        result = new org.apache.maven.repository.Proxy();
-        auth = proxy.getAuthentication();
-        if (auth != null) {
-            if (auth.getPrivateKeyFile() != null) {
-                throw new UnsupportedOperationException(auth.getPrivateKeyFile());
-            }
-            if (auth.getPassphrase() != null) {
-                throw new UnsupportedOperationException(auth.getPassphrase());
-            }
-            result.setUserName(auth.getUsername());
-            result.setPassword(auth.getPassword());
-        }
-        result.setHost(proxy.getHost());
-        result.setPort(proxy.getPort());
-        result.setProtocol(proxy.getType());
-        return result;
     }
 }
