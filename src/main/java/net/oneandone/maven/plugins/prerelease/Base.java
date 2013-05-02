@@ -58,12 +58,6 @@ public abstract class Base extends AbstractMojo {
     @Parameter(property = "repositorySystemSession", readonly = true)
     private RepositorySystemSession repositorySession;
 
-    /**
-     * The project's remote repositories to use for the resolution of project dependencies.
-     */
-    @Parameter(property = "project.remoteProjectRepositories", readonly = true)
-    private List<RemoteRepository> remoteRepositories;
-
     @Parameter(property = "project.remoteArtifactRepositories", readonly = true)
     private List<ArtifactRepository> remoteRepositoriesLegacy;
 
@@ -94,6 +88,6 @@ public abstract class Base extends AbstractMojo {
     public abstract void doExecute() throws Exception;
 
     protected Maven maven() {
-        return new Maven(world, repositorySystem, repositorySession, projectBuilder, remoteRepositories, remoteRepositoriesLegacy);
+        return new Maven(world, repositorySystem, repositorySession, projectBuilder, remoteRepositoriesLegacy);
     }
 }

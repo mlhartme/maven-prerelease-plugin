@@ -93,7 +93,7 @@ public class Maven {
                 remoteRepositories.set(i, repository);
             }
         }
-        return new Maven(world, system, session, container.lookup(ProjectBuilder.class), remoteRepositories, convert(remoteRepositories));
+        return new Maven(world, system, session, container.lookup(ProjectBuilder.class), convert(remoteRepositories));
     }
 
     //--
@@ -131,7 +131,6 @@ public class Maven {
     private final World world;
     private final RepositorySystem repositorySystem;
     private final RepositorySystemSession repositorySession;
-    private final List<RemoteRepository> remote;
     private final List<ArtifactRepository> remoteLegacy; // needed to load poms :(
 
     // TODO: use a project builder that works without legacy classes, esp. without ArtifactRepository ...
@@ -139,12 +138,11 @@ public class Maven {
     private final ProjectBuilder builder;
 
     public Maven(World world, RepositorySystem repositorySystem, RepositorySystemSession repositorySession, ProjectBuilder builder,
-                 List<RemoteRepository> remote, List<ArtifactRepository> remoteLegacy) {
+                 List<ArtifactRepository> remoteLegacy) {
         this.world = world;
         this.repositorySystem = repositorySystem;
         this.repositorySession = repositorySession;
         this.builder = builder;
-        this.remote = remote;
         this.remoteLegacy = remoteLegacy;
     }
 
