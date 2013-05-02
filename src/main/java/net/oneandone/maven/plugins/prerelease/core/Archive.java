@@ -15,7 +15,7 @@
  */
 package net.oneandone.maven.plugins.prerelease.core;
 
-import net.oneandone.maven.plugins.prerelease.change.File;
+import net.oneandone.maven.plugins.prerelease.util.ChangesXml;
 import net.oneandone.maven.plugins.prerelease.OnShutdown;
 import net.oneandone.sushi.fs.DirectoryNotFoundException;
 import net.oneandone.sushi.fs.FileNotFoundException;
@@ -178,10 +178,10 @@ public class Archive implements AutoCloseable {
 
     /** @return true to indicate missing actions */
     public static boolean adjustChanges(FileNode workingCopy, String version) throws XmlException, IOException, SAXException {
-        File changes;
+        ChangesXml changes;
 
         try {
-            changes = File.load(workingCopy);
+            changes = ChangesXml.load(workingCopy);
         } catch (FileNotFoundException e) {
             return false;
         }

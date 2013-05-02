@@ -15,7 +15,7 @@
  */
 package net.oneandone.maven.plugins.prerelease.core;
 
-import net.oneandone.maven.plugins.prerelease.change.File;
+import net.oneandone.maven.plugins.prerelease.util.ChangesXml;
 import net.oneandone.maven.plugins.prerelease.maven.Maven;
 import net.oneandone.maven.plugins.prerelease.util.Subversion;
 import net.oneandone.maven.plugins.prerelease.util.Transform;
@@ -200,7 +200,7 @@ public class Prerelease {
 
     public FileNode prepareOrigCommit(Log log) throws IOException, XmlException, SAXException, MojoExecutionException {
         FileNode result;
-        File changes;
+        ChangesXml changes;
 
         result = checkout.getWorld().getTemp().createTempDirectory();
         log.debug(target.svnLauncher("co", "--depth", "empty", descriptor.svnOrig, result.getAbsolute()).exec());
@@ -210,7 +210,7 @@ public class Prerelease {
         log.debug(Subversion.launcher(result, "up", "--depth", "empty", "src/changes").exec());
         log.debug(Subversion.launcher(result, "up", "src/changes/changes.xml").exec());
         try {
-            changes = File.load(result);
+            changes = ChangesXml.load(result);
         } catch (FileNotFoundException e) {
             log.info("no changes.xml to adjust.");
             changes = null;
@@ -218,7 +218,7 @@ public class Prerelease {
 
         Subversion.launcher(result, "lock", "pom.xml");
         if (changes != null) {
-            Subversion.launcher(result, "lock", File.PATH);
+            Subversion.launcher(result, "lock", ChangesXml.PATH);
         }
 
         // make sure the version we've locked what we will modify:
@@ -352,8 +352,8 @@ public class Prerelease {
 
     private void origUnlock(FileNode origCommit) {
         Subversion.launcher(origCommit, "unlock" , "pom.xml");
-        if (origCommit.join(File.PATH).exists()) {
-            Subversion.launcher(origCommit, "unlock" , File.PATH);
+        if (origCommit.join(ChangesXml.PATH).exists()) {
+            Subversion.launcher(origCommit, "unlock" , ChangesXml.PATH);
         }
     }
 

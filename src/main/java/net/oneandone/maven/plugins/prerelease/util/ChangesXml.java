@@ -1,4 +1,4 @@
-package net.oneandone.maven.plugins.prerelease.change;
+package net.oneandone.maven.plugins.prerelease.util;
 
 import net.oneandone.sushi.cli.ArgumentException;
 import net.oneandone.sushi.fs.file.FileNode;
@@ -16,25 +16,25 @@ import java.util.Iterator;
 
 /** Represents the changes.xml file. */
 
-public class File {
+public class ChangesXml {
     private static final String NAMESPACE_URI = "http://maven.apache.org/changes/1.0.0";
     public static final String PATH = "src/changes/changes.xml";
 
     private static final SimpleDateFormat FORMAT = new SimpleDateFormat("yyyy-MM-dd");
     private static final SimpleDateFormat MONTH_FORMAT = new SimpleDateFormat("yyyy-MM");
 
-    public static File load(FileNode basedir) throws IOException, SAXException {
+    public static ChangesXml load(FileNode basedir) throws IOException, SAXException {
         FileNode dest;
 
         dest = basedir.join(PATH);
-        return new File(dest, dest.readXml());
+        return new ChangesXml(dest, dest.readXml());
     }
 
     private final FileNode dest;
     private final Document doc;
     private final Selector selector;
 
-    public File(FileNode dest, Document doc) {
+    public ChangesXml(FileNode dest, Document doc) {
         this.dest = dest;
         this.doc = doc;
         this.selector = dest.getWorld().getXml().getSelector();
