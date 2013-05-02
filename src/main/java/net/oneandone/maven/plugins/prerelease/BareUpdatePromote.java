@@ -15,7 +15,7 @@
  */
 package net.oneandone.maven.plugins.prerelease;
 
-import net.oneandone.maven.plugins.prerelease.maven.Maven;
+import net.oneandone.maven.plugins.prerelease.util.Maven;
 import net.oneandone.maven.plugins.prerelease.core.Descriptor;
 import net.oneandone.maven.plugins.prerelease.core.Prerelease;
 import net.oneandone.maven.plugins.prerelease.core.Target;

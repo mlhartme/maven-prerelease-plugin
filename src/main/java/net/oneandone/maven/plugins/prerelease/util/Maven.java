@@ -1,4 +1,4 @@
-package net.oneandone.maven.plugins.prerelease.maven;
+package net.oneandone.maven.plugins.prerelease.util;
 
 import net.oneandone.sushi.fs.World;
 import net.oneandone.sushi.fs.file.FileNode;

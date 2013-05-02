@@ -16,7 +16,7 @@
 package net.oneandone.maven.plugins.prerelease.core;
 
 import net.oneandone.maven.plugins.prerelease.Plugin;
-import net.oneandone.maven.plugins.prerelease.maven.Maven;
+import net.oneandone.maven.plugins.prerelease.util.Maven;
 import net.oneandone.sushi.fs.file.FileNode;
 import net.oneandone.sushi.launcher.Failure;
 import net.oneandone.sushi.launcher.Launcher;

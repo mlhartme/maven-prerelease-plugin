@@ -15,7 +15,7 @@
  */
 package net.oneandone.maven.plugins.prerelease;
 
-import net.oneandone.maven.plugins.prerelease.maven.Maven;
+import net.oneandone.maven.plugins.prerelease.util.Maven;
 import net.oneandone.sushi.fs.World;
 import org.apache.maven.artifact.repository.ArtifactRepository;
 import org.apache.maven.execution.MavenSession;
@@ -26,7 +26,6 @@ import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.project.ProjectBuilder;
 import org.sonatype.aether.RepositorySystem;
 import org.sonatype.aether.RepositorySystemSession;
-import org.sonatype.aether.repository.RemoteRepository;
 
 import java.util.List;
 
