@@ -208,31 +208,32 @@ public class Prerelease {
             changes.releaseDate(descriptor.project.version, new Date());
             changes.save();
         }
-        // svn up does not fail if for none-existing files!
+        // svn up does not fail for none-existing files!
         return result;
     }
 
     //--
 
-    public void deploy(Log log, Properties userProperties) throws IOException, DeploymentException {
-        Maven.launcher(checkout, userProperties).arg("prerelease:doDeploy").exec(new LogWriter(log));
-    }
-
-    //--
-
-    public void build(final Log log, boolean alwaysUpdate, Properties userProperties) throws Exception {
+    public void build(final Log log, boolean alwaysUpdate, Properties userProperties, String ... goals) throws Exception {
         Launcher mvn;
-        FileNode installed;
 
         mvn = Maven.launcher(checkout, userProperties);
-        mvn.arg(// no "clean" because we have a vanilla directory from svn
-                "install");
         if (alwaysUpdate) {
             mvn.arg("-U");
         }
+        mvn.arg(goals);
         log.info(mvn.toString());
+        mvn.exec(new LogWriter(log));
+
+        // TODO: check that the workspace is without modifications
+    }
+
+    public void create(final Log log, boolean alwaysUpdate, Properties userProperties) throws Exception {
+        FileNode installed;
+
+        // no "clean" because we have a vanilla directory from svn
         try {
-            mvn.exec(new LogWriter(log));
+            build(log, alwaysUpdate, userProperties, "install");
         } finally {
             installed = descriptor.project.localRepo(checkout.getWorld());
             if (installed.exists()) {
@@ -240,6 +241,12 @@ public class Prerelease {
             }
         }
         // TODO: check that the workspace is without modifications
+    }
+
+    //--
+
+    public void deploy(Log log, Properties userProperties) throws IOException, DeploymentException {
+        Maven.launcher(checkout, userProperties).arg("net.oneandone.maven.plugin.prerelease:doDeploy").exec(new LogWriter(log));
     }
 
     public static class LogWriter extends Writer {
@@ -286,19 +293,8 @@ public class Prerelease {
         }
     }
 
-    public void verify(final Log log, String profile, Properties userProperties) throws Exception {
-        build(log, userProperties, "verify", /* to save disk space: */ "clean", "-P" + profile);
-    }
-
-    public void build(final Log log, Properties userProperties, String ... goals) throws Exception {
-        Launcher mvn;
-
-        mvn = Maven.launcher(checkout, userProperties);
-        mvn.arg(goals);
-        log.info(mvn.toString());
-        mvn.exec(new LogWriter(log));
-
-        // TODO: check that the workspace is without modifications
+    public void verify(final Log log, String profile, boolean alwaysUpdate, Properties userProperties) throws Exception {
+        build(log, alwaysUpdate, userProperties, "verify", /* to save disk space: */ "clean", "-P" + profile);
     }
 
     //-- promote

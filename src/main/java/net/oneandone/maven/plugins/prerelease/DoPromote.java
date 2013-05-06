@@ -26,8 +26,10 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 
-@Mojo(name = "test")
-public class DoDeploy extends Base {
+/** Invoke all plugins attached to the deploy phase. Uses internally by the Promote Mojo. */
+
+@Mojo(name = "do-promote")
+public class DoPromote extends Base {
     @Component
     private BuilderCommon builderCommon;
 
