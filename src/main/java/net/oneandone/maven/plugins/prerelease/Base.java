@@ -46,12 +46,6 @@ public abstract class Base extends AbstractMojo {
     private ProjectBuilder projectBuilder;
 
     /**
-     * The entry point to Aether, i.e. the component doing all the work.
-     */
-    @Component
-    private RepositorySystem repositorySystem;
-
-    /**
      * The current repository/network configuration of Maven.
      */
     @Parameter(property = "repositorySystemSession", readonly = true)
@@ -87,6 +81,6 @@ public abstract class Base extends AbstractMojo {
     public abstract void doExecute() throws Exception;
 
     protected Maven maven() {
-        return new Maven(world, repositorySystem, repositorySession, projectBuilder, remoteRepositoriesLegacy);
+        return new Maven(world, repositorySession, projectBuilder, remoteRepositoriesLegacy);
     }
 }

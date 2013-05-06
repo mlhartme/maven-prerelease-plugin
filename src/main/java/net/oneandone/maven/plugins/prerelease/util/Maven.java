@@ -75,7 +75,7 @@ public class Maven {
             session.setOffline(false);
             session.setLocalRepositoryManager(system.newLocalRepositoryManager(localRepository));
             session.setProxySelector(null);
-            return new Maven(world, system, session, container.lookup(ProjectBuilder.class), Arrays.asList(repository));
+            return new Maven(world, session, container.lookup(ProjectBuilder.class), Arrays.asList(repository));
         } catch (ComponentLookupException e) {
             throw new IllegalStateException(e);
         }
@@ -110,7 +110,6 @@ public class Maven {
     //--
 
     private final World world;
-    private final RepositorySystem repositorySystem;
     private final RepositorySystemSession repositorySession;
     private final List<ArtifactRepository> remoteLegacy; // needed to load poms :(
 
@@ -118,10 +117,8 @@ public class Maven {
     // As far as I know, there's no such project builder as of mvn 3.0.2.
     private final ProjectBuilder builder;
 
-    public Maven(World world, RepositorySystem repositorySystem, RepositorySystemSession repositorySession, ProjectBuilder builder,
-                 List<ArtifactRepository> remoteLegacy) {
+    public Maven(World world, RepositorySystemSession repositorySession, ProjectBuilder builder, List<ArtifactRepository> remoteLegacy) {
         this.world = world;
-        this.repositorySystem = repositorySystem;
         this.repositorySession = repositorySession;
         this.builder = builder;
         this.remoteLegacy = remoteLegacy;
@@ -185,52 +182,5 @@ public class Maven {
             dependencies.addAll(result.getDependencyResolutionResult().getDependencies());
         }
         return result.getProject();
-    }
-
-    //-- deploy
-
-    /** convenience method */
-    public void deploy(RemoteRepository target, Artifact ... artifacts) throws DeploymentException {
-        deploy(target, null, Arrays.asList(artifacts));
-    }
-
-    /** convenience method */
-    public void deploy(RemoteRepository target, String pluginName, Artifact ... artifacts) throws DeploymentException {
-        deploy(target, pluginName, Arrays.asList(artifacts));
-    }
-
-    /**
-     * You'll usually pass one jar artifact and the corresponding pom artifact.
-     * @param pluginName null if you deploy normal artifacts; none-null for Maven Plugins, that you wish to add a plugin mapping for;
-     *                   specifies the plugin name in this case.  */
-    public void deploy(RemoteRepository target, String pluginName, List<Artifact> artifacts) throws DeploymentException {
-        DeployRequest request;
-        GroupRepositoryMetadata gm;
-        String prefix;
-
-        request = new DeployRequest();
-        for (Artifact artifact : artifacts) {
-            if (artifact.getFile() == null) {
-                throw new IllegalArgumentException(artifact.toString() + " without file");
-            }
-            request.addArtifact(artifact);
-            if (pluginName != null) {
-                gm = new GroupRepositoryMetadata(artifact.getGroupId());
-                prefix = getGoalPrefixFromArtifactId(artifact.getArtifactId());
-                gm.addPluginMapping(prefix, artifact.getArtifactId(), pluginName);
-                request.addMetadata(new MetadataBridge(gm));
-            }
-        }
-        request.setRepository(target);
-        repositorySystem.deploy(repositorySession, request);
-    }
-
-    /** from PluginDescriptor */
-    public static String getGoalPrefixFromArtifactId(String artifactId) {
-        if ("maven-plugin-plugin".equals(artifactId)) {
-            return "plugin";
-        } else {
-            return artifactId.replaceAll("-?maven-?", "").replaceAll("-?plugin-?", "");
-        }
     }
 }
