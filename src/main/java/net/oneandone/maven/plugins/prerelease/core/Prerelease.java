@@ -76,7 +76,6 @@ public class Prerelease {
             log.debug(target.svnLauncher("checkout", "--depth=empty", tagbase, tags.getAbsolute()).exec());
             log.debug(target.svnLauncher("copy", "-r" + descriptor.revision, descriptor.svnOrig, checkout.getAbsolute()).exec());
             prerelease = new Prerelease(target, checkout, descriptor);
-            prerelease.artifacts().mkdir();
             prerelease.descriptor.save(target);
             Transform.adjustPom(prerelease.checkout.join("pom.xml"), descriptor.previous, descriptor.project.version,
                     descriptor.svnOrig, descriptor.svnTag);
@@ -128,27 +127,6 @@ public class Prerelease {
                 + " promoted by " + by, descriptor.svnTag);
         log.info(launcher.toString());
         log.info(launcher.exec());
-    }
-
-    public List<Artifact> artifactList() throws IOException {
-        FileNode artifacts;
-        FileNode dir;
-        List<Artifact> result;
-        Artifact artifact;
-
-        artifacts = artifacts();
-        dir = (FileNode) artifacts.findOne("**/*.pom").getParent();
-        result = new ArrayList<>();
-        for (FileNode file : dir.list()) {
-            if (file.getName().endsWith(".md5") || file.getName().endsWith(".sha1") || file.getName().endsWith(".asc")) {
-                // skip
-            } else {
-                artifact = artifact(file.getRelative(artifacts));
-                artifact = artifact.setFile(file.toPath().toFile());
-                result.add(artifact);
-            }
-        }
-        return result;
     }
 
     public static Artifact artifact(String origPath) {
@@ -244,20 +222,24 @@ public class Prerelease {
 
     public void build(final Log log, boolean alwaysUpdate, boolean promoting, Properties userProperties) throws Exception {
         Launcher mvn;
+        FileNode installed;
 
         mvn = Maven.launcher(checkout, userProperties);
-        mvn.arg("-DaltDeploymentRepository=prerelease::default::" + artifacts().toPath().toFile().toURI(),
-                // do not install release artifacts because we do not necessarily deploy them
-                "-Dmaven.install.skip",
-                // no "clean" because we have a vanilla directory from svn
-                "deploy");
+        mvn.arg(// no "clean" because we have a vanilla directory from svn
+                "install");
         if (alwaysUpdate) {
             mvn.arg("-U");
         }
         mvn.args(promoting ? descriptor.schedule.promotingProperties() : descriptor.schedule.nonePromotingProperties());
         log.info(mvn.toString());
-        mvn.exec(new LogWriter(log));
-
+        try {
+            mvn.exec(new LogWriter(log));
+        } finally {
+            installed = descriptor.project.localRepo(checkout.getWorld());
+            if (installed.exists()) {
+                installed.move(artifacts());
+            }
+        }
         // TODO: check that the workspace is without modifications
     }
 
