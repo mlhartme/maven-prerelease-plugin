@@ -17,6 +17,7 @@ import org.apache.maven.plugins.annotations.Component;
 import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.project.MavenProject;
+import org.apache.maven.project.MavenProjectHelper;
 import org.codehaus.plexus.component.annotations.Requirement;
 
 import java.io.File;
@@ -29,6 +30,9 @@ import java.util.List;
 public class DoDeploy extends Base {
     @Component
     private BuilderCommon builderCommon;
+
+    @Component
+    private MavenProjectHelper projectHelper;
 
     @Component
     private MojoExecutor mojoExecutor;
@@ -51,32 +55,25 @@ public class DoDeploy extends Base {
             }
         }
         ProjectIndex projectIndex = new ProjectIndex( session.getProjects() );
-        project.getArtifact().setFile(new File("target/prerelease-1.5.0-SNAPSHOT.jar"));
-        getLog().info("before");
+        artifactsFile();
         mojoExecutor.execute(session, executions, projectIndex);
-        getLog().info("after");
     }
 
-    public void initArtifacts() throws IOException {
+    public void artifactsFile() throws IOException {
         FileNode artifacts;
-        List<org.sonatype.aether.artifact.Artifact> result;
         String str;
-        org.sonatype.aether.artifact.Artifact artifact;
         String type;
         String classifier;
 
         artifacts = world.file(project.getBasedir()).getParent().join("artifacts");
-        result = new ArrayList<>();
         for (FileNode file : artifacts.list()) {
             if (file.getName().endsWith(".md5") || file.getName().endsWith(".sha1") || file.getName().endsWith(".asc")) {
                 // skip
             } else {
                 type = file.getExtension();
-                if (type.equals(".pom")) {
+                if (type.equals(".pom") && !project.getPackaging().equals("pom")) {
                     // ignored
-                    // TODO: what about pom projects
                 } else {
-                    type = type.substring(1);
                     str = file.getName();
                     str = Strings.removeRight(str, type);
                     str = Strings.removeLeft(str, project.getArtifactId() + "-");
@@ -85,11 +82,10 @@ public class DoDeploy extends Base {
                         project.getArtifact().setFile(file.toPath().toFile());
                     } else {
                         classifier = Strings.removeRight(str, "-");
-                        ProjectHelper.attach();
+                        projectHelper.attachArtifact(project, file.toPath().toFile(), classifier);
                     }
                 }
             }
         }
     }
-
 }

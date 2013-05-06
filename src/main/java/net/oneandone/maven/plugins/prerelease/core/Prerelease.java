@@ -214,8 +214,8 @@ public class Prerelease {
 
     //--
 
-    public void deploy(Maven maven) throws IOException, DeploymentException {
-        maven.deploy(descriptor.deployRepository, descriptor.deployPluginMetadata ? descriptor.project.name : null, artifactList());
+    public void deploy(Log log) throws IOException, DeploymentException {
+        Maven.launcher(checkout, new Properties()).arg("prerelease:doDeploy").exec(new LogWriter(log));
     }
 
     //--
@@ -308,7 +308,7 @@ public class Prerelease {
      * @param beforePromotePhase true to include the beforePromotePhase, false when it was already included as part of the normal build
      * @param userProperties is mandatory for Jenkins builds, because the user name is passed as a property
      */
-    public void promote(Log log, Maven maven, String user, boolean beforePromotePhase, Properties userProperties)
+    public void promote(Log log, String user, boolean beforePromotePhase, Properties userProperties)
             throws Exception {
         FileNode origCommit;
 
@@ -318,7 +318,7 @@ public class Prerelease {
         }
         origCommit = prepareOrigCommit(log);
         try {
-            promoteLocked(log, maven, user, userProperties, origCommit);
+            promoteLocked(log, user, userProperties, origCommit);
         } catch (Throwable e) { // CAUTION: catching exceptions is not enough -- in particular, out-of-memory during upload is an error!
             try {
                 origUnlock(origCommit);
@@ -338,11 +338,11 @@ public class Prerelease {
         }
     }
 
-    private void promoteLocked(Log log, Maven maven, String user, Properties userProperties,
+    private void promoteLocked(Log log, String user, Properties userProperties,
                                FileNode origCommit) throws IOException, DeploymentException {
         commit(log, user);
         try {
-            deploy(maven);
+            deploy(log);
         } catch (Exception e) {
             log.info("deployment failed - reverting tag");
             revertCommit(log, user);
