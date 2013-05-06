@@ -30,23 +30,14 @@ public class UpdatePromote extends Promote {
     public void doExecute(Archive archive) throws Exception {
         WorkingCopy workingCopy;
         Prerelease prerelease;
-        boolean existing;
 
         workingCopy = checkedWorkingCopy();
         setTarget(archive.target(workingCopy.revision()));
         prerelease = target.loadOpt();
         if (prerelease == null) {
-            prerelease = Prerelease.create(getLog(), checkedDescriptor(workingCopy), target, alwaysUpdate, true,
-                    session.getUserProperties());
-            existing = false;
-        } else {
-            existing = true;
+            prerelease = Prerelease.create(getLog(), checkedDescriptor(workingCopy), target, alwaysUpdate, session.getUserProperties());
         }
-        prerelease.promote(getLog(), getUser(), existing, session.getUserProperties());
+        prerelease.promote(getLog(), getUser(), session.getUserProperties());
         workingCopy.update(getLog());
-    }
-
-    public void saveSchedule(Properties dest) {
-        schedule().save(dest, "");
     }
 }

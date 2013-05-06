@@ -66,7 +66,7 @@ public class Promote extends ProjectBase {
         if (prerelease == null) {
             throw new MojoExecutionException("no prerelease for revision " + revision);
         }
-        prerelease.promote(getLog(), user, true, session.getUserProperties());
+        prerelease.promote(getLog(), user, session.getUserProperties());
         workingCopy.update(getLog());
     }
 }

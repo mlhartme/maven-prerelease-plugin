@@ -50,7 +50,7 @@ public class Prerelease {
         return new Prerelease(target, workingCopy, descriptor);
     }
 
-    public static Prerelease create(Log log, Descriptor descriptor, Target target, boolean update, boolean promoting, Properties properties)
+    public static Prerelease create(Log log, Descriptor descriptor, Target target, boolean update, Properties properties)
             throws Exception {
         Prerelease prerelease;
         FileNode tags;
@@ -80,7 +80,7 @@ public class Prerelease {
             Transform.adjustPom(prerelease.checkout.join("pom.xml"), descriptor.previous, descriptor.project.version,
                     descriptor.svnOrig, descriptor.svnTag);
             Archive.adjustChanges(prerelease.checkout, prerelease.descriptor.project.version);
-            prerelease.build(log, update, promoting, properties);
+            prerelease.build(log, update, properties);
             log.info("created prerelease in " + prerelease.target);
         } catch (Exception e) {
             target.scheduleRemove(log, "create failed: " + e.getMessage());
@@ -214,13 +214,13 @@ public class Prerelease {
 
     //--
 
-    public void deploy(Log log) throws IOException, DeploymentException {
-        Maven.launcher(checkout, new Properties()).arg("prerelease:doDeploy").exec(new LogWriter(log));
+    public void deploy(Log log, Properties userProperties) throws IOException, DeploymentException {
+        Maven.launcher(checkout, userProperties).arg("prerelease:doDeploy").exec(new LogWriter(log));
     }
 
     //--
 
-    public void build(final Log log, boolean alwaysUpdate, boolean promoting, Properties userProperties) throws Exception {
+    public void build(final Log log, boolean alwaysUpdate, Properties userProperties) throws Exception {
         Launcher mvn;
         FileNode installed;
 
@@ -230,7 +230,6 @@ public class Prerelease {
         if (alwaysUpdate) {
             mvn.arg("-U");
         }
-        mvn.args(promoting ? descriptor.schedule.promotingProperties() : descriptor.schedule.nonePromotingProperties());
         log.info(mvn.toString());
         try {
             mvn.exec(new LogWriter(log));
@@ -305,17 +304,12 @@ public class Prerelease {
     //-- promote
 
     /**
-     * @param beforePromotePhase true to include the beforePromotePhase, false when it was already included as part of the normal build
      * @param userProperties is mandatory for Jenkins builds, because the user name is passed as a property
      */
-    public void promote(Log log, String user, boolean beforePromotePhase, Properties userProperties)
-            throws Exception {
+    public void promote(Log log, String user, Properties userProperties) throws Exception {
         FileNode origCommit;
 
         log.info("promoting revision " + descriptor.revision + " to " + descriptor.project);
-        if (beforePromotePhase) {
-            descriptor.schedule.beforePromote(log, checkout, userProperties);
-        }
         origCommit = prepareOrigCommit(log);
         try {
             promoteLocked(log, user, userProperties, origCommit);
@@ -342,20 +336,12 @@ public class Prerelease {
                                FileNode origCommit) throws IOException, DeploymentException {
         commit(log, user);
         try {
-            deploy(log);
+            deploy(log, userProperties);
         } catch (Exception e) {
             log.info("deployment failed - reverting tag");
             revertCommit(log, user);
             target.scheduleRemove(log, "deployment failed (tag has been reverted): " + e.getMessage());
             throw e;
-        }
-        try {
-            descriptor.schedule.afterPromote(log, checkout, userProperties);
-        } catch (Exception e) {
-            log.warn("Promote succeeded: your artifacts have been deployed, and your svn tag was created. ");
-            log.warn("However, after-promote jobs failed with this exception: ");
-            log.warn(e);
-            log.warn("Thus, you can use your release, but someone expecienced should have a look.");
         }
         try {
             log.info("Update pom and changes ...");

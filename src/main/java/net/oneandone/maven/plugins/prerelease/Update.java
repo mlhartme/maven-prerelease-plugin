@@ -36,13 +36,13 @@ public class Update extends ProjectBase {
         workingCopy = checkedWorkingCopy();
         getLog().info("checking project ...");
         revision = workingCopy.revision();
-        descriptor = Descriptor.create(project, revision, schedule());
+        descriptor = Descriptor.create(project, revision);
         workingCopy.checkCompatibility(descriptor);
         setTarget(archive.target(revision));
         if (target.exists()) {
             getLog().info("prerelease already exists: " + descriptor.getName());
         } else {
-            prerelease = Prerelease.create(getLog(), descriptor, target, alwaysUpdate, false, session.getUserProperties());
+            prerelease = Prerelease.create(getLog(), descriptor, target, alwaysUpdate, session.getUserProperties());
             try {
                 descriptor.check(world, project);
             } catch (RuntimeException e) {

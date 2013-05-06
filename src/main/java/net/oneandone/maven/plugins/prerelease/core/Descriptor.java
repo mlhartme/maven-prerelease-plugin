@@ -46,25 +46,22 @@ public class Descriptor {
     private static final String DEPLOY_PLUGIN_METADATA = "deployPluginMetadata";
     private static final String PREVIOUS = "previous"; // previous snapshot version
     private static final String NEXT = "next"; // next snapshot version
-    private static final String SCHEDULE_PREFIX = "plugin.";
 
     public static Descriptor load(Target target) throws IOException {
         Properties properties;
         InputStream src;
-        Schedule schedule;
 
         properties = new Properties();
         src = file(target).createInputStream();
         properties.load(src);
-        schedule = Schedule.load(properties, SCHEDULE_PREFIX);
         return new Descriptor(target.getRevision(), get(properties, SVN_ORIG), get(properties, SVN_TAG),
                 new Project(get(properties, PROJECT_NAME), get(properties, PROJECT_URL),
                         get(properties, PROJECT_GROUP_ID), get(properties, PROJECT_ARTIFACT_ID), get(properties, PROJECT_VERSION)),
                 repo(get(properties, DEPLOY_REPOSITORY)), "true".equals(get(properties, DEPLOY_PLUGIN_METADATA)),
-                get(properties, PREVIOUS), get(properties, NEXT), schedule);
+                get(properties, PREVIOUS), get(properties, NEXT));
     }
 
-    public static Descriptor create(MavenProject mavenProject, long revision, Schedule schedule)
+    public static Descriptor create(MavenProject mavenProject, long revision)
             throws MissingScmTag, MissingDeveloperConnection, CannotBumpVersion, CannotDeterminTagBase {
         Project project;
         String svnOrig;
@@ -77,13 +74,13 @@ public class Descriptor {
         repo = mavenProject.getDistributionManagement().getRepository();
         return new Descriptor(revision, svnOrig, svnTag, project, new RemoteRepository(repo.getId(),
                 repo.getLayout(), Strings.removeLeftOpt(repo.getUrl(), "dav:")),
-                "maven-plugin".equals(mavenProject.getPackaging()), mavenProject.getVersion(), next(project.version), schedule);
+                "maven-plugin".equals(mavenProject.getPackaging()), mavenProject.getVersion(), next(project.version));
     }
 
-    public static Descriptor checkedCreate(World world, MavenProject mavenProject, long revision, Schedule schedule)
+    public static Descriptor checkedCreate(World world, MavenProject mavenProject, long revision)
             throws CannotDeterminTagBase,
             MissingScmTag, CannotBumpVersion, MissingDeveloperConnection, TagAlreadyExists, VersioningProblem {
-        return create(mavenProject, revision, schedule).check(world, mavenProject);
+        return create(mavenProject, revision).check(world, mavenProject);
     }
 
     //--
@@ -97,10 +94,9 @@ public class Descriptor {
     public final boolean deployPluginMetadata;
     public final String previous;
     public final String next;
-    public final Schedule schedule;
 
     public Descriptor(long revision, String svnOrig, String svnTag, Project project, RemoteRepository deployRepository,
-                      boolean deployPluginMetadata, String previous, String next, Schedule schedule) {
+                      boolean deployPluginMetadata, String previous, String next) {
         if (svnOrig.endsWith("/")) {
             throw new IllegalArgumentException(svnOrig);
         }
@@ -115,7 +111,6 @@ public class Descriptor {
         this.deployPluginMetadata = deployPluginMetadata;
         this.previous = previous;
         this.next = next;
-        this.schedule = schedule;
     }
 
     /** @return this */
@@ -177,7 +172,6 @@ public class Descriptor {
         properties.setProperty(PROJECT_ARTIFACT_ID, project.artifactId);
         properties.setProperty(PROJECT_VERSION, project.version);
         properties.setProperty(NEXT, next);
-        schedule.save(properties, SCHEDULE_PREFIX);
         dest = file(target).createOutputStream(false);
         properties.store(dest, "");
         dest.close();

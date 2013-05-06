@@ -18,7 +18,6 @@ package net.oneandone.maven.plugins.prerelease;
 import net.oneandone.maven.plugins.prerelease.util.Maven;
 import net.oneandone.maven.plugins.prerelease.core.Archive;
 import net.oneandone.maven.plugins.prerelease.core.Descriptor;
-import net.oneandone.maven.plugins.prerelease.core.Schedule;
 import net.oneandone.maven.plugins.prerelease.core.Target;
 import net.oneandone.sushi.fs.file.FileNode;
 import net.oneandone.sushi.fs.svn.SvnNode;
@@ -91,7 +90,7 @@ public abstract class BareBase extends Base {
         project = load(maven);
         getLog().info("project " + project.getGroupId() + ":" + project.getArtifactId() + ":" + project.getVersion());
         archiveDirectory = Archive.directory(world.file(archiveRoot), project);
-        descriptor = Descriptor.create(project, revisionForDescriptor(archiveDirectory), schedule(project)).check(world, project);
+        descriptor = Descriptor.create(project, revisionForDescriptor(archiveDirectory)).check(world, project);
         getLog().info("revision: " + descriptor.revision);
         if (!descriptor.svnOrig.equals(svnurl)) {
             throw new MojoExecutionException("svn mismatch: " + svnurl + " vs " + descriptor.svnOrig);
@@ -107,17 +106,6 @@ public abstract class BareBase extends Base {
     }
 
     public abstract void doExecute(Maven maven, MavenProject project, Target target, Descriptor descriptor) throws Exception;
-
-    private Schedule schedule(MavenProject project) throws Exception {
-        org.apache.maven.plugin.Mojo up;
-        Properties dest;
-
-        // cannot cast to Update Promote because it's loaded by a different class loader
-        up = mojo(project, "prerelease:update-promote");
-        dest = new Properties();
-        up.getClass().getDeclaredMethod("saveSchedule", Properties.class).invoke(up, dest);
-        return Schedule.load(dest, "");
-    }
 
     protected org.apache.maven.plugin.Mojo mojo(MavenProject project, String key) throws Exception {
         MavenProject oldProject;

@@ -29,16 +29,12 @@ import org.apache.maven.project.MavenProject;
 public class BareUpdatePromote extends BareUpdate {
     public void doExecute(Maven maven, MavenProject project, Target target, Descriptor descriptor) throws Exception {
         Prerelease prerelease;
-        boolean existing;
 
         prerelease = target.loadOpt();
         if (prerelease == null) {
             descriptor.check(world, project);
-            prerelease = Prerelease.create(getLog(), descriptor, target, alwaysUpdate, true, session.getUserProperties());
-            existing = false;
-        } else {
-            existing = true;
+            prerelease = Prerelease.create(getLog(), descriptor, target, alwaysUpdate, session.getUserProperties());
         }
-        prerelease.promote(getLog(), getUser(), existing, session.getUserProperties());
+        prerelease.promote(getLog(), getUser(), session.getUserProperties());
     }
 }

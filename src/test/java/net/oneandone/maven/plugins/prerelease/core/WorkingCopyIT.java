@@ -92,7 +92,7 @@ public class WorkingCopyIT extends IntegrationBase {
         maven = Maven.withDefaults(WORLD);
         project = maven.loadPom(dir.join("pom.xml"));
         revision = WorkingCopy.load(dir).revision(); // TODO: expensive
-        descriptor = Descriptor.checkedCreate(WORLD, project, revision, new Schedule());
+        descriptor = Descriptor.checkedCreate(WORLD, project, revision);
         WorkingCopy.load(dir).checkCompatibility(descriptor);
     }
 
@@ -108,7 +108,7 @@ public class WorkingCopyIT extends IntegrationBase {
         maven = Maven.withDefaults(WORLD);
         project = maven.loadPom(dir.join("pom.xml"));
         revision = WorkingCopy.load(dir).revision() + 1;
-        descriptor = Descriptor.checkedCreate(WORLD, project, revision, new Schedule());
+        descriptor = Descriptor.checkedCreate(WORLD, project, revision);
         WorkingCopy.load(dir).checkCompatibility(descriptor);
     }
 }

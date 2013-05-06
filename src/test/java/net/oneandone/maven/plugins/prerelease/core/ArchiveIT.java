@@ -107,10 +107,10 @@ public class ArchiveIT extends IntegrationBase {
         maven = Maven.withDefaults(WORLD);
         project = maven.loadPom(dir.join("pom.xml"));
         revision = WorkingCopy.load(dir).revision();
-        descriptor = Descriptor.checkedCreate(WORLD, project, revision, new Schedule());
+        descriptor = Descriptor.checkedCreate(WORLD, project, revision);
         tmp = dir.getWorld().getTemp().createTempDirectory();
         try (Archive archive = Archive.open(tmp, 5, nullLog())) {
-            prerelease = Prerelease.create(nullLog(), descriptor, archive.target(descriptor.revision), false, true, new Properties());
+            prerelease = Prerelease.create(nullLog(), descriptor, archive.target(descriptor.revision), false, new Properties());
         }
     }
 

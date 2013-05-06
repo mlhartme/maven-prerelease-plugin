@@ -17,23 +17,15 @@ package net.oneandone.maven.plugins.prerelease;
 
 import net.oneandone.maven.plugins.prerelease.core.Archive;
 import net.oneandone.maven.plugins.prerelease.core.Descriptor;
-import net.oneandone.maven.plugins.prerelease.core.Schedule;
 import net.oneandone.maven.plugins.prerelease.core.Target;
 import net.oneandone.maven.plugins.prerelease.core.WorkingCopy;
 import net.oneandone.sushi.fs.file.FileNode;
 import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.project.MavenProject;
 
-import java.util.ArrayList;
-import java.util.List;
-
 public abstract class ProjectBase extends Base {
     @Parameter(property = "project", required = true, readonly = true)
     protected MavenProject project;
-
-    @Parameter
-    private List<Plugin> plugins = new ArrayList<>();
-
 
     /**
      * Specifies where to create a symlink to the prerelease checkout. No symlink is created if the prerelease has no checkout (and thus is
@@ -101,12 +93,8 @@ public abstract class ProjectBase extends Base {
 
         getLog().info("checking project ...");
         revision = workingCopy.revision();
-        descriptor = Descriptor.checkedCreate(world, project, revision, schedule());
+        descriptor = Descriptor.checkedCreate(world, project, revision);
         workingCopy.checkCompatibility(descriptor);
         return descriptor;
-    }
-
-    protected Schedule schedule() {
-        return new Schedule(plugins);
     }
 }

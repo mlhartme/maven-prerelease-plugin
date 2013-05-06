@@ -38,7 +38,7 @@ public class DescriptorIT extends IntegrationBase {
         maven = Maven.withDefaults(WORLD);
         project = maven.loadPom(dir.join("pom.xml"));
         revision = WorkingCopy.load(dir).revision(); // TODO: expensive
-        descriptor = Descriptor.checkedCreate(WORLD, project, revision, new Schedule());
+        descriptor = Descriptor.checkedCreate(WORLD, project, revision);
         assertEquals(revision, descriptor.revision);
         assertEquals("1.0.0-SNAPSHOT", descriptor.previous);
         assertEquals("minimal", descriptor.project.artifactId);
@@ -61,11 +61,11 @@ public class DescriptorIT extends IntegrationBase {
         maven = Maven.withDefaults(WORLD);
         project = maven.loadPom(dir.join("pom.xml"));
         revision = WorkingCopy.load(dir).revision(); // TODO: expensive
-        Descriptor.checkedCreate(WORLD, project, revision, new Schedule());
+        Descriptor.checkedCreate(WORLD, project, revision);
         tag = new URI(REPOSITORY_URL + "/minimal/tags/minimal-1.0.0");
         svnMkdir(tag);
         try {
-            Descriptor.checkedCreate(WORLD, project, revision, new Schedule());
+            Descriptor.checkedCreate(WORLD, project, revision);
         } finally {
             svnRemove(tag);
         }
@@ -82,7 +82,7 @@ public class DescriptorIT extends IntegrationBase {
         maven = Maven.withDefaults(WORLD);
         project = maven.loadPom(dir.join("pom.xml"));
         revision = WorkingCopy.load(dir).revision(); // TODO: expensive
-        Descriptor.checkedCreate(WORLD, project, revision, new Schedule());
+        Descriptor.checkedCreate(WORLD, project, revision);
     }
 
     @Test(expected = VersioningProblem.class)
@@ -96,7 +96,7 @@ public class DescriptorIT extends IntegrationBase {
         maven = Maven.withDefaults(WORLD);
         project = maven.loadPom(dir.join("pom.xml"));
         revision = WorkingCopy.load(dir).revision(); // TODO: expensive
-        Descriptor.checkedCreate(WORLD, project, revision, new Schedule());
+        Descriptor.checkedCreate(WORLD, project, revision);
     }
 
     @Test(expected = VersioningProblem.class)
@@ -110,6 +110,6 @@ public class DescriptorIT extends IntegrationBase {
         maven = Maven.withDefaults(WORLD);
         project = maven.loadPom(dir.join("pom.xml"));
         revision = WorkingCopy.load(dir).revision(); // TODO: expensive
-        Descriptor.checkedCreate(WORLD, project, revision, new Schedule());
+        Descriptor.checkedCreate(WORLD, project, revision);
     }
 }
