@@ -33,6 +33,7 @@ import org.sonatype.aether.util.artifact.DefaultArtifact;
 import org.xml.sax.SAXException;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.Writer;
 import java.util.ArrayList;
 import java.util.Date;
@@ -114,6 +115,7 @@ public class Prerelease {
     public void commit(Log log, String by) throws Failure {
         Launcher launcher;
 
+        log.info("committing tag:");
         launcher = Subversion.launcher(checkout, "commit", "-m",
                 "Prerelease " + descriptor.revision + " promoted to " + descriptor.project.version + " by " + by);
         log.info(launcher.toString());
@@ -249,13 +251,17 @@ public class Prerelease {
         Launcher launcher;
 
         launcher = Maven.launcher(checkout, userProperties);
-        launcher.arg("net.oneandone.maven.plugins:prerelease:1.5.0-SNAPSHOT:do-promote");
+        launcher.arg("net.oneandone.maven.plugins:prerelease:" + getVersion() + ":do-promote");
         if (log.isDebugEnabled()) {
             launcher.arg("--debug");
         }
         log.info(launcher.toString());
         launcher.exec(new LogWriter(log));
         log.info("deploy done");
+    }
+
+    private String getVersion() {
+        return getClass().getPackage().getImplementationVersion();
     }
 
     public static class LogWriter extends Writer {
