@@ -37,7 +37,7 @@ public class UpdatePromote extends Promote {
         if (prerelease == null) {
             prerelease = Prerelease.create(getLog(), checkedDescriptor(workingCopy), target, alwaysUpdate, session.getUserProperties());
         }
-        prerelease.promote(getLog(), getUser(), session.getUserProperties());
+        prerelease.promote(getLog(), getUser(), session.getUserProperties(), mandatory);
         workingCopy.update(getLog());
     }
 }

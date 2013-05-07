@@ -22,6 +22,8 @@ import net.oneandone.maven.plugins.prerelease.core.Target;
 import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.project.MavenProject;
 
+import java.util.Properties;
+
 /**
  * Perform update-promote without a working copy. Svn url and revision are passed as arguments, not determined from a working copy.
  */
@@ -35,6 +37,15 @@ public class BareUpdatePromote extends BareUpdate {
             descriptor.check(world, project);
             prerelease = Prerelease.create(getLog(), descriptor, target, alwaysUpdate, session.getUserProperties());
         }
-        prerelease.promote(getLog(), getUser(), session.getUserProperties());
+        prerelease.promote(getLog(), getUser(), session.getUserProperties(), getMandatory(project));
     }
+
+    private String getMandatory(MavenProject project) throws Exception {
+        org.apache.maven.plugin.Mojo mojo;
+
+        // cannot cast to Promote because it's loaded by a different class loader
+        mojo = mojo(project, "prerelease:promote");
+        return (String) mojo.getClass().getDeclaredField("mandatory").get(mojo);
+    }
+
 }

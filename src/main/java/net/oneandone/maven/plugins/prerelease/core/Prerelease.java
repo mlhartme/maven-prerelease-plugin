@@ -247,11 +247,11 @@ public class Prerelease {
 
     //--
 
-    public void deploy(Log log, Properties userProperties) throws IOException, DeploymentException {
+    public void deploy(Log log, Properties userProperties, String mandatory) throws IOException, DeploymentException {
         Launcher launcher;
 
         launcher = Maven.launcher(checkout, userProperties);
-        launcher.arg("net.oneandone.maven.plugins:prerelease:" + getVersion() + ":do-promote");
+        launcher.arg("net.oneandone.maven.plugins:prerelease:" + getVersion() + ":do-promote", "-Dprerelease.promote.mandatory=" + mandatory);
         if (log.isDebugEnabled()) {
             launcher.arg("--debug");
         }
@@ -317,13 +317,13 @@ public class Prerelease {
     /**
      * @param userProperties is mandatory for Jenkins builds, because the user name is passed as a property
      */
-    public void promote(Log log, String user, Properties userProperties) throws Exception {
+    public void promote(Log log, String user, Properties userProperties, String mandatory) throws Exception {
         FileNode origCommit;
 
         log.info("promoting revision " + descriptor.revision + " to " + descriptor.project);
         origCommit = prepareOrigCommit(log);
         try {
-            promoteLocked(log, user, userProperties, origCommit);
+            promoteLocked(log, user, userProperties, mandatory, origCommit);
         } catch (Throwable e) { // CAUTION: catching exceptions is not enough -- in particular, out-of-memory during upload is an error!
             try {
                 origUnlock(origCommit);
@@ -344,11 +344,11 @@ public class Prerelease {
     }
 
     /** commit before deploy - because if deployment fails, we can reliably revert the commit. */
-    private void promoteLocked(Log log, String user, Properties userProperties,
+    private void promoteLocked(Log log, String user, Properties userProperties, String mandatory,
                                FileNode origCommit) throws IOException, DeploymentException {
         commit(log, user);
         try {
-            deploy(log, userProperties);
+            deploy(log, userProperties, mandatory);
         } catch (Exception e) {
             log.info("deployment failed - reverting tag");
             revertCommit(log, user);

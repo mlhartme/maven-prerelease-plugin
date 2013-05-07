@@ -159,7 +159,7 @@ public class IntegrationBase {
         pom = tmp.join("pom.xml");
         str = pom.readString();
         str = str.replace("@@TARGET@@", TARGET.getAbsolute());
-        str = str.replace("@@VERSION@@", "1.2.3");
+        str = str.replace("@@VERSION@@", "1.5.0-SNAPSHOT");
         str = str.replace("@@SVNURL@@", REPOSITORY_URL + "/" + name + "/trunk");
         pom.writeString(str);
         svnImport(URI.create(REPOSITORY_URL + "/" + name + "/trunk"), tmp);

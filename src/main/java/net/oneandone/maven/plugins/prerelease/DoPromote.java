@@ -1,6 +1,7 @@
 package net.oneandone.maven.plugins.prerelease;
 
 import net.oneandone.sushi.fs.file.FileNode;
+import net.oneandone.sushi.util.Separator;
 import net.oneandone.sushi.util.Strings;
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.lifecycle.MavenExecutionPlan;
@@ -42,23 +43,44 @@ public class DoPromote extends Base {
     @Parameter(property = "project", required = true, readonly = true)
     protected MavenProject project;
 
+    /** comma separated list of artifact ids */
+    @Parameter(property = "prerelease.promote.mandatory", required = true)
+    protected String mandatory;
+
     @Override
     public void doExecute() throws Exception {
-        List<MojoExecution> executions;
+        List<MojoExecution> mandatoryExecutions;
+        List<MojoExecution> optionalExecutions;
+        List<String> mandatories;
 
+        mandatories = Separator.COMMA.split(mandatory);
         MavenExecutionPlan executionPlan =
                 builderCommon.resolveBuildPlan(session, project, new TaskSegment(false, new LifecycleTask("deploy")), new HashSet<Artifact>());
         getLog().info(executionPlan.toString());
-        executions = new ArrayList<>();
+        mandatoryExecutions = new ArrayList<>();
+        optionalExecutions = new ArrayList<>();
         for (MojoExecution obj : executionPlan.getMojoExecutions()) {
             if ("deploy".equals(obj.getLifecyclePhase())) {
-                getLog().info(obj.getPlugin().getArtifactId() + ":" + obj.getGoal());
-                executions.add(obj);
+                if (mandatories.contains(obj.getPlugin().getArtifactId())) {
+                    getLog().info("mandatory: " + obj.getPlugin().getArtifactId() + ":" + obj.getGoal());
+                    mandatoryExecutions.add(obj);
+                } else {
+                    getLog().info("optional " + obj.getPlugin().getArtifactId() + ":" + obj.getGoal());
+                    optionalExecutions.add(obj);
+                }
             }
         }
         ProjectIndex projectIndex = new ProjectIndex(session.getProjects());
         artifactFiles();
-        mojoExecutor.execute(session, executions, projectIndex);
+        mojoExecutor.execute(session, mandatoryExecutions, projectIndex);
+        try {
+            mojoExecutor.execute(session, mandatoryExecutions, projectIndex);
+        } catch (Exception e) {
+            getLog().warn("Promote succeeded: your artifacts have been deployed, and your svn tag was created. ");
+            getLog().warn("However, optional promote goals failed with this exception: ");
+            getLog().warn(e);
+            getLog().warn("Thus, you can use your release, but someone experienced should have a look.");
+        }
     }
 
     public void artifactFiles() throws IOException {

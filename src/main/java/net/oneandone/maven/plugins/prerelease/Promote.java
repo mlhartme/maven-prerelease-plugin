@@ -50,6 +50,12 @@ public class Promote extends ProjectBase {
     @Parameter(property = "prerelease.user", required = true)
     private String user;
 
+    /**
+     * Comma-separated list of plugin artifact ids that are mandatory for promotion.
+     */
+    @Parameter(property = "prerelease.promote.mandatory", defaultValue = "maven-deploy-plugin")
+    protected String mandatory;
+
     public String getUser() {
         return user;
     }
@@ -66,7 +72,7 @@ public class Promote extends ProjectBase {
         if (prerelease == null) {
             throw new MojoExecutionException("no prerelease for revision " + revision);
         }
-        prerelease.promote(getLog(), user, session.getUserProperties());
+        prerelease.promote(getLog(), user, session.getUserProperties(), mandatory);
         workingCopy.update(getLog());
     }
 }
