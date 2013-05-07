@@ -199,8 +199,8 @@ public class Prerelease {
             Subversion.launcher(result, "lock", ChangesXml.PATH);
         }
 
-        // make sure the version we've locked what we will modify:
-        // (or in other words: make sure we see possible changes that be committed between checkout and lock)
+        // make sure the version we've locked is what we will modify:
+        // (or in other words: make sure we see possible changes that were committed between checkout and lock)
         Subversion.launcher(result, "up");
 
         Transform.adjustPom(result.join("pom.xml"), descriptor.previous, descriptor.next, null, null);
@@ -337,6 +337,7 @@ public class Prerelease {
         }
     }
 
+    /** commit before deploy - because if deployment fails, we can reliably revert the commit. */
     private void promoteLocked(Log log, String user, Properties userProperties,
                                FileNode origCommit) throws IOException, DeploymentException {
         commit(log, user);
