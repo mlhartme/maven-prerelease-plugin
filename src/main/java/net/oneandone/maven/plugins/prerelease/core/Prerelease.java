@@ -80,7 +80,7 @@ public class Prerelease {
             Transform.adjustPom(prerelease.checkout.join("pom.xml"), descriptor.previous, descriptor.project.version,
                     descriptor.svnOrig, descriptor.svnTag);
             Archive.adjustChanges(prerelease.checkout, prerelease.descriptor.project.version);
-            prerelease.build(log, update, properties);
+            prerelease.create(log, update, properties);
             log.info("created prerelease in " + prerelease.target);
         } catch (Exception e) {
             target.scheduleRemove(log, "create failed: " + e.getMessage());
@@ -246,7 +246,16 @@ public class Prerelease {
     //--
 
     public void deploy(Log log, Properties userProperties) throws IOException, DeploymentException {
-        Maven.launcher(checkout, userProperties).arg("net.oneandone.maven.plugin.prerelease:doDeploy").exec(new LogWriter(log));
+        Launcher launcher;
+
+        launcher = Maven.launcher(checkout, userProperties);
+        launcher.arg("net.oneandone.maven.plugins:prerelease:1.5.0-SNAPSHOT:do-promote");
+        if (log.isDebugEnabled()) {
+            launcher.arg("--debug");
+        }
+        log.info(launcher.toString());
+        launcher.exec(new LogWriter(log));
+        log.info("deploy done");
     }
 
     public static class LogWriter extends Writer {

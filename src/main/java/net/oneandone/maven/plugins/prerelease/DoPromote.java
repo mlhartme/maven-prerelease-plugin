@@ -52,38 +52,39 @@ public class DoPromote extends Base {
         executions = new ArrayList<>();
         for (MojoExecution obj : executionPlan.getMojoExecutions()) {
             if ("deploy".equals(obj.getLifecyclePhase())) {
-                getLog().info(obj.getLifecyclePhase() + " - " + obj.getPlugin().getArtifactId() + ":" + obj.getGoal());
+                getLog().info(obj.getPlugin().getArtifactId() + ":" + obj.getGoal());
                 executions.add(obj);
             }
         }
-        ProjectIndex projectIndex = new ProjectIndex( session.getProjects() );
-        artifactsFile();
+        ProjectIndex projectIndex = new ProjectIndex(session.getProjects());
+        artifactFiles();
         mojoExecutor.execute(session, executions, projectIndex);
     }
 
-    public void artifactsFile() throws IOException {
+    public void artifactFiles() throws IOException {
         FileNode artifacts;
+        String name;
         String str;
         String type;
         String classifier;
 
-        artifacts = world.file(project.getBasedir()).getParent().join("artifacts");
+        artifacts = world.file(project.getBasedir()).getParent().getParent().join("artifacts");
         for (FileNode file : artifacts.list()) {
-            if (file.getName().endsWith(".md5") || file.getName().endsWith(".sha1") || file.getName().endsWith(".asc")) {
+            name = file.getName();
+            if (name.endsWith(".md5") || name.endsWith(".sha1") || name.endsWith(".asc") || name.equals("_maven.repositories")) {
                 // skip
             } else {
                 type = file.getExtension();
-                if (type.equals(".pom") && !project.getPackaging().equals("pom")) {
+                if ("pom".equals(type) && !project.getPackaging().equals("pom")) {
                     // ignored
                 } else {
-                    str = file.getName();
-                    str = Strings.removeRight(str, type);
+                    str = name.substring(0, name.length() - type.length() - 1);
                     str = Strings.removeLeft(str, project.getArtifactId() + "-");
-                    str = Strings.removeRight(str, project.getVersion());
+                    str = Strings.removeLeft(str, project.getVersion());
                     if (str.isEmpty()) {
                         project.getArtifact().setFile(file.toPath().toFile());
                     } else {
-                        classifier = Strings.removeRight(str, "-");
+                        classifier = Strings.removeLeft(str, "-");
                         projectHelper.attachArtifact(project, file.toPath().toFile(), classifier);
                     }
                 }
