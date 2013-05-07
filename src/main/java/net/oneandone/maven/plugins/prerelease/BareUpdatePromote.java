@@ -22,6 +22,7 @@ import net.oneandone.maven.plugins.prerelease.core.Target;
 import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.project.MavenProject;
 
+import java.lang.reflect.Field;
 import java.util.Properties;
 
 /**
@@ -42,10 +43,13 @@ public class BareUpdatePromote extends BareUpdate {
 
     private String getMandatory(MavenProject project) throws Exception {
         org.apache.maven.plugin.Mojo mojo;
+        Field field;
 
         // cannot cast to Promote because it's loaded by a different class loader
-        mojo = mojo(project, "prerelease:promote");
-        return (String) mojo.getClass().getDeclaredField("mandatory").get(mojo);
+        mojo = mojo(project, "net.oneandone.maven.plugins:prerelease:update-promote");
+        field = mojo.getClass().getDeclaredField("mandatory");
+        field.setAccessible(true);
+        return (String) field.get(mojo);
     }
 
 }

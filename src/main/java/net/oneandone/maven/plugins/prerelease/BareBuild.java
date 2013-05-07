@@ -46,7 +46,7 @@ public class BareBuild extends BareBase {
         org.apache.maven.plugin.Mojo mojo;
         Field field;
 
-        mojo = mojo(project, "prerelease:build");
+        mojo = mojo(project, "net.oneandone.maven.plugins:prerelease:build");
         field = mojo.getClass().getDeclaredField("arguments");
         field.setAccessible(true);
         return (String[]) field.get(mojo);
