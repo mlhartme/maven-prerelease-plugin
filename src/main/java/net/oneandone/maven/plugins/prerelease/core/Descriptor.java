@@ -33,7 +33,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
 
-/** basically the prerelease.properties */
+/** Basically the prerelease.properties. Metadata about a prerelease. */
 public class Descriptor {
     private static final String SVN_ORIG = "svn.orig";
     private static final String SVN_TAG = "svn.tag";

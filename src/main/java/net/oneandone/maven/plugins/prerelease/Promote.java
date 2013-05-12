@@ -25,14 +25,13 @@ import org.apache.maven.plugins.annotations.Parameter;
 import java.io.IOException;
 
 /**
- * Promotes a pre-release by commuting the tag and deploying its artifact(s).
+ * Promotes a prerelease by commuting the tag and deploying its artifact(s).
  *
- * Execute this goal in the svn working directory of the project you want to release and make sure you have created a pre-release.
+ * Execute this goal in the svn working directory of the project you want to release and make sure you have created a prerelease.
  *
  * This goal commits the tag of the current prerelease and deploys the respective artifact(s). It also updates (in your svn trunk or branch
  * on the svn server) the project version in pom.xml to the next development version, and it updates your changes file (if you have one).
- * In your svn working directory, it runs "svn up" to get the adjusted pom and changes files. In addtion, this goal sends a Frischfleisch
- * notification.
+ * In your svn working directory, it runs "svn up" to get the adjusted pom and changes files.
  *
  * Artifacts are deployed by invoking all plugin goals tied to the deploy phase. These goals are either mandatory or optional, as configured
  * by the "mandatory" parameter. Mandatory goals have to succeed for this plugin to succeed. Optional goals may fail, which results in a

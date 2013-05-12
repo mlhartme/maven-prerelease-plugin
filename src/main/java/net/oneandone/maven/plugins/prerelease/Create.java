@@ -23,15 +23,15 @@ import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugins.annotations.Mojo;
 
 /**
- * Creates a pre-release with an uncommitted tag and undeployed artifacts. Creating a pre-release is the first step to create a release;
- * once you have a pre-release, you can quicky get a release by promoting the pre-release.
+ * Creates a prerelease with an uncommitted tag and undeployed artifacts. Creating a prerelease is the first step to create a release;
+ * once you have a prerelease, you can quicky get a release by promoting the prerelease.
  *
  * Execute this in the svn working directory of your project. Basically, this goal runs checks, creates an uncommitted tag of your working
  * directory and invokes "mvn clean deploy" in it. Maven is invoked with an alternative deployment repository pointing into a subdirectory
  * of this prerelease. In addition, the "performRelease" property is defined to get the same profiles activation you get during a
  * "release:promote" call,
  *
- * When successfull, pre-releases are stored in the configured archive directory, previous pre-release are wiped.
+ * When successful, prereleases are stored in the configured archive directory, previous prerelease are wiped.
  *
  * Checks executed by this goal:
  *

@@ -23,7 +23,7 @@ import org.apache.maven.plugins.annotations.Mojo;
 import java.util.Properties;
 
 /**
- * Updates and promotes a pre-release. Convenience goal.
+ * Updates and promotes a prerelease. Convenience goal.
  */
 @Mojo(name = "update-promote")
 public class UpdatePromote extends Promote {

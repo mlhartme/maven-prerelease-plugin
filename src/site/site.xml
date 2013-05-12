@@ -2,7 +2,7 @@
 <project name="Maven Pre-Release Plugin">
   <version position="left"/>
   <bannerLeft>
-    <name>Maven Pre-Release Plugin</name>
+    <name>Maven Prerelease Plugin</name>
   </bannerLeft>
   <bannerRight>
     <src>http://www1.schlund.de/img-fl/header/logo.gif</src>

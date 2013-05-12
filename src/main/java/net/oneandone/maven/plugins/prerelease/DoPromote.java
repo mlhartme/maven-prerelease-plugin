@@ -52,7 +52,7 @@ public class DoPromote extends Base {
         List<MojoExecution> mandatoryExecutions;
         List<MojoExecution> optionalExecutions;
         List<String> mandatories;
-        ProjectIndex projectIndex;
+        ProjectIndex index;
 
         mandatories = Separator.COMMA.split(mandatory);
         MavenExecutionPlan executionPlan =
@@ -71,11 +71,11 @@ public class DoPromote extends Base {
                 }
             }
         }
-        projectIndex = new ProjectIndex(session.getProjects());
+        index = new ProjectIndex(session.getProjects());
         artifactFiles();
-        mojoExecutor.execute(session, mandatoryExecutions, projectIndex);
+        mojoExecutor.execute(session, mandatoryExecutions, index);
         try {
-            mojoExecutor.execute(session, optionalExecutions, projectIndex);
+            mojoExecutor.execute(session, optionalExecutions, index);
         } catch (Exception e) {
             getLog().warn("Promote succeeded: your artifacts have been deployed, and the svn tag was created. ");
             getLog().warn("However, optional promote goals failed with this exception: ");

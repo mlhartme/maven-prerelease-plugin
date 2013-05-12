@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <document>
   <properties>
-    <title>Maven Pre-Release Plugin</title>
+    <title>Maven Prerelease Plugin</title>
   </properties>
   <body>
-    <section name="Maven Pre-Release Plugin">
+    <section name="Maven Prerelease Plugin">
       <p><a href="http://wiki.intranet.1and1.com/bin/view/UE/MavenPrereleasePlugin">Wiki</a></p>
     </section>
   </body>

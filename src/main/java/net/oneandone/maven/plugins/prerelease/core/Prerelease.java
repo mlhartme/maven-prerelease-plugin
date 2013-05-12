@@ -226,8 +226,6 @@ public class Prerelease {
         mvn.arg(goals);
         log.info(mvn.toString());
         mvn.exec(new LogWriter(log));
-
-        // TODO: check that the workspace is without modifications
     }
 
     public void create(final Log log, boolean alwaysUpdate, Properties userProperties) throws Exception {
@@ -357,7 +355,7 @@ public class Prerelease {
         }
         try {
             log.info("Update pom and changes ...");
-            log.debug(Subversion.launcher(origCommit, "commit", "-m", "Pre-Release " + descriptor.revision
+            log.debug(Subversion.launcher(origCommit, "commit", "-m", "Prerelease " + descriptor.revision
                     + " promoted to release " + descriptor.project + " by " + user + ", starting next development iteration.").exec());
             origCommit.deleteTree();
             // Move prerelease directory into REMOVE directory because it's invalid now:
