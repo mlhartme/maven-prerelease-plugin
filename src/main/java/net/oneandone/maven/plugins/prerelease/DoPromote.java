@@ -1,5 +1,7 @@
 package net.oneandone.maven.plugins.prerelease;
 
+import net.oneandone.maven.plugins.prerelease.core.Descriptor;
+import net.oneandone.maven.plugins.prerelease.core.Prerelease;
 import net.oneandone.sushi.fs.file.FileNode;
 import net.oneandone.sushi.util.Separator;
 import net.oneandone.sushi.util.Strings;
@@ -26,6 +28,8 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.Properties;
 
 /** Invoke all plugins attached to the deploy phase. Uses internally by the Promote Mojo. */
 
@@ -53,6 +57,7 @@ public class DoPromote extends Base {
         List<MojoExecution> optionalExecutions;
         List<String> mandatories;
         ProjectIndex index;
+        Prerelease prerelease;
 
         mandatories = Separator.COMMA.split(mandatory);
         MavenExecutionPlan executionPlan =
@@ -72,7 +77,9 @@ public class DoPromote extends Base {
             }
         }
         index = new ProjectIndex(session.getProjects());
-        artifactFiles();
+        prerelease = Prerelease.forCheckout(world.file(project.getBasedir()));
+        artifactFiles(prerelease);
+        project.getProperties().putAll(prerelease.descriptor.deployProperties);
         mojoExecutor.execute(session, mandatoryExecutions, index);
         try {
             mojoExecutor.execute(session, optionalExecutions, index);
@@ -84,14 +91,14 @@ public class DoPromote extends Base {
         }
     }
 
-    public void artifactFiles() throws IOException {
+    public void artifactFiles(Prerelease prerelease) throws IOException {
         FileNode artifacts;
         String name;
         String str;
         String type;
         String classifier;
 
-        artifacts = world.file(project.getBasedir()).getParent().getParent().join("artifacts");
+        artifacts = prerelease.artifacts();
         for (FileNode file : artifacts.list()) {
             name = file.getName();
             if (name.endsWith(".md5") || name.endsWith(".sha1") || name.endsWith(".asc") || name.equals("_maven.repositories")) {

@@ -30,7 +30,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Properties;
 
 /** Basically the prerelease.properties. Metadata about a prerelease. */
@@ -46,6 +48,7 @@ public class Descriptor {
     private static final String DEPLOY_PLUGIN_METADATA = "deployPluginMetadata";
     private static final String PREVIOUS = "previous"; // previous snapshot version
     private static final String NEXT = "next"; // next snapshot version
+    private static final String DEPLOY_PROPERTIES = "deployProperties.";
 
     public static Descriptor load(Target target) throws IOException {
         Properties properties;
@@ -58,7 +61,8 @@ public class Descriptor {
                 new Project(get(properties, PROJECT_NAME), get(properties, PROJECT_URL),
                         get(properties, PROJECT_GROUP_ID), get(properties, PROJECT_ARTIFACT_ID), get(properties, PROJECT_VERSION)),
                 repo(get(properties, DEPLOY_REPOSITORY)), "true".equals(get(properties, DEPLOY_PLUGIN_METADATA)),
-                get(properties, PREVIOUS), get(properties, NEXT));
+                get(properties, PREVIOUS), get(properties, NEXT),
+                getProperties(properties, DEPLOY_PROPERTIES));
     }
 
     public static Descriptor create(MavenProject mavenProject, long revision)
@@ -74,7 +78,8 @@ public class Descriptor {
         repo = mavenProject.getDistributionManagement().getRepository();
         return new Descriptor(revision, svnOrig, svnTag, project, new RemoteRepository(repo.getId(),
                 repo.getLayout(), Strings.removeLeftOpt(repo.getUrl(), "dav:")),
-                "maven-plugin".equals(mavenProject.getPackaging()), mavenProject.getVersion(), next(project.version));
+                "maven-plugin".equals(mavenProject.getPackaging()), mavenProject.getVersion(), next(project.version),
+                new HashMap<String, String>());
     }
 
     public static Descriptor checkedCreate(World world, MavenProject mavenProject, long revision)
@@ -94,9 +99,10 @@ public class Descriptor {
     public final boolean deployPluginMetadata;
     public final String previous;
     public final String next;
+    public final Map<String, String> deployProperties;
 
     public Descriptor(long revision, String svnOrig, String svnTag, Project project, RemoteRepository deployRepository,
-                      boolean deployPluginMetadata, String previous, String next) {
+                      boolean deployPluginMetadata, String previous, String next, Map<String, String> deployProperties) {
         if (svnOrig.endsWith("/")) {
             throw new IllegalArgumentException(svnOrig);
         }
@@ -111,6 +117,7 @@ public class Descriptor {
         this.deployPluginMetadata = deployPluginMetadata;
         this.previous = previous;
         this.next = next;
+        this.deployProperties = deployProperties;
     }
 
     /** @return this */
@@ -172,6 +179,9 @@ public class Descriptor {
         properties.setProperty(PROJECT_ARTIFACT_ID, project.artifactId);
         properties.setProperty(PROJECT_VERSION, project.version);
         properties.setProperty(NEXT, next);
+        for (Map.Entry<String, String> entry : deployProperties.entrySet()) {
+            properties.setProperty(DEPLOY_PROPERTIES + entry.getKey(), entry.getValue());
+        }
         dest = file(target).createOutputStream(false);
         properties.store(dest, "");
         dest.close();
@@ -260,6 +270,20 @@ public class Descriptor {
             throw new IllegalStateException("missing key: " + key);
         }
         return value;
+    }
+
+    private static Map<String, String> getProperties(Properties properties, String prefix) {
+        String key;
+        Map<String, String> result;
+
+        result = new HashMap<>();
+        for (Map.Entry<Object, Object> entry : properties.entrySet()) {
+            key = (String) entry.getKey();
+            if (key.startsWith(prefix)) {
+                result.put(key.substring(prefix.length()), (String) entry.getValue());
+            }
+        }
+        return result;
     }
 
 
