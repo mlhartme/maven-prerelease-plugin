@@ -25,20 +25,22 @@ import org.apache.maven.plugins.annotations.Parameter;
 import java.io.IOException;
 
 /**
- * Promotes a pre-release by commiting the tag and deploying its artifact(s).
+ * Promotes a pre-release by commuting the tag and deploying its artifact(s).
  *
  * Execute this goal in the svn working directory of the project you want to release and make sure you have created a pre-release.
  *
  * This goal commits the tag of the current prerelease and deploys the respective artifact(s). It also updates (in your svn trunk or branch
  * on the svn server) the project version in pom.xml to the next development version, and it updates your changes file (if you have one).
  * In your svn working directory, it runs "svn up" to get the adjusted pom and changes files. In addtion, this goal sends a Frischfleisch
- * notification,
+ * notification.
  *
- * This goal moves the prerelease from it's archive directory to ${basedir}/target/promoted.
+ * Artifacts are deployed by invoking all plugin goals tied to the deploy phase. These goals are either mandatory or optional, as configured
+ * by the "mandatory" parameter. Mandatory goals have to succeed for this plugin to succeed. Optional goals may fail, which results in a
+ * warning only. The maven-deploy plugin is typically (and by default) mandatory, other notification goals are optional.
  *
  * Error handling. In contrast to Maven's Release Plugin there's no rollback goal: when promote fails, artifacts and tags will be properly
- * remote. Details: If Tag creation fails, this goal fails with an error. If artifact deployment fails, the svn tag will be deleted from
- * the repository and the goal fails with an error. If later promote steps fail, the plugins succeeds, but issues a warning.
+ * removed. (If Tag creation fails, this goal fails with an error. If artifact deployment fails, the svn tag will be deleted from
+ * the repository and the goal fails with an error. If optional promote goal fail, the plugins succeeds, but it issues a warning.)
  *
  * Note that the deployment date of artifacts in the repository may be later that the release date in the changes.xml.
  */
