@@ -109,7 +109,7 @@ public class Maven {
     private final List<ArtifactRepository> remoteLegacy; // needed to load poms :(
 
     // TODO: use a project builder that works without legacy classes, esp. without ArtifactRepository ...
-    // As far as I know, there's no such project builder as of mvn 3.0.2.
+    // As far as I know, there's no such project builder in mvn 3.0.2.
     private final ProjectBuilder builder;
 
     public Maven(World world, RepositorySystemSession repositorySession, ProjectBuilder builder, List<ArtifactRepository> remoteLegacy) {

@@ -46,7 +46,7 @@ import java.io.IOException;
 @Mojo(name = "promote")
 public class Promote extends ProjectBase {
     /**
-     * Email of the user invoking this goal. Determined via devreg when not specified.
+     * Email of the user invoking this goal.
      */
     @Parameter(property = "prerelease.user", required = true)
     private String user;

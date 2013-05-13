@@ -5,7 +5,7 @@
         Moved code to github, adjust groupId and package names.
       </action>
       <action date="2013-04-30" dev="mhm" type="update">
-        Dump devreg dependency, prerelease.user is mandatory now.
+        Dumped devreg dependency, prerelease.user is mandatory now.
       </action>
       <action date="2013-04-30" dev="mhm" type="remove">
         Dumped frischfleisch goal.

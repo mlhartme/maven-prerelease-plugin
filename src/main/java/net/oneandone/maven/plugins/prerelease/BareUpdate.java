@@ -29,7 +29,7 @@ import org.apache.maven.project.MavenProject;
 @Mojo(name = "bare-update", requiresProject = false)
 public class BareUpdate extends BareBase {
     /**
-     * Email of the user invoking this goal. Determined via devreg when not specified.
+     * Email of the user invoking this goal.
      */
     @Parameter(property = "prerelease.user", required = true)
     private String user;
