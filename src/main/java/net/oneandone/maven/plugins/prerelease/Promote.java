@@ -18,9 +18,15 @@ package net.oneandone.maven.plugins.prerelease;
 import net.oneandone.maven.plugins.prerelease.core.Archive;
 import net.oneandone.maven.plugins.prerelease.core.Prerelease;
 import net.oneandone.maven.plugins.prerelease.core.WorkingCopy;
+import org.apache.maven.execution.MavenSession;
+import org.apache.maven.lifecycle.internal.BuilderCommon;
+import org.apache.maven.lifecycle.internal.MojoExecutor;
 import org.apache.maven.plugin.MojoExecutionException;
+import org.apache.maven.plugins.annotations.Component;
 import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
+import org.apache.maven.project.MavenProject;
+import org.apache.maven.project.MavenProjectHelper;
 
 import java.io.IOException;
 
@@ -57,6 +63,15 @@ public class Promote extends ProjectBase {
     @Parameter(property = "prerelease.promote.mandatory", defaultValue = "maven-deploy-plugin")
     protected String mandatory;
 
+    @Component
+    protected BuilderCommon builderCommon;
+
+    @Component
+    protected MavenProjectHelper projectHelper;
+
+    @Component
+    protected MojoExecutor mojoExecutor;
+
     public String getUser() {
         return user;
     }
@@ -65,6 +80,7 @@ public class Promote extends ProjectBase {
         WorkingCopy workingCopy;
         long revision;
         Prerelease prerelease;
+        MavenProject releasePom;
 
         workingCopy = checkedWorkingCopy();
         revision = workingCopy.revision();
@@ -73,7 +89,8 @@ public class Promote extends ProjectBase {
         if (prerelease == null) {
             throw new MojoExecutionException("no prerelease for revision " + revision);
         }
-        prerelease.promote(getLog(), user, session.getUserProperties(), mandatory);
+        releasePom = maven().loadPom(prerelease.checkout.join("pom.xml")); // TODO
+        prerelease.promote(getLog(), user, mandatory, releasePom, session, builderCommon, projectHelper, mojoExecutor);
         workingCopy.update(getLog());
     }
 }

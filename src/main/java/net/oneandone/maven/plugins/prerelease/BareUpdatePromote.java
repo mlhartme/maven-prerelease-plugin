@@ -19,8 +19,12 @@ import net.oneandone.maven.plugins.prerelease.util.Maven;
 import net.oneandone.maven.plugins.prerelease.core.Descriptor;
 import net.oneandone.maven.plugins.prerelease.core.Prerelease;
 import net.oneandone.maven.plugins.prerelease.core.Target;
+import org.apache.maven.lifecycle.internal.BuilderCommon;
+import org.apache.maven.lifecycle.internal.MojoExecutor;
+import org.apache.maven.plugins.annotations.Component;
 import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.project.MavenProject;
+import org.apache.maven.project.MavenProjectHelper;
 
 import java.lang.reflect.Field;
 import java.util.Properties;
@@ -30,6 +34,15 @@ import java.util.Properties;
  */
 @Mojo(name = "bare-update-promote", requiresProject = false)
 public class BareUpdatePromote extends BareUpdate {
+    @Component
+    protected BuilderCommon builderCommon;
+
+    @Component
+    protected MavenProjectHelper projectHelper;
+
+    @Component
+    protected MojoExecutor mojoExecutor;
+
     public void doExecute(Maven maven, MavenProject project, Target target, Descriptor descriptor) throws Exception {
         Prerelease prerelease;
 
@@ -38,7 +51,7 @@ public class BareUpdatePromote extends BareUpdate {
             descriptor.check(world, project);
             prerelease = Prerelease.create(getLog(), descriptor, target, alwaysUpdate, session.getUserProperties());
         }
-        prerelease.promote(getLog(), getUser(), session.getUserProperties(), getMandatory(project));
+        prerelease.promote(getLog(), getUser(), getMandatory(project), project, session, builderCommon, projectHelper, mojoExecutor);
     }
 
     private String getMandatory(MavenProject project) throws Exception {

@@ -23,10 +23,19 @@ import net.oneandone.sushi.fs.FileNotFoundException;
 import net.oneandone.sushi.fs.file.FileNode;
 import net.oneandone.sushi.launcher.Failure;
 import net.oneandone.sushi.launcher.Launcher;
+import net.oneandone.sushi.util.Separator;
 import net.oneandone.sushi.util.Strings;
 import net.oneandone.sushi.xml.XmlException;
+import org.apache.maven.execution.MavenSession;
+import org.apache.maven.lifecycle.MavenExecutionPlan;
+import org.apache.maven.lifecycle.internal.*;
+import org.apache.maven.plugin.MojoExecution;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.logging.Log;
+import org.apache.maven.plugins.annotations.Component;
+import org.apache.maven.plugins.annotations.Parameter;
+import org.apache.maven.project.MavenProject;
+import org.apache.maven.project.MavenProjectHelper;
 import org.sonatype.aether.artifact.Artifact;
 import org.sonatype.aether.deployment.DeploymentException;
 import org.sonatype.aether.util.artifact.DefaultArtifact;
@@ -35,10 +44,7 @@ import org.xml.sax.SAXException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.Writer;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.Properties;
+import java.util.*;
 
 public class Prerelease {
     public static Prerelease forCheckout(FileNode checkout) throws IOException {
@@ -256,19 +262,6 @@ public class Prerelease {
         return "net.oneandone.maven.plugins:prerelease:" + getVersion() + ":" + goal;
     }
 
-    public void deploy(Log log, Properties userProperties, String mandatory) throws IOException, DeploymentException {
-        Launcher launcher;
-
-        launcher = Maven.launcher(checkout, userProperties);
-        launcher.arg(goal("do-promote"), "-Dprerelease.promote.mandatory=" + mandatory);
-        if (log.isDebugEnabled()) {
-            launcher.arg("--debug");
-        }
-        log.info(launcher.toString());
-        launcher.exec(new LogWriter(log));
-        log.info("deploy done");
-    }
-
     private String getVersion() {
         return getClass().getPackage().getImplementationVersion();
     }
@@ -323,16 +316,15 @@ public class Prerelease {
 
     //-- promote
 
-    /**
-     * @param userProperties is mandatory for Jenkins builds, because the user name is passed as a property
-     */
-    public void promote(Log log, String user, Properties userProperties, String mandatory) throws Exception {
+    public void promote(Log log, String user, String mandatory,
+                        MavenProject project, MavenSession session, BuilderCommon builderCommon, MavenProjectHelper projectHelper,
+                        MojoExecutor mojoExecutor) throws Exception {
         FileNode origCommit;
 
         log.info("promoting revision " + descriptor.revision + " to " + descriptor.project);
         origCommit = prepareOrigCommit(log);
         try {
-            promoteLocked(log, user, userProperties, mandatory, origCommit);
+            promoteLocked(log, user, mandatory, origCommit, project, session, builderCommon, projectHelper, mojoExecutor);
         } catch (Throwable e) { // CAUTION: catching exceptions is not enough -- in particular, out-of-memory during upload is an error!
             try {
                 origUnlock(origCommit);
@@ -353,11 +345,12 @@ public class Prerelease {
     }
 
     /** commit before deploy - because if deployment fails, we can reliably revert the commit. */
-    private void promoteLocked(Log log, String user, Properties userProperties, String mandatory,
-                               FileNode origCommit) throws IOException, DeploymentException {
+    private void promoteLocked(Log log, String user, String mandatory, FileNode origCommit,
+                               MavenProject project, MavenSession session, BuilderCommon builderCommon, MavenProjectHelper projectHelper,
+                               MojoExecutor mojoExecutor) throws Exception {
         commit(log, user);
         try {
-            deploy(log, userProperties, mandatory);
+            deploy(log, mandatory, project, session, builderCommon, projectHelper, mojoExecutor);
         } catch (Exception e) {
             log.info("deployment failed - reverting tag");
             revertCommit(log, user);
@@ -381,4 +374,73 @@ public class Prerelease {
         }
     }
 
+    //--
+
+    public void deploy(Log log, String mandatory, MavenProject project, MavenSession session, BuilderCommon builderCommon, MavenProjectHelper projectHelper, MojoExecutor mojoExecutor) throws Exception {
+        List<MojoExecution> mandatoryExecutions;
+        List<MojoExecution> optionalExecutions;
+        List<String> mandatories;
+        ProjectIndex index;
+
+        mandatories = Separator.COMMA.split(mandatory);
+        MavenExecutionPlan executionPlan =
+                builderCommon.resolveBuildPlan(session, project, new TaskSegment(false, new LifecycleTask("deploy")), new HashSet<org.apache.maven.artifact.Artifact>());
+        log.info(executionPlan.toString());
+        mandatoryExecutions = new ArrayList<>();
+        optionalExecutions = new ArrayList<>();
+        for (MojoExecution obj : executionPlan.getMojoExecutions()) {
+            if ("deploy".equals(obj.getLifecyclePhase())) {
+                if (mandatories.contains(obj.getPlugin().getArtifactId())) {
+                    log.info("mandatory: " + obj.getPlugin().getArtifactId() + ":" + obj.getGoal());
+                    mandatoryExecutions.add(obj);
+                } else {
+                    log.info("optional " + obj.getPlugin().getArtifactId() + ":" + obj.getGoal());
+                    optionalExecutions.add(obj);
+                }
+            }
+        }
+        index = new ProjectIndex(session.getProjects());
+        artifactFiles(project, projectHelper);
+        project.getProperties().putAll(descriptor.deployProperties);
+        mojoExecutor.execute(session, mandatoryExecutions, index);
+        try {
+            mojoExecutor.execute(session, optionalExecutions, index);
+        } catch (Exception e) {
+            log.warn("Promote succeeded: your artifacts have been deployed, and the svn tag was created. ");
+            log.warn("However, optional promote goals failed with this exception: ");
+            log.warn(e);
+            log.warn("Thus, you can use your release, but someone experienced should have a look.");
+        }
+    }
+
+    private void artifactFiles(MavenProject project, MavenProjectHelper projectHelper) throws IOException {
+        FileNode artifacts;
+        String name;
+        String str;
+        String type;
+        String classifier;
+
+        artifacts = artifacts();
+        for (FileNode file : artifacts.list()) {
+            name = file.getName();
+            if (name.endsWith(".md5") || name.endsWith(".sha1") || name.endsWith(".asc") || name.equals("_maven.repositories")) {
+                // skip
+            } else {
+                type = file.getExtension();
+                if ("pom".equals(type) && !project.getPackaging().equals("pom")) {
+                    // ignored
+                } else {
+                    str = name.substring(0, name.length() - type.length() - 1);
+                    str = Strings.removeLeft(str, project.getArtifactId() + "-");
+                    str = Strings.removeLeft(str, project.getVersion());
+                    if (str.isEmpty()) {
+                        project.getArtifact().setFile(file.toPath().toFile());
+                    } else {
+                        classifier = Strings.removeLeft(str, "-");
+                        projectHelper.attachArtifact(project, file.toPath().toFile(), classifier);
+                    }
+                }
+            }
+        }
+    }
 }
