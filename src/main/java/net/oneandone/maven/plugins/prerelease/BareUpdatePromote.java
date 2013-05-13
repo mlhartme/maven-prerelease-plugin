@@ -46,7 +46,7 @@ public class BareUpdatePromote extends BareUpdate {
         Field field;
 
         // cannot cast to Promote because it's loaded by a different class loader
-        mojo = mojo(project, "net.oneandone.maven.plugins:prerelease:update-promote");
+        mojo = mojo(project, "net.oneandone.maven.plugins:prerelease:promote");
         field = mojo.getClass().getDeclaredField("mandatory");
         field.setAccessible(true);
         return (String) field.get(mojo);

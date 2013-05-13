@@ -24,7 +24,6 @@ import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugins.annotations.Component;
 import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.project.ProjectBuilder;
-import org.sonatype.aether.RepositorySystem;
 import org.sonatype.aether.RepositorySystemSession;
 
 import java.util.List;
