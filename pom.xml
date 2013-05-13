@@ -19,7 +19,6 @@
   <properties>
     <aetherVersion>1.13.1</aetherVersion>
     <mavenVersion>3.0.4</mavenVersion>
-    <wagonVersion>1.0</wagonVersion>
     <wsd.ypid>20236</wsd.ypid>
     <oneandone.java.source>1.7</oneandone.java.source>
     <oneandone.java.target>1.7</oneandone.java.target>
@@ -57,12 +56,6 @@
       <version>2.4</version>
     </dependency>
 
-    <dependency>
-      <!-- not used directly, but I want to force using the latest version in the dependency tree:-->
-      <groupId>org.apache.maven.wagon</groupId>
-      <artifactId>wagon-provider-api</artifactId>
-      <version>${wagonVersion}</version>
-    </dependency>
     <dependency>
       <!-- not used directly, but I want to force using the latest version in the dependency tree:-->
       <groupId>org.codehaus.plexus</groupId>
@@ -137,19 +130,6 @@
       <groupId>org.apache.maven</groupId>
       <artifactId>maven-aether-provider</artifactId>
       <version>${mavenVersion}</version>
-    </dependency>
-
-    <dependency>
-      <groupId>org.apache.maven.wagon</groupId>
-      <artifactId>wagon-file</artifactId>
-      <version>${wagonVersion}</version>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.maven.wagon</groupId>
-      <!-- CAUTION: wagon-http-lightweight only tranfers files that fit into memory (see the known limitation on
-           http://maven.apache.org/wagon/wagon-providers/wagon-http-lightweight/)! -->
-      <artifactId>wagon-http</artifactId>
-      <version>${wagonVersion}</version>
     </dependency>
 
     <dependency>
