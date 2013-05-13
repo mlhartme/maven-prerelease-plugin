@@ -7,8 +7,6 @@ import org.apache.maven.artifact.repository.ArtifactRepository;
 import org.apache.maven.artifact.repository.ArtifactRepositoryPolicy;
 import org.apache.maven.artifact.repository.DefaultArtifactRepository;
 import org.apache.maven.artifact.repository.layout.DefaultRepositoryLayout;
-import org.apache.maven.artifact.repository.metadata.GroupRepositoryMetadata;
-import org.apache.maven.artifact.repository.metadata.MetadataBridge;
 import org.apache.maven.model.building.ModelBuildingRequest;
 import org.apache.maven.project.DefaultProjectBuildingRequest;
 import org.apache.maven.project.MavenProject;
@@ -27,11 +25,8 @@ import org.codehaus.plexus.component.repository.exception.ComponentLookupExcepti
 import org.codehaus.plexus.logging.Logger;
 import org.sonatype.aether.RepositorySystem;
 import org.sonatype.aether.artifact.Artifact;
-import org.sonatype.aether.deployment.DeployRequest;
-import org.sonatype.aether.deployment.DeploymentException;
 import org.sonatype.aether.graph.Dependency;
 import org.sonatype.aether.repository.LocalRepository;
-import org.sonatype.aether.repository.RemoteRepository;
 import org.sonatype.aether.repository.RepositoryPolicy;
 import org.sonatype.aether.resolution.ArtifactResolutionException;
 
@@ -141,19 +136,6 @@ public class Maven {
     //-- load poms
 
     public MavenProject loadPom(FileNode file) throws ProjectBuildingException {
-        try {
-            return loadPom(file, false);
-        } catch (ArtifactResolutionException e) {
-            throw new IllegalStateException(e);
-        }
-    }
-
-    public MavenProject loadPom(FileNode file, boolean resolve) throws ArtifactResolutionException, ProjectBuildingException {
-        return loadPom(file, resolve, null, null, null);
-    }
-
-    public MavenProject loadPom(FileNode file, boolean resolve, Properties userProperties, List<String> profiles,
-                                List<Dependency> dependencies) throws ArtifactResolutionException, ProjectBuildingException {
         ProjectBuildingRequest request;
         ProjectBuildingResult result;
 
@@ -163,24 +145,12 @@ public class Maven {
         request.setProcessPlugins(false);
         request.setValidationLevel(ModelBuildingRequest.VALIDATION_LEVEL_MINIMAL);
         request.setSystemProperties(System.getProperties());
-        if (userProperties != null) {
-            request.setUserProperties(userProperties);
-        }
         //If you don't turn this into RepositoryMerging.REQUEST_DOMINANT the dependencies will be resolved against Maven Central
         //and not against the configured repositories. The default of the DefaultProjectBuildingRequest is
         // RepositoryMerging.POM_DOMINANT.
         request.setRepositoryMerging(ProjectBuildingRequest.RepositoryMerging.REQUEST_DOMINANT);
-        request.setResolveDependencies(resolve);
-        if (profiles != null) {
-            request.setActiveProfileIds(profiles);
-        }
+        request.setResolveDependencies(false);
         result = builder.build(file.toPath().toFile(), request);
-        if (dependencies != null) {
-            if (!resolve) {
-                throw new IllegalArgumentException();
-            }
-            dependencies.addAll(result.getDependencyResolutionResult().getDependencies());
-        }
         return result.getProject();
     }
 }
