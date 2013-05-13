@@ -240,7 +240,7 @@ public class Prerelease {
 
         // no "clean" because we have a vanilla directory from svn
         try {
-            build(log, alwaysUpdate, userProperties, "install");
+            build(log, alwaysUpdate, userProperties, goal("do-checkpoint"), "install", goal("do-checkpoint"));
         } finally {
             installed = descriptor.project.localRepo(checkout.getWorld());
             if (installed.exists()) {
@@ -252,11 +252,15 @@ public class Prerelease {
 
     //--
 
+    private String goal(String goal) {
+        return "net.oneandone.maven.plugins:prerelease:" + getVersion() + ":" + goal;
+    }
+
     public void deploy(Log log, Properties userProperties, String mandatory) throws IOException, DeploymentException {
         Launcher launcher;
 
         launcher = Maven.launcher(checkout, userProperties);
-        launcher.arg("net.oneandone.maven.plugins:prerelease:" + getVersion() + ":do-promote", "-Dprerelease.promote.mandatory=" + mandatory);
+        launcher.arg(goal("do-promote"), "-Dprerelease.promote.mandatory=" + mandatory);
         if (log.isDebugEnabled()) {
             launcher.arg("--debug");
         }
