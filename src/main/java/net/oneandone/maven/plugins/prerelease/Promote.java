@@ -21,6 +21,7 @@ import net.oneandone.maven.plugins.prerelease.core.WorkingCopy;
 import org.apache.maven.execution.MavenSession;
 import org.apache.maven.lifecycle.internal.BuilderCommon;
 import org.apache.maven.lifecycle.internal.MojoExecutor;
+import org.apache.maven.plugin.MojoExecution;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugins.annotations.Component;
 import org.apache.maven.plugins.annotations.Mojo;
@@ -90,7 +91,13 @@ public class Promote extends ProjectBase {
             throw new MojoExecutionException("no prerelease for revision " + revision);
         }
         releasePom = maven().loadPom(prerelease.checkout.join("pom.xml")); // TODO
-        prerelease.promote(getLog(), user, mandatory, releasePom, session, builderCommon, projectHelper, mojoExecutor);
+        releasePom.setPluginArtifactRepositories(project.getRemoteArtifactRepositories()); // TODO ...
+        session.setCurrentProject(releasePom);
+        try {
+            prerelease.promote(getLog(), user, mandatory, releasePom, session, builderCommon, projectHelper, mojoExecutor);
+        } finally {
+            session.setCurrentProject(project);
+        }
         workingCopy.update(getLog());
     }
 }
