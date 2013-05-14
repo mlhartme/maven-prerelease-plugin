@@ -21,6 +21,7 @@ import org.apache.maven.artifact.repository.ArtifactRepository;
 import org.apache.maven.execution.MavenExecutionRequestPopulator;
 import org.apache.maven.execution.MavenSession;
 import org.apache.maven.lifecycle.internal.BuilderCommon;
+import org.apache.maven.lifecycle.internal.LifecycleStarter;
 import org.apache.maven.lifecycle.internal.MojoExecutor;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
@@ -70,7 +71,11 @@ public abstract class Base extends AbstractMojo {
     protected MojoExecutor mojoExecutor;
 
     @Component
-    MavenExecutionRequestPopulator populator;
+    protected MavenExecutionRequestPopulator populator;
+
+    @Component
+    protected LifecycleStarter lifecycleStarter;
+
 
     protected final World world;
 
@@ -96,6 +101,6 @@ public abstract class Base extends AbstractMojo {
     public abstract void doExecute() throws Exception;
 
     protected Maven maven() {
-        return new Maven(world, session, repositorySession, projectBuilder, remoteRepositoriesLegacy, populator);
+        return new Maven(world, session, repositorySession, projectBuilder, remoteRepositoriesLegacy, populator, lifecycleStarter);
     }
 }

@@ -20,6 +20,7 @@ import org.apache.maven.execution.MavenExecutionResult;
 import org.apache.maven.execution.MavenSession;
 import org.apache.maven.lifecycle.MavenExecutionPlan;
 import org.apache.maven.lifecycle.internal.BuilderCommon;
+import org.apache.maven.lifecycle.internal.LifecycleStarter;
 import org.apache.maven.lifecycle.internal.LifecycleTask;
 import org.apache.maven.lifecycle.internal.MojoExecutor;
 import org.apache.maven.lifecycle.internal.ProjectIndex;
@@ -96,7 +97,7 @@ public class Maven {
             session.setLocalRepositoryManager(system.newLocalRepositoryManager(localRepository));
             session.setProxySelector(null);
             return new Maven(world, new MavenSession(container, session, new DefaultMavenExecutionRequest(), new DefaultMavenExecutionResult()),
-                    session, container.lookup(ProjectBuilder.class), Arrays.asList(repository), new DefaultMavenExecutionRequestPopulator());
+                    session, container.lookup(ProjectBuilder.class), Arrays.asList(repository), new DefaultMavenExecutionRequestPopulator(), null);
         } catch (ComponentLookupException e) {
             throw new IllegalStateException(e);
         }
@@ -139,15 +140,17 @@ public class Maven {
     // TODO: use a project builder that works without legacy classes, esp. without ArtifactRepository ...
     // As far as I know, there's no such project builder in mvn 3.0.2.
     private final ProjectBuilder builder;
+    private LifecycleStarter lifecycleStarter;
 
     public Maven(World world, MavenSession parentSession, RepositorySystemSession repositorySession, ProjectBuilder builder,
-                 List<ArtifactRepository> remoteLegacy, MavenExecutionRequestPopulator populator) {
+                 List<ArtifactRepository> remoteLegacy, MavenExecutionRequestPopulator populator, LifecycleStarter lifecycleStarter) {
         this.world = world;
         this.parentSession = parentSession;
         this.repositorySession = repositorySession;
         this.builder = builder;
         this.remoteLegacy = remoteLegacy;
         this.populator = populator;
+        this.lifecycleStarter = lifecycleStarter;
     }
 
     public List<FileNode> files(List<Artifact> artifacts) {
@@ -212,6 +215,14 @@ public class Maven {
         session.setProjects(Collections.singletonList(buildingResults.get(0).getProject()));
         // TODO: why
         session.getCurrentProject().setPluginArtifactRepositories(parentSession.getCurrentProject().getRemoteArtifactRepositories());
+        // TODO: legacySupport.setSession
+
+        result.setTopologicallySortedProjects(session.getProjects());
+        result.setProject(session.getTopLevelProject());
         return session;
+    }
+
+    public void execute(MavenSession session) {
+        lifecycleStarter.execute(session);
     }
 }

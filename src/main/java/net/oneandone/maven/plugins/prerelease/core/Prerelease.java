@@ -93,7 +93,7 @@ public class Prerelease {
             Archive.adjustChanges(prerelease.checkout, prerelease.descriptor.project.version);
             // no "clean" because we have a vanilla directory from svn
             session = maven.subsession(checkout, "install");
-            prerelease.create(session, builderCommon, mojoExecutor);
+            prerelease.create(maven, session);
             log.info("created prerelease in " + prerelease.target);
         } catch (Exception e) {
             target.scheduleRemove(log, "create failed: " + e.getMessage());
@@ -240,25 +240,15 @@ public class Prerelease {
         mvn.exec(new LogWriter(log));
     }
 
-    private void create(MavenSession session, BuilderCommon builderCommon, MojoExecutor mojoExecutor) throws Exception {
+    private void create(Maven maven, MavenSession session) throws Exception {
         MavenProject project;
-        MavenExecutionPlan executionPlan;
-        List<MojoExecution> executions;
-        ProjectIndex index;
         FileNode installed;
         Map<String, String> initialProperties;
 
         project = session.getCurrentProject();
         initialProperties = stringProperties(project);
-        if (session.getRequest().getGoals().size() != 1) {
-            throw new IllegalStateException();
-        }
-        executionPlan = builderCommon.resolveBuildPlan(session, project,
-                new TaskSegment(false, new LifecycleTask(session.getRequest().getGoals().get(0))), new HashSet<org.apache.maven.artifact.Artifact>());
-        executions = executionPlan.getMojoExecutions();
-        index = new ProjectIndex(session.getProjects());
         try {
-            mojoExecutor.execute(session, executions, index);
+            maven.execute(session);
         } finally {
             installed = descriptor.project.localRepo(checkout.getWorld());
             if (installed.exists()) {
