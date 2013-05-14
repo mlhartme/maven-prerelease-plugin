@@ -317,14 +317,14 @@ public class Prerelease {
     //-- promote
 
     public void promote(Log log, String user, String mandatory,
-                        MavenProject project, MavenSession session, BuilderCommon builderCommon, MavenProjectHelper projectHelper,
+                        Maven maven, MavenSession session, BuilderCommon builderCommon, MavenProjectHelper projectHelper,
                         MojoExecutor mojoExecutor) throws Exception {
         FileNode origCommit;
 
         log.info("promoting revision " + descriptor.revision + " to " + descriptor.project);
         origCommit = prepareOrigCommit(log);
         try {
-            promoteLocked(log, user, mandatory, origCommit, project, session, builderCommon, projectHelper, mojoExecutor);
+            promoteLocked(log, user, mandatory, origCommit, maven, session, builderCommon, projectHelper, mojoExecutor);
         } catch (Throwable e) { // CAUTION: catching exceptions is not enough -- in particular, out-of-memory during upload is an error!
             try {
                 origUnlock(origCommit);
@@ -346,16 +346,28 @@ public class Prerelease {
 
     /** commit before deploy - because if deployment fails, we can reliably revert the commit. */
     private void promoteLocked(Log log, String user, String mandatory, FileNode origCommit,
-                               MavenProject project, MavenSession session, BuilderCommon builderCommon, MavenProjectHelper projectHelper,
+                               Maven maven, MavenSession session, BuilderCommon builderCommon, MavenProjectHelper projectHelper,
                                MojoExecutor mojoExecutor) throws Exception {
-        commit(log, user);
+        MavenProject project;
+        MavenProject previous;
+
+        project = maven.loadPom(checkout.join("pom.xml"));
+        previous = session.getCurrentProject();
+        session.setCurrentProject(project);
+        // TODO: why?
+        project.setPluginArtifactRepositories(previous.getRemoteArtifactRepositories());
         try {
-            deploy(log, mandatory, project, session, builderCommon, projectHelper, mojoExecutor);
-        } catch (Exception e) {
-            log.info("deployment failed - reverting tag");
-            revertCommit(log, user);
-            target.scheduleRemove(log, "deployment failed (tag has been reverted): " + e.getMessage());
-            throw e;
+            commit(log, user);
+            try {
+                deployPhase(log, mandatory, project, session, builderCommon, projectHelper, mojoExecutor);
+            } catch (Exception e) {
+                log.info("deployment failed - reverting tag");
+                revertCommit(log, user);
+                target.scheduleRemove(log, "deployment failed (tag has been reverted): " + e.getMessage());
+                throw e;
+            }
+        } finally {
+            session.setCurrentProject(previous);
         }
         try {
             log.info("Update pom and changes ...");
@@ -376,7 +388,7 @@ public class Prerelease {
 
     //--
 
-    public void deploy(Log log, String mandatory, MavenProject project, MavenSession session, BuilderCommon builderCommon, MavenProjectHelper projectHelper, MojoExecutor mojoExecutor) throws Exception {
+    private void deployPhase(Log log, String mandatory, MavenProject project, MavenSession session, BuilderCommon builderCommon, MavenProjectHelper projectHelper, MojoExecutor mojoExecutor) throws Exception {
         List<MojoExecution> mandatoryExecutions;
         List<MojoExecution> optionalExecutions;
         List<String> mandatories;
@@ -385,7 +397,6 @@ public class Prerelease {
         mandatories = Separator.COMMA.split(mandatory);
         MavenExecutionPlan executionPlan =
                 builderCommon.resolveBuildPlan(session, project, new TaskSegment(false, new LifecycleTask("deploy")), new HashSet<org.apache.maven.artifact.Artifact>());
-        log.info(executionPlan.toString());
         mandatoryExecutions = new ArrayList<>();
         optionalExecutions = new ArrayList<>();
         for (MojoExecution obj : executionPlan.getMojoExecutions()) {

@@ -81,7 +81,6 @@ public class Promote extends ProjectBase {
         WorkingCopy workingCopy;
         long revision;
         Prerelease prerelease;
-        MavenProject releasePom;
 
         workingCopy = checkedWorkingCopy();
         revision = workingCopy.revision();
@@ -90,14 +89,7 @@ public class Promote extends ProjectBase {
         if (prerelease == null) {
             throw new MojoExecutionException("no prerelease for revision " + revision);
         }
-        releasePom = maven().loadPom(prerelease.checkout.join("pom.xml")); // TODO
-        releasePom.setPluginArtifactRepositories(project.getRemoteArtifactRepositories()); // TODO ...
-        session.setCurrentProject(releasePom);
-        try {
-            prerelease.promote(getLog(), user, mandatory, releasePom, session, builderCommon, projectHelper, mojoExecutor);
-        } finally {
-            session.setCurrentProject(project);
-        }
+        prerelease.promote(getLog(), user, mandatory, maven(), session, builderCommon, projectHelper, mojoExecutor);
         workingCopy.update(getLog());
     }
 }

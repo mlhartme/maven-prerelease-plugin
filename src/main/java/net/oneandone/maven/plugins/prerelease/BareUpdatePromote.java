@@ -51,9 +51,10 @@ public class BareUpdatePromote extends BareUpdate {
             descriptor.check(world, project);
             prerelease = Prerelease.create(getLog(), descriptor, target, alwaysUpdate, session.getUserProperties());
         }
-        prerelease.promote(getLog(), getUser(), getMandatory(project), project, session, builderCommon, projectHelper, mojoExecutor);
+        prerelease.promote(getLog(), getUser(), getMandatory(project), maven(), session, builderCommon, projectHelper, mojoExecutor);
     }
 
+    // TODO: move into promote goal
     private String getMandatory(MavenProject project) throws Exception {
         org.apache.maven.plugin.Mojo mojo;
         Field field;
