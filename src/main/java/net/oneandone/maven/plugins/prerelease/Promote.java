@@ -64,15 +64,6 @@ public class Promote extends ProjectBase {
     @Parameter(property = "prerelease.promote.mandatory", defaultValue = "maven-deploy-plugin")
     protected String mandatory;
 
-    @Component
-    protected BuilderCommon builderCommon;
-
-    @Component
-    protected MavenProjectHelper projectHelper;
-
-    @Component
-    protected MojoExecutor mojoExecutor;
-
     public String getUser() {
         return user;
     }

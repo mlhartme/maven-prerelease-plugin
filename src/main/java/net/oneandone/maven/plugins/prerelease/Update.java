@@ -19,7 +19,11 @@ import net.oneandone.maven.plugins.prerelease.core.Archive;
 import net.oneandone.maven.plugins.prerelease.core.Descriptor;
 import net.oneandone.maven.plugins.prerelease.core.Prerelease;
 import net.oneandone.maven.plugins.prerelease.core.WorkingCopy;
+import org.apache.maven.lifecycle.internal.BuilderCommon;
+import org.apache.maven.lifecycle.internal.MojoExecutor;
+import org.apache.maven.plugins.annotations.Component;
 import org.apache.maven.plugins.annotations.Mojo;
+import org.apache.maven.project.MavenProjectHelper;
 
 /**
  * Checks if there is a prerelease for the last change in your svn working directory, creates one if not.
@@ -31,7 +35,6 @@ public class Update extends ProjectBase {
         WorkingCopy workingCopy;
         Descriptor descriptor;
         long revision;
-        Prerelease prerelease;
 
         workingCopy = checkedWorkingCopy();
         getLog().info("checking project ...");
@@ -42,14 +45,7 @@ public class Update extends ProjectBase {
         if (target.exists()) {
             getLog().info("prerelease already exists: " + descriptor.getName());
         } else {
-            prerelease = Prerelease.create(getLog(), descriptor, target, alwaysUpdate, session.getUserProperties());
-            try {
-                descriptor.check(world, project);
-            } catch (RuntimeException e) {
-                throw e;
-            } catch (Exception e) {
-                prerelease.target.scheduleRemove(getLog(), "build ok, but prerelease is not promotable: " + e.getMessage());
-            }
+            Prerelease.create(getLog(), descriptor, target, maven(), builderCommon, mojoExecutor);
         }
     }
 }

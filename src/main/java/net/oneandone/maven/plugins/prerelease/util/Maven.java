@@ -1,5 +1,9 @@
 package net.oneandone.maven.plugins.prerelease.util;
 
+import net.oneandone.maven.plugins.prerelease.core.Archive;
+import net.oneandone.maven.plugins.prerelease.core.Descriptor;
+import net.oneandone.maven.plugins.prerelease.core.Prerelease;
+import net.oneandone.maven.plugins.prerelease.core.Target;
 import net.oneandone.sushi.fs.World;
 import net.oneandone.sushi.fs.file.FileNode;
 import net.oneandone.sushi.launcher.Launcher;
@@ -7,7 +11,20 @@ import org.apache.maven.artifact.repository.ArtifactRepository;
 import org.apache.maven.artifact.repository.ArtifactRepositoryPolicy;
 import org.apache.maven.artifact.repository.DefaultArtifactRepository;
 import org.apache.maven.artifact.repository.layout.DefaultRepositoryLayout;
+import org.apache.maven.execution.DefaultMavenExecutionRequest;
+import org.apache.maven.execution.DefaultMavenExecutionResult;
+import org.apache.maven.execution.MavenExecutionRequest;
+import org.apache.maven.execution.MavenExecutionResult;
+import org.apache.maven.execution.MavenSession;
+import org.apache.maven.lifecycle.MavenExecutionPlan;
+import org.apache.maven.lifecycle.internal.BuilderCommon;
+import org.apache.maven.lifecycle.internal.LifecycleTask;
+import org.apache.maven.lifecycle.internal.MojoExecutor;
+import org.apache.maven.lifecycle.internal.ProjectIndex;
+import org.apache.maven.lifecycle.internal.TaskSegment;
 import org.apache.maven.model.building.ModelBuildingRequest;
+import org.apache.maven.plugin.MojoExecution;
+import org.apache.maven.plugin.logging.Log;
 import org.apache.maven.project.DefaultProjectBuildingRequest;
 import org.apache.maven.project.MavenProject;
 import org.apache.maven.project.ProjectBuilder;
@@ -33,6 +50,8 @@ import org.sonatype.aether.resolution.ArtifactResolutionException;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
@@ -70,7 +89,8 @@ public class Maven {
             session.setOffline(false);
             session.setLocalRepositoryManager(system.newLocalRepositoryManager(localRepository));
             session.setProxySelector(null);
-            return new Maven(world, session, container.lookup(ProjectBuilder.class), Arrays.asList(repository));
+            return new Maven(world, new MavenSession(container, session, new DefaultMavenExecutionRequest(), new DefaultMavenExecutionResult()),
+                    session, container.lookup(ProjectBuilder.class), Arrays.asList(repository));
         } catch (ComponentLookupException e) {
             throw new IllegalStateException(e);
         }
@@ -105,6 +125,7 @@ public class Maven {
     //--
 
     private final World world;
+    private final MavenSession parentSession;
     private final RepositorySystemSession repositorySession;
     private final List<ArtifactRepository> remoteLegacy; // needed to load poms :(
 
@@ -112,8 +133,9 @@ public class Maven {
     // As far as I know, there's no such project builder in mvn 3.0.2.
     private final ProjectBuilder builder;
 
-    public Maven(World world, RepositorySystemSession repositorySession, ProjectBuilder builder, List<ArtifactRepository> remoteLegacy) {
+    public Maven(World world, MavenSession parentSession, RepositorySystemSession repositorySession, ProjectBuilder builder, List<ArtifactRepository> remoteLegacy) {
         this.world = world;
+        this.parentSession = parentSession;
         this.repositorySession = repositorySession;
         this.builder = builder;
         this.remoteLegacy = remoteLegacy;
@@ -142,15 +164,37 @@ public class Maven {
         request = new DefaultProjectBuildingRequest();
         request.setRepositorySession(repositorySession);
         request.setRemoteRepositories(remoteLegacy);
-        request.setProcessPlugins(false);
+        request.setProcessPlugins(true);
         request.setValidationLevel(ModelBuildingRequest.VALIDATION_LEVEL_MINIMAL);
         request.setSystemProperties(System.getProperties());
         //If you don't turn this into RepositoryMerging.REQUEST_DOMINANT the dependencies will be resolved against Maven Central
         //and not against the configured repositories. The default of the DefaultProjectBuildingRequest is
         // RepositoryMerging.POM_DOMINANT.
         request.setRepositoryMerging(ProjectBuildingRequest.RepositoryMerging.REQUEST_DOMINANT);
-        request.setResolveDependencies(false);
+        request.setResolveDependencies(true);
         result = builder.build(file.toPath().toFile(), request);
         return result.getProject();
+    }
+
+    //--
+
+    public MavenSession subsession(FileNode basedir, String ... goals) throws Exception {
+        MavenProject project;
+        MavenExecutionRequest request;
+        MavenExecutionResult result;
+        MavenSession session;
+
+        project = loadPom(basedir.join("pom.xml"));
+        // TODO: why?
+        project.setPluginArtifactRepositories(parentSession.getCurrentProject().getRemoteArtifactRepositories());
+        request = new DefaultMavenExecutionRequest();
+        request.setGoals(Arrays.asList(goals));
+        result = new DefaultMavenExecutionResult();
+        session = new MavenSession(parentSession.getContainer(), parentSession.getRepositorySession(), request, result);
+        session.setProjects(Collections.singletonList(project));
+        if (project != session.getTopLevelProject()) {
+            throw new IllegalStateException();
+        }
+        return session;
     }
 }

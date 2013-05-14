@@ -42,7 +42,7 @@ import org.tmatesoft.svn.core.SVNException;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.Collection;
-import java.util.Properties;
+import java.util.Collections;
 
 /**
  * Perform update-promote without a working copy. Svn url and revision are passed as arguments, not determined from a working copy.
@@ -116,7 +116,7 @@ public abstract class BareBase extends Base {
 
         oldProject = session.getCurrentProject();
         project.setPluginArtifactRepositories(project.getRemoteArtifactRepositories()); // TODO ...
-        session.setCurrentProject(project);
+        session.setProjects(Collections.singletonList(project));
         try {
             descriptor = mojoDescriptorCreator.getMojoDescriptor(key, session, project);
             execution = new MojoExecution(descriptor, "default-cli", MojoExecution.Source.CLI);
@@ -131,7 +131,7 @@ public abstract class BareBase extends Base {
                 Thread.currentThread().setContextClassLoader(oldClassLoader);
             }
         } finally {
-            session.setCurrentProject(oldProject);
+            session.setProjects(Collections.singletonList(oldProject));
         }
     }
 

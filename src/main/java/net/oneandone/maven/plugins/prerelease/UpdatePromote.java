@@ -35,7 +35,7 @@ public class UpdatePromote extends Promote {
         setTarget(archive.target(workingCopy.revision()));
         prerelease = target.loadOpt();
         if (prerelease == null) {
-            prerelease = Prerelease.create(getLog(), checkedDescriptor(workingCopy), target, alwaysUpdate, session.getUserProperties());
+            prerelease = Prerelease.create(getLog(), checkedDescriptor(workingCopy), target, maven(), builderCommon, mojoExecutor);
         }
         prerelease.promote(getLog(), getUser(), mandatory, maven(), session, builderCommon, projectHelper, mojoExecutor);
         workingCopy.update(getLog());

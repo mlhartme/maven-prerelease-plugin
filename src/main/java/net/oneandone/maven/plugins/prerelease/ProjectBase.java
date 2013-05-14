@@ -20,8 +20,12 @@ import net.oneandone.maven.plugins.prerelease.core.Descriptor;
 import net.oneandone.maven.plugins.prerelease.core.Target;
 import net.oneandone.maven.plugins.prerelease.core.WorkingCopy;
 import net.oneandone.sushi.fs.file.FileNode;
+import org.apache.maven.lifecycle.internal.BuilderCommon;
+import org.apache.maven.lifecycle.internal.MojoExecutor;
+import org.apache.maven.plugins.annotations.Component;
 import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.project.MavenProject;
+import org.apache.maven.project.MavenProjectHelper;
 
 public abstract class ProjectBase extends Base {
     @Parameter(property = "project", required = true, readonly = true)

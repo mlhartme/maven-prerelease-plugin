@@ -26,34 +26,30 @@ import net.oneandone.sushi.launcher.Launcher;
 import net.oneandone.sushi.util.Separator;
 import net.oneandone.sushi.util.Strings;
 import net.oneandone.sushi.xml.XmlException;
-import org.apache.maven.execution.MavenSession;
+import org.apache.maven.execution.*;
 import org.apache.maven.lifecycle.MavenExecutionPlan;
 import org.apache.maven.lifecycle.internal.*;
 import org.apache.maven.plugin.MojoExecution;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.logging.Log;
-import org.apache.maven.plugins.annotations.Component;
-import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.project.MavenProject;
 import org.apache.maven.project.MavenProjectHelper;
 import org.sonatype.aether.artifact.Artifact;
-import org.sonatype.aether.deployment.DeploymentException;
 import org.sonatype.aether.util.artifact.DefaultArtifact;
 import org.xml.sax.SAXException;
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.Writer;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Properties;
 
 public class Prerelease {
-    public static Prerelease forCheckout(FileNode checkout) throws IOException {
-        FileNode node;
-
-        node = checkout.getParent().getParent();
-        return load(new Target(node, Long.parseLong(node.getName())));
-    }
-
     public static Prerelease load(Target target) throws IOException {
         Descriptor descriptor;
         FileNode workingCopy;
@@ -64,8 +60,9 @@ public class Prerelease {
         return new Prerelease(target, workingCopy, descriptor);
     }
 
-    public static Prerelease create(Log log, Descriptor descriptor, Target target, boolean update, Properties properties)
+    public static Prerelease create(Log log, Descriptor descriptor, Target target, Maven maven, BuilderCommon builderCommon, MojoExecutor mojoExecutor)
             throws Exception {
+        MavenSession session;
         Prerelease prerelease;
         FileNode tags;
         FileNode checkout;
@@ -94,7 +91,9 @@ public class Prerelease {
             Transform.adjustPom(prerelease.checkout.join("pom.xml"), descriptor.previous, descriptor.project.version,
                     descriptor.svnOrig, descriptor.svnTag);
             Archive.adjustChanges(prerelease.checkout, prerelease.descriptor.project.version);
-            prerelease.create(log, update, properties);
+            // no "clean" because we have a vanilla directory from svn
+            session = maven.subsession(checkout, "install");
+            prerelease.create(session, builderCommon, mojoExecutor);
             log.info("created prerelease in " + prerelease.target);
         } catch (Exception e) {
             target.scheduleRemove(log, "create failed: " + e.getMessage());
@@ -241,30 +240,68 @@ public class Prerelease {
         mvn.exec(new LogWriter(log));
     }
 
-    public void create(final Log log, boolean alwaysUpdate, Properties userProperties) throws Exception {
+    private void create(MavenSession session, BuilderCommon builderCommon, MojoExecutor mojoExecutor) throws Exception {
+        MavenProject project;
+        MavenExecutionPlan executionPlan;
+        List<MojoExecution> executions;
+        ProjectIndex index;
         FileNode installed;
+        Map<String, String> initialProperties;
 
-        // no "clean" because we have a vanilla directory from svn
+        project = session.getCurrentProject();
+        initialProperties = stringProperties(project);
+        if (session.getRequest().getGoals().size() != 1) {
+            throw new IllegalStateException();
+        }
+        executionPlan = builderCommon.resolveBuildPlan(session, project,
+                new TaskSegment(false, new LifecycleTask(session.getRequest().getGoals().get(0))), new HashSet<org.apache.maven.artifact.Artifact>());
+        executions = executionPlan.getMojoExecutions();
+        index = new ProjectIndex(session.getProjects());
         try {
-            build(log, alwaysUpdate, userProperties, goal("do-checkpoint"), "install", goal("do-checkpoint"));
+            mojoExecutor.execute(session, executions, index);
         } finally {
             installed = descriptor.project.localRepo(checkout.getWorld());
             if (installed.exists()) {
                 installed.move(artifacts());
             }
         }
+        saveDeployProperties(project, initialProperties);
         // TODO: check that the workspace is without modifications
     }
 
+    private static Map<String, String> stringProperties(MavenProject project) throws Exception {
+        Map<String, String> result;
+
+        result = new HashMap<>();
+        for (Map.Entry<Object, Object> entry : project.getProperties().entrySet()) {
+            if (entry.getValue() instanceof String) {
+                result.put((String) entry.getKey(), (String) entry.getValue());
+            } else {
+                throw new IllegalStateException(entry.getKey() + ": " + entry.getValue());
+            }
+        }
+        return result;
+    }
+
+    private void saveDeployProperties(MavenProject project, Map<String, String> previous) throws Exception {
+        String old;
+        Map<String, String> deployProperties;
+
+        deployProperties = descriptor.deployProperties;
+        for (Map.Entry<Object, Object> entry : project.getProperties().entrySet()) {
+            if (entry.getValue() instanceof String) {
+                old = previous.get(entry.getKey());
+                if (!entry.getValue().equals(old)) {
+                    deployProperties.put((String) entry.getKey(), (String) entry.getValue());
+                }
+            } else {
+                throw new IllegalStateException(entry.getKey() + ": " + entry.getValue());
+            }
+        }
+        descriptor.save(target);
+    }
+
     //--
-
-    private String goal(String goal) {
-        return "net.oneandone.maven.plugins:prerelease:" + getVersion() + ":" + goal;
-    }
-
-    private String getVersion() {
-        return getClass().getPackage().getImplementationVersion();
-    }
 
     public static class LogWriter extends Writer {
         private final Log log;
@@ -353,7 +390,7 @@ public class Prerelease {
 
         project = maven.loadPom(checkout.join("pom.xml"));
         previous = session.getCurrentProject();
-        session.setCurrentProject(project);
+        session.setProjects(Collections.singletonList(project));
         // TODO: why?
         project.setPluginArtifactRepositories(previous.getRemoteArtifactRepositories());
         try {
@@ -367,7 +404,7 @@ public class Prerelease {
                 throw e;
             }
         } finally {
-            session.setCurrentProject(previous);
+            session.setProjects(Collections.singletonList(previous));
         }
         try {
             log.info("Update pom and changes ...");
