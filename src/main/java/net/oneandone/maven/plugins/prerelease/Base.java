@@ -18,6 +18,7 @@ package net.oneandone.maven.plugins.prerelease;
 import net.oneandone.maven.plugins.prerelease.util.Maven;
 import net.oneandone.sushi.fs.World;
 import org.apache.maven.artifact.repository.ArtifactRepository;
+import org.apache.maven.execution.MavenExecutionRequestPopulator;
 import org.apache.maven.execution.MavenSession;
 import org.apache.maven.lifecycle.internal.BuilderCommon;
 import org.apache.maven.lifecycle.internal.MojoExecutor;
@@ -68,6 +69,9 @@ public abstract class Base extends AbstractMojo {
     @Component
     protected MojoExecutor mojoExecutor;
 
+    @Component
+    MavenExecutionRequestPopulator populator;
+
     protected final World world;
 
     protected boolean alwaysUpdate;
@@ -92,6 +96,6 @@ public abstract class Base extends AbstractMojo {
     public abstract void doExecute() throws Exception;
 
     protected Maven maven() {
-        return new Maven(world, session, repositorySession, projectBuilder, remoteRepositoriesLegacy);
+        return new Maven(world, session, repositorySession, projectBuilder, remoteRepositoriesLegacy, populator);
     }
 }

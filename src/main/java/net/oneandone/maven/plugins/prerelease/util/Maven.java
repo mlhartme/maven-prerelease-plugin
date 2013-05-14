@@ -12,8 +12,10 @@ import org.apache.maven.artifact.repository.ArtifactRepositoryPolicy;
 import org.apache.maven.artifact.repository.DefaultArtifactRepository;
 import org.apache.maven.artifact.repository.layout.DefaultRepositoryLayout;
 import org.apache.maven.execution.DefaultMavenExecutionRequest;
+import org.apache.maven.execution.DefaultMavenExecutionRequestPopulator;
 import org.apache.maven.execution.DefaultMavenExecutionResult;
 import org.apache.maven.execution.MavenExecutionRequest;
+import org.apache.maven.execution.MavenExecutionRequestPopulator;
 import org.apache.maven.execution.MavenExecutionResult;
 import org.apache.maven.execution.MavenSession;
 import org.apache.maven.lifecycle.MavenExecutionPlan;
@@ -23,6 +25,8 @@ import org.apache.maven.lifecycle.internal.MojoExecutor;
 import org.apache.maven.lifecycle.internal.ProjectIndex;
 import org.apache.maven.lifecycle.internal.TaskSegment;
 import org.apache.maven.model.building.ModelBuildingRequest;
+import org.apache.maven.model.building.ModelProblem;
+import org.apache.maven.model.building.ModelProblemUtils;
 import org.apache.maven.plugin.MojoExecution;
 import org.apache.maven.plugin.logging.Log;
 import org.apache.maven.project.DefaultProjectBuildingRequest;
@@ -32,6 +36,7 @@ import org.apache.maven.project.ProjectBuildingException;
 import org.apache.maven.project.ProjectBuildingRequest;
 import org.apache.maven.project.ProjectBuildingResult;
 import org.apache.maven.repository.internal.MavenRepositorySystemSession;
+import org.codehaus.plexus.util.StringUtils;
 import org.sonatype.aether.RepositorySystemSession;
 import org.codehaus.plexus.DefaultContainerConfiguration;
 import org.codehaus.plexus.DefaultPlexusContainer;
@@ -90,7 +95,7 @@ public class Maven {
             session.setLocalRepositoryManager(system.newLocalRepositoryManager(localRepository));
             session.setProxySelector(null);
             return new Maven(world, new MavenSession(container, session, new DefaultMavenExecutionRequest(), new DefaultMavenExecutionResult()),
-                    session, container.lookup(ProjectBuilder.class), Arrays.asList(repository));
+                    session, container.lookup(ProjectBuilder.class), Arrays.asList(repository), new DefaultMavenExecutionRequestPopulator());
         } catch (ComponentLookupException e) {
             throw new IllegalStateException(e);
         }
@@ -128,17 +133,20 @@ public class Maven {
     private final MavenSession parentSession;
     private final RepositorySystemSession repositorySession;
     private final List<ArtifactRepository> remoteLegacy; // needed to load poms :(
+    private final MavenExecutionRequestPopulator populator;
 
     // TODO: use a project builder that works without legacy classes, esp. without ArtifactRepository ...
     // As far as I know, there's no such project builder in mvn 3.0.2.
     private final ProjectBuilder builder;
 
-    public Maven(World world, MavenSession parentSession, RepositorySystemSession repositorySession, ProjectBuilder builder, List<ArtifactRepository> remoteLegacy) {
+    public Maven(World world, MavenSession parentSession, RepositorySystemSession repositorySession, ProjectBuilder builder,
+                 List<ArtifactRepository> remoteLegacy, MavenExecutionRequestPopulator populator) {
         this.world = world;
         this.parentSession = parentSession;
         this.repositorySession = repositorySession;
         this.builder = builder;
         this.remoteLegacy = remoteLegacy;
+        this.populator = populator;
     }
 
     public List<FileNode> files(List<Artifact> artifacts) {
@@ -179,22 +187,26 @@ public class Maven {
     //--
 
     public MavenSession subsession(FileNode basedir, String ... goals) throws Exception {
-        MavenProject project;
         MavenExecutionRequest request;
         MavenExecutionResult result;
         MavenSession session;
+        ProjectBuildingRequest buildingRequest;
+        List<ProjectBuildingResult> buildingResults;
 
-        project = loadPom(basedir.join("pom.xml"));
-        // TODO: why?
-        project.setPluginArtifactRepositories(parentSession.getCurrentProject().getRemoteArtifactRepositories());
         request = new DefaultMavenExecutionRequest();
         request.setGoals(Arrays.asList(goals));
+        populator.populateDefaults(request);
+        buildingRequest = request.getProjectBuildingRequest();
+        buildingResults = builder.build(Arrays.asList(basedir.join("pom.xml").toPath().toFile()), request.isRecursive(), buildingRequest);
         result = new DefaultMavenExecutionResult();
         session = new MavenSession(parentSession.getContainer(), parentSession.getRepositorySession(), request, result);
-        session.setProjects(Collections.singletonList(project));
-        if (project != session.getTopLevelProject()) {
+        if (buildingResults.size() != 1) {
             throw new IllegalStateException();
         }
+        session.setProjects(Collections.singletonList(buildingResults.get(0).getProject()));
+        // TODO: why
+        session.getCurrentProject().setPluginArtifactRepositories(parentSession.getCurrentProject().getRemoteArtifactRepositories());
+
         return session;
     }
 }
