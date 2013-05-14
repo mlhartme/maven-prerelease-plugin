@@ -35,6 +35,7 @@ import org.apache.maven.project.ProjectBuilder;
 import org.apache.maven.project.ProjectBuildingException;
 import org.apache.maven.project.ProjectBuildingRequest;
 import org.apache.maven.project.ProjectBuildingResult;
+import org.apache.maven.repository.DelegatingLocalArtifactRepository;
 import org.apache.maven.repository.internal.MavenRepositorySystemSession;
 import org.codehaus.plexus.util.StringUtils;
 import org.sonatype.aether.RepositorySystemSession;
@@ -186,6 +187,7 @@ public class Maven {
 
     //--
 
+    /** collected from Maven's startup code */
     public MavenSession subsession(FileNode basedir, String ... goals) throws Exception {
         MavenExecutionRequest request;
         MavenExecutionResult result;
@@ -196,6 +198,10 @@ public class Maven {
         request = new DefaultMavenExecutionRequest();
         request.setGoals(Arrays.asList(goals));
         populator.populateDefaults(request);
+        DelegatingLocalArtifactRepository delegatingLocalArtifactRepository = new DelegatingLocalArtifactRepository( request.getLocalRepository() );
+        request.setLocalRepository( delegatingLocalArtifactRepository );
+        // TODO: maven has this:
+        // request.getProjectBuildingRequest().setRepositorySession(parentSession.getRepositorySession());
         buildingRequest = request.getProjectBuildingRequest();
         buildingResults = builder.build(Arrays.asList(basedir.join("pom.xml").toPath().toFile()), request.isRecursive(), buildingRequest);
         result = new DefaultMavenExecutionResult();
@@ -206,7 +212,6 @@ public class Maven {
         session.setProjects(Collections.singletonList(buildingResults.get(0).getProject()));
         // TODO: why
         session.getCurrentProject().setPluginArtifactRepositories(parentSession.getCurrentProject().getRemoteArtifactRepositories());
-
         return session;
     }
 }
