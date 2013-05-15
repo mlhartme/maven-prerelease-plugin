@@ -10,6 +10,7 @@ import org.apache.maven.execution.DefaultMavenExecutionRequest;
 import org.apache.maven.execution.ExecutionListener;
 import org.apache.maven.execution.MavenExecutionRequest;
 import org.apache.maven.execution.MavenExecutionResult;
+import org.apache.maven.execution.MavenSession;
 import org.apache.maven.model.building.ModelBuildingRequest;
 import org.apache.maven.plugin.logging.Log;
 import org.apache.maven.project.DefaultProjectBuildingRequest;
@@ -19,6 +20,10 @@ import org.apache.maven.project.ProjectBuildingException;
 import org.apache.maven.project.ProjectBuildingRequest;
 import org.apache.maven.project.ProjectBuildingResult;
 import org.apache.maven.repository.internal.MavenRepositorySystemSession;
+import org.apache.maven.settings.Mirror;
+import org.apache.maven.settings.Proxy;
+import org.apache.maven.settings.Server;
+import org.apache.maven.settings.SettingsUtils;
 import org.codehaus.plexus.PlexusContainer;
 import org.sonatype.aether.RepositorySystemSession;
 import org.codehaus.plexus.DefaultContainerConfiguration;
@@ -59,7 +64,7 @@ public class Maven {
             session.setOffline(false);
             session.setLocalRepositoryManager(system.newLocalRepositoryManager(localRepository));
             session.setProxySelector(null);
-            return new Maven(world, container, null, session, container.lookup(ProjectBuilder.class), Arrays.asList(repository));
+            return new Maven(world, null, null, session, container.lookup(ProjectBuilder.class), Arrays.asList(repository));
         } catch (ComponentLookupException e) {
             throw new IllegalStateException(e);
         }
@@ -94,7 +99,7 @@ public class Maven {
     //--
 
     private final World world;
-    private final PlexusContainer container;
+    private final MavenSession parentSession;
     private final ExecutionListener executionListener;
     private final RepositorySystemSession repositorySession;
     private final List<ArtifactRepository> remoteLegacy; // needed to load poms :(
@@ -103,27 +108,60 @@ public class Maven {
     // As far as I know, there's no such project builder in mvn 3.0.2.
     private final ProjectBuilder builder;
 
-    public Maven(World world, PlexusContainer container, ExecutionListener executionListener,
+    public Maven(World world, MavenSession parentSession, ExecutionListener executionListener,
                  RepositorySystemSession repositorySession, ProjectBuilder builder, List<ArtifactRepository> remoteLegacy) {
         this.world = world;
-        this.container = container;
+        this.parentSession = parentSession;
         this.executionListener = executionListener;
         this.repositorySession = repositorySession;
         this.builder = builder;
         this.remoteLegacy = remoteLegacy;
     }
 
-    public void build(final Log log, FileNode basedir, boolean alwaysUpdate, Properties userProperties, String ... goals) throws Exception {
+    public void build(FileNode basedir, boolean alwaysUpdate, Properties userProperties, String ... goals) throws Exception {
+        MavenExecutionRequest parentRequest;
         org.apache.maven.Maven maven;
         MavenExecutionRequest request;
         MavenExecutionResult result;
         Exception exception;
 
-        maven = container.lookup(org.apache.maven.Maven.class);
+        parentRequest = parentSession.getRequest();
+        maven = parentSession.getContainer().lookup(org.apache.maven.Maven.class);
         request = new DefaultMavenExecutionRequest();
+        request.setLoggingLevel(parentRequest.getLoggingLevel());
+        request.setUserSettingsFile(parentRequest.getUserSettingsFile());
+        request.setGlobalSettingsFile(parentRequest.getGlobalSettingsFile());
+        request.setUserToolchainsFile(parentRequest.getUserToolchainsFile());
+        request.setShowErrors(parentRequest.isShowErrors());
+
+        request.setOffline(parentRequest.isOffline());
+        request.setInteractiveMode(parentRequest.isInteractiveMode());
+        request.setPluginGroups(parentRequest.getPluginGroups());
+        request.setLocalRepository(parentRequest.getLocalRepository());
+
+        for (Server server : parentRequest.getServers()) {
+            server = server.clone();
+            request.addServer( server );
+        }
+        for (Proxy proxy : parentRequest.getProxies()) {
+            if (proxy.isActive()) {
+                request.addProxy(proxy.clone());
+            }
+        }
+
+        for (Mirror mirror : parentRequest.getMirrors()) {
+            request.addMirror(mirror.clone());
+        }
+
+        request.setActiveProfiles(parentRequest.getActiveProfiles());
+        for ( org.apache.maven.model.Profile profile : parentRequest.getProfiles() ) {
+            request.addProfile(profile.clone());
+        }
+
         request.setPom(basedir.join("pom.xml").toPath().toFile());
         request.setGoals(Arrays.asList(goals));
         request.setBaseDirectory(basedir.toPath().toFile());
+        request.setSystemProperties(parentRequest.getSystemProperties());
         request.setUserProperties(userProperties);
         request.setExecutionListener(executionListener);
         if (alwaysUpdate) {

@@ -90,7 +90,7 @@ public class Prerelease {
             Transform.adjustPom(prerelease.checkout.join("pom.xml"), descriptor.previous, descriptor.project.version,
                     descriptor.svnOrig, descriptor.svnTag);
             Archive.adjustChanges(prerelease.checkout, prerelease.descriptor.project.version);
-            prerelease.create(maven ,log, update, properties);
+            prerelease.create(maven, update, properties);
             log.info("created prerelease in " + prerelease.target);
         } catch (Exception e) {
             target.scheduleRemove(log, "create failed: " + e.getMessage());
@@ -225,12 +225,12 @@ public class Prerelease {
 
     //--
 
-    public void create(Maven maven, final Log log, boolean alwaysUpdate, Properties userProperties) throws Exception {
+    public void create(Maven maven, boolean alwaysUpdate, Properties userProperties) throws Exception {
         FileNode installed;
 
         // no "clean" because we have a vanilla directory from svn
         try {
-            maven.build(log, checkout, alwaysUpdate, userProperties, goal("do-checkpoint"), "install", goal("do-checkpoint"));
+            maven.build(checkout, alwaysUpdate, userProperties, goal("do-checkpoint"), "install", goal("do-checkpoint"));
         } finally {
             installed = descriptor.project.localRepo(checkout.getWorld());
             if (installed.exists()) {
@@ -294,8 +294,8 @@ public class Prerelease {
         }
     }
 
-    public void verify(Maven maven, final Log log, String profile, boolean alwaysUpdate, Properties userProperties) throws Exception {
-        maven.build(log, checkout, alwaysUpdate, userProperties, "verify", /* to save disk space: */ "clean", "-P" + profile);
+    public void verify(Maven maven, String profile, boolean alwaysUpdate, Properties userProperties) throws Exception {
+        maven.build(checkout, alwaysUpdate, userProperties, "verify", /* to save disk space: */ "clean", "-P" + profile);
     }
 
     //-- promote

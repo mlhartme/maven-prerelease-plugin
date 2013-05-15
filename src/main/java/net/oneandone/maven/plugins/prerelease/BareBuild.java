@@ -39,7 +39,7 @@ public class BareBuild extends BareBase {
         if (prerelease == null) {
             throw new MojoExecutionException("prerelease not found: " + descriptor.revision);
         }
-        maven().build(getLog(), prerelease.checkout, false, session.getUserProperties(), arguments(project));
+        maven().build(prerelease.checkout, false, session.getUserProperties(), arguments(project));
     }
 
     private String[] arguments(MavenProject project) throws Exception {

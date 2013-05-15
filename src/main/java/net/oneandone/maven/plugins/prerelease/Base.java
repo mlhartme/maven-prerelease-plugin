@@ -80,6 +80,6 @@ public abstract class Base extends AbstractMojo {
     public abstract void doExecute() throws Exception;
 
     protected Maven maven() {
-        return new Maven(world, session.getContainer(), session.getRequest().getExecutionListener(), repositorySession, projectBuilder, remoteRepositoriesLegacy);
+        return new Maven(world, session, session.getRequest().getExecutionListener(), repositorySession, projectBuilder, remoteRepositoriesLegacy);
     }
 }
