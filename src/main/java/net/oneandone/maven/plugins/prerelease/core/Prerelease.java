@@ -23,17 +23,11 @@ import net.oneandone.sushi.fs.FileNotFoundException;
 import net.oneandone.sushi.fs.file.FileNode;
 import net.oneandone.sushi.launcher.Failure;
 import net.oneandone.sushi.launcher.Launcher;
-import net.oneandone.sushi.util.Separator;
 import net.oneandone.sushi.util.Strings;
 import net.oneandone.sushi.xml.XmlException;
 import org.apache.maven.execution.MavenSession;
-import org.apache.maven.lifecycle.MavenExecutionPlan;
 import org.apache.maven.lifecycle.internal.BuilderCommon;
-import org.apache.maven.lifecycle.internal.LifecycleTask;
 import org.apache.maven.lifecycle.internal.MojoExecutor;
-import org.apache.maven.lifecycle.internal.ProjectIndex;
-import org.apache.maven.lifecycle.internal.TaskSegment;
-import org.apache.maven.plugin.MojoExecution;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.logging.Log;
 import org.apache.maven.project.MavenProject;
@@ -43,10 +37,7 @@ import org.sonatype.aether.util.artifact.DefaultArtifact;
 import org.xml.sax.SAXException;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Date;
-import java.util.HashSet;
-import java.util.List;
 
 public class Prerelease {
     public static Prerelease load(Target target) throws IOException {
@@ -228,7 +219,7 @@ public class Prerelease {
 
         // no "clean" because we have a vanilla directory from svn
         try {
-            maven.build(checkout, new PropertySnapshotListener(this, maven.getExecutionListener()), false, "install");
+            maven.build(checkout, new StateStoreListener(this, maven.getExecutionListener()), false, "install");
         } finally {
             installed = descriptor.project.localRepo(checkout.getWorld());
             if (installed.exists()) {

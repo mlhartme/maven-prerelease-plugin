@@ -9,11 +9,11 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
-public class RestoreState extends BaseExecutionListener {
+public class StateRestoreListener extends BaseExecutionListener {
     private final Prerelease prerelease;
     private final MavenProjectHelper projectHelper;
 
-    public RestoreState(Prerelease prerelease, MavenProjectHelper projectHelper, ExecutionListener base) {
+    public StateRestoreListener(Prerelease prerelease, MavenProjectHelper projectHelper, ExecutionListener base) {
         super(base);
         this.prerelease = prerelease;
         this.projectHelper = projectHelper;

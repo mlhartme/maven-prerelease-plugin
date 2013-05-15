@@ -8,11 +8,11 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
-public class PropertySnapshotListener extends BaseExecutionListener {
+public class StateStoreListener extends BaseExecutionListener {
     private final Prerelease prerelease;
     private final Map<String, String> initialProperties;
 
-    public PropertySnapshotListener(Prerelease prerelease, ExecutionListener base) {
+    public StateStoreListener(Prerelease prerelease, ExecutionListener base) {
         super(base);
         this.prerelease = prerelease;
         this.initialProperties = new HashMap<>();

@@ -1,18 +1,14 @@
 package net.oneandone.maven.plugins.prerelease.util;
 
 import net.oneandone.maven.plugins.prerelease.core.Prerelease;
-import net.oneandone.maven.plugins.prerelease.core.RestoreState;
+import net.oneandone.maven.plugins.prerelease.core.StateRestoreListener;
 import net.oneandone.sushi.fs.World;
 import net.oneandone.sushi.fs.file.FileNode;
-import net.oneandone.sushi.util.Separator;
-import org.apache.maven.InternalErrorException;
 import org.apache.maven.artifact.repository.ArtifactRepository;
 import org.apache.maven.artifact.repository.ArtifactRepositoryPolicy;
 import org.apache.maven.artifact.repository.DefaultArtifactRepository;
 import org.apache.maven.artifact.repository.layout.DefaultRepositoryLayout;
-import org.apache.maven.execution.BuildFailure;
 import org.apache.maven.execution.DefaultMavenExecutionRequest;
-import org.apache.maven.execution.ExecutionEvent;
 import org.apache.maven.execution.ExecutionListener;
 import org.apache.maven.execution.MavenExecutionRequest;
 import org.apache.maven.execution.MavenExecutionResult;
@@ -23,16 +19,12 @@ import org.apache.maven.lifecycle.LifecycleNotFoundException;
 import org.apache.maven.lifecycle.LifecyclePhaseNotFoundException;
 import org.apache.maven.lifecycle.MavenExecutionPlan;
 import org.apache.maven.lifecycle.internal.BuilderCommon;
-import org.apache.maven.lifecycle.internal.DefaultLifecycleExecutionPlanCalculator;
 import org.apache.maven.lifecycle.internal.ExecutionPlanItem;
-import org.apache.maven.lifecycle.internal.LifecycleExecutionPlanCalculator;
 import org.apache.maven.lifecycle.internal.LifecycleModuleBuilder;
-import org.apache.maven.lifecycle.internal.ProjectIndex;
 import org.apache.maven.lifecycle.internal.ReactorContext;
 import org.apache.maven.lifecycle.internal.TaskSegment;
 import org.apache.maven.model.building.ModelBuildingRequest;
 import org.apache.maven.plugin.InvalidPluginDescriptorException;
-import org.apache.maven.plugin.MojoExecution;
 import org.apache.maven.plugin.MojoNotFoundException;
 import org.apache.maven.plugin.PluginDescriptorParsingException;
 import org.apache.maven.plugin.PluginNotFoundException;
@@ -246,7 +238,7 @@ public class Maven {
     }
 
     public void deployOnly(Prerelease prerelease, MavenProjectHelper projectHelper) throws Exception {
-        build(prerelease.checkout, new RestoreState(prerelease, projectHelper, executionListener), true, "deploy");
+        build(prerelease.checkout, new StateRestoreListener(prerelease, projectHelper, executionListener), true, "deploy");
 
         /* TODO
         mandatories = Separator.COMMA.split(mandatory);
