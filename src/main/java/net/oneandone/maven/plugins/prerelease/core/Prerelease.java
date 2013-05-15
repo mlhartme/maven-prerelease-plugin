@@ -32,17 +32,13 @@ import org.apache.maven.lifecycle.internal.*;
 import org.apache.maven.plugin.MojoExecution;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.logging.Log;
-import org.apache.maven.plugins.annotations.Component;
-import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.project.MavenProject;
 import org.apache.maven.project.MavenProjectHelper;
 import org.sonatype.aether.artifact.Artifact;
-import org.sonatype.aether.deployment.DeploymentException;
 import org.sonatype.aether.util.artifact.DefaultArtifact;
 import org.xml.sax.SAXException;
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.Writer;
 import java.util.*;
 
@@ -64,7 +60,7 @@ public class Prerelease {
         return new Prerelease(target, workingCopy, descriptor);
     }
 
-    public static Prerelease create(Log log, Descriptor descriptor, Target target, boolean update, Properties properties)
+    public static Prerelease create(Maven maven, Log log, Descriptor descriptor, Target target, boolean update, Properties properties)
             throws Exception {
         Prerelease prerelease;
         FileNode tags;
@@ -94,7 +90,7 @@ public class Prerelease {
             Transform.adjustPom(prerelease.checkout.join("pom.xml"), descriptor.previous, descriptor.project.version,
                     descriptor.svnOrig, descriptor.svnTag);
             Archive.adjustChanges(prerelease.checkout, prerelease.descriptor.project.version);
-            prerelease.create(log, update, properties);
+            prerelease.create(maven ,log, update, properties);
             log.info("created prerelease in " + prerelease.target);
         } catch (Exception e) {
             target.scheduleRemove(log, "create failed: " + e.getMessage());
@@ -229,24 +225,12 @@ public class Prerelease {
 
     //--
 
-    public void build(final Log log, boolean alwaysUpdate, Properties userProperties, String ... goals) throws Exception {
-        Launcher mvn;
-
-        mvn = Maven.launcher(checkout, userProperties);
-        if (alwaysUpdate) {
-            mvn.arg("-U");
-        }
-        mvn.arg(goals);
-        log.info(mvn.toString());
-        mvn.exec(new LogWriter(log));
-    }
-
-    public void create(final Log log, boolean alwaysUpdate, Properties userProperties) throws Exception {
+    public void create(Maven maven, final Log log, boolean alwaysUpdate, Properties userProperties) throws Exception {
         FileNode installed;
 
         // no "clean" because we have a vanilla directory from svn
         try {
-            build(log, alwaysUpdate, userProperties, goal("do-checkpoint"), "install", goal("do-checkpoint"));
+            maven.build(log, checkout, alwaysUpdate, userProperties, goal("do-checkpoint"), "install", goal("do-checkpoint"));
         } finally {
             installed = descriptor.project.localRepo(checkout.getWorld());
             if (installed.exists()) {
@@ -310,8 +294,8 @@ public class Prerelease {
         }
     }
 
-    public void verify(final Log log, String profile, boolean alwaysUpdate, Properties userProperties) throws Exception {
-        build(log, alwaysUpdate, userProperties, "verify", /* to save disk space: */ "clean", "-P" + profile);
+    public void verify(Maven maven, final Log log, String profile, boolean alwaysUpdate, Properties userProperties) throws Exception {
+        maven.build(log, checkout, alwaysUpdate, userProperties, "verify", /* to save disk space: */ "clean", "-P" + profile);
     }
 
     //-- promote
