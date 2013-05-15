@@ -30,7 +30,7 @@ public class Build extends ProjectBase {
     /**
      * Arguments to pass to mvn. Separate with "," when using the property, e.g. "-Dprerelease.build=clean,package,-DskipTests=true"
      */
-    @Parameter(property = "prerelease.build", defaultValue = "validate")
+    @Parameter(property = "prerelease.build", defaultValue = "verify")
     protected String[] arguments;
 
     @Override

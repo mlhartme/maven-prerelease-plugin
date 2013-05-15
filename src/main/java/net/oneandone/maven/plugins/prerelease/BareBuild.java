@@ -23,8 +23,6 @@ import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.project.MavenProject;
 
-import java.lang.reflect.Field;
-
 /**
  * Preform build without a working copy.
  *
@@ -39,17 +37,6 @@ public class BareBuild extends BareBase {
         if (prerelease == null) {
             throw new MojoExecutionException("prerelease not found: " + descriptor.revision);
         }
-        maven().build(prerelease.checkout, arguments(project));
+        maven().build(prerelease.checkout, "net.oneandone.maven.plugins:prerelease:build");
     }
-
-    private String[] arguments(MavenProject project) throws Exception {
-        org.apache.maven.plugin.Mojo mojo;
-        Field field;
-
-        mojo = mojo(project, "net.oneandone.maven.plugins:prerelease:build");
-        field = mojo.getClass().getDeclaredField("arguments");
-        field.setAccessible(true);
-        return (String[]) field.get(mojo);
-    }
-
 }
