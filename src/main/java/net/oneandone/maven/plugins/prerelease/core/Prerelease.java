@@ -228,7 +228,7 @@ public class Prerelease {
 
         // no "clean" because we have a vanilla directory from svn
         try {
-            maven.build(checkout, new PropertySnapshotListener(this, maven.getExecutionListener()), "install");
+            maven.build(checkout, new PropertySnapshotListener(this, maven.getExecutionListener()), false, "install");
         } finally {
             installed = descriptor.project.localRepo(checkout.getWorld());
             if (installed.exists()) {
@@ -252,7 +252,7 @@ public class Prerelease {
         log.info("promoting revision " + descriptor.revision + " to " + descriptor.project);
         origCommit = prepareOrigCommit(log);
         try {
-            promoteLocked(log, user, mandatory, origCommit, maven, session, builderCommon, projectHelper, mojoExecutor);
+            promoteLocked(log, user, mandatory, origCommit, maven, session, projectHelper);
         } catch (Throwable e) { // CAUTION: catching exceptions is not enough -- in particular, out-of-memory during upload is an error!
             try {
                 origUnlock(origCommit);
@@ -274,8 +274,7 @@ public class Prerelease {
 
     /** commit before deploy - because if deployment fails, we can reliably revert the commit. */
     private void promoteLocked(Log log, String user, String mandatory, FileNode origCommit,
-                               Maven maven, MavenSession session, BuilderCommon builderCommon, MavenProjectHelper projectHelper,
-                               MojoExecutor mojoExecutor) throws Exception {
+                               Maven maven, MavenSession session, MavenProjectHelper projectHelper) throws Exception {
         MavenProject project;
         MavenProject previous;
 
@@ -287,7 +286,7 @@ public class Prerelease {
         try {
             commit(log, user);
             try {
-                deployPhase(log, mandatory, project, session, builderCommon, projectHelper, mojoExecutor);
+                maven.deployOnly(this, projectHelper);
             } catch (Exception e) {
                 log.info("deployment failed - reverting tag");
                 revertCommit(log, user);
@@ -316,43 +315,7 @@ public class Prerelease {
 
     //--
 
-    private void deployPhase(Log log, String mandatory, MavenProject project, MavenSession session, BuilderCommon builderCommon, MavenProjectHelper projectHelper, MojoExecutor mojoExecutor) throws Exception {
-        List<MojoExecution> mandatoryExecutions;
-        List<MojoExecution> optionalExecutions;
-        List<String> mandatories;
-        ProjectIndex index;
-
-        mandatories = Separator.COMMA.split(mandatory);
-        MavenExecutionPlan executionPlan =
-                builderCommon.resolveBuildPlan(session, project, new TaskSegment(false, new LifecycleTask("deploy")), new HashSet<org.apache.maven.artifact.Artifact>());
-        mandatoryExecutions = new ArrayList<>();
-        optionalExecutions = new ArrayList<>();
-        for (MojoExecution obj : executionPlan.getMojoExecutions()) {
-            if ("deploy".equals(obj.getLifecyclePhase())) {
-                if (mandatories.contains(obj.getPlugin().getArtifactId())) {
-                    log.info("mandatory: " + obj.getPlugin().getArtifactId() + ":" + obj.getGoal());
-                    mandatoryExecutions.add(obj);
-                } else {
-                    log.info("optional " + obj.getPlugin().getArtifactId() + ":" + obj.getGoal());
-                    optionalExecutions.add(obj);
-                }
-            }
-        }
-        index = new ProjectIndex(session.getProjects());
-        artifactFiles(project, projectHelper);
-        project.getProperties().putAll(descriptor.deployProperties);
-        mojoExecutor.execute(session, mandatoryExecutions, index);
-        try {
-            mojoExecutor.execute(session, optionalExecutions, index);
-        } catch (Exception e) {
-            log.warn("Promote succeeded: your artifacts have been deployed, and the svn tag was created. ");
-            log.warn("However, optional promote goals failed with this exception: ");
-            log.warn(e);
-            log.warn("Thus, you can use your release, but someone experienced should have a look.");
-        }
-    }
-
-    private void artifactFiles(MavenProject project, MavenProjectHelper projectHelper) throws IOException {
+    public void artifactFiles(MavenProject project, MavenProjectHelper projectHelper) throws IOException {
         FileNode artifacts;
         String name;
         String str;

@@ -1,19 +1,47 @@
 package net.oneandone.maven.plugins.prerelease.util;
 
+import net.oneandone.maven.plugins.prerelease.core.Prerelease;
+import net.oneandone.maven.plugins.prerelease.core.RestoreState;
 import net.oneandone.sushi.fs.World;
 import net.oneandone.sushi.fs.file.FileNode;
+import net.oneandone.sushi.util.Separator;
+import org.apache.maven.InternalErrorException;
 import org.apache.maven.artifact.repository.ArtifactRepository;
 import org.apache.maven.artifact.repository.ArtifactRepositoryPolicy;
 import org.apache.maven.artifact.repository.DefaultArtifactRepository;
 import org.apache.maven.artifact.repository.layout.DefaultRepositoryLayout;
+import org.apache.maven.execution.BuildFailure;
 import org.apache.maven.execution.DefaultMavenExecutionRequest;
+import org.apache.maven.execution.ExecutionEvent;
 import org.apache.maven.execution.ExecutionListener;
 import org.apache.maven.execution.MavenExecutionRequest;
 import org.apache.maven.execution.MavenExecutionResult;
 import org.apache.maven.execution.MavenSession;
+import org.apache.maven.lifecycle.DefaultLifecycles;
+import org.apache.maven.lifecycle.LifecycleExecutionException;
+import org.apache.maven.lifecycle.LifecycleNotFoundException;
+import org.apache.maven.lifecycle.LifecyclePhaseNotFoundException;
+import org.apache.maven.lifecycle.MavenExecutionPlan;
+import org.apache.maven.lifecycle.internal.BuilderCommon;
+import org.apache.maven.lifecycle.internal.DefaultLifecycleExecutionPlanCalculator;
+import org.apache.maven.lifecycle.internal.ExecutionPlanItem;
+import org.apache.maven.lifecycle.internal.LifecycleExecutionPlanCalculator;
+import org.apache.maven.lifecycle.internal.LifecycleModuleBuilder;
+import org.apache.maven.lifecycle.internal.ProjectIndex;
+import org.apache.maven.lifecycle.internal.ReactorContext;
+import org.apache.maven.lifecycle.internal.TaskSegment;
 import org.apache.maven.model.building.ModelBuildingRequest;
+import org.apache.maven.plugin.InvalidPluginDescriptorException;
+import org.apache.maven.plugin.MojoExecution;
+import org.apache.maven.plugin.MojoNotFoundException;
+import org.apache.maven.plugin.PluginDescriptorParsingException;
+import org.apache.maven.plugin.PluginNotFoundException;
+import org.apache.maven.plugin.PluginResolutionException;
+import org.apache.maven.plugin.prefix.NoPluginFoundForPrefixException;
+import org.apache.maven.plugin.version.PluginVersionResolutionException;
 import org.apache.maven.project.DefaultProjectBuildingRequest;
 import org.apache.maven.project.MavenProject;
+import org.apache.maven.project.MavenProjectHelper;
 import org.apache.maven.project.ProjectBuilder;
 import org.apache.maven.project.ProjectBuildingException;
 import org.apache.maven.project.ProjectBuildingRequest;
@@ -36,9 +64,11 @@ import org.sonatype.aether.repository.LocalRepository;
 import org.sonatype.aether.repository.RepositoryPolicy;
 
 import java.io.File;
+import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Set;
 
 public class Maven {
     public static Maven withDefaults(World world) {
@@ -119,14 +149,14 @@ public class Maven {
     }
 
     public void build(FileNode basedir, String ... goals) throws Exception {
-        build(basedir, executionListener, goals);
+        build(basedir, executionListener, false, goals);
     }
 
     /**
      * Creates an DefaultMaven instance, initializes it form parentRequest (in Maven, this is done by MavenCli - also by
      * loading settings).
      */
-    public void build(FileNode basedir, ExecutionListener theExecutionListener, String ... goals) throws Exception {
+    public void build(FileNode basedir, ExecutionListener theExecutionListener, final boolean filter, String ... goals) throws Exception {
         MavenExecutionRequest parentRequest;
         org.apache.maven.Maven maven;
         MavenExecutionRequest request;
@@ -173,8 +203,35 @@ public class Maven {
         request.setUserProperties(parentRequest.getUserProperties());
         request.setExecutionListener(theExecutionListener);
         request.setUpdateSnapshots(parentRequest.isUpdateSnapshots());
-        result = maven.execute(request);
-        // TODO: log
+
+        LifecycleModuleBuilder b = parentSession.getContainer().lookup(LifecycleModuleBuilder.class);
+        Field f = b.getClass().getDeclaredField("builderCommon");
+        f.setAccessible(true);
+        final BuilderCommon bc = (BuilderCommon) f.get(b);
+        f.set(b, new BuilderCommon() {
+            public MavenExecutionPlan resolveBuildPlan(MavenSession session, MavenProject project, TaskSegment taskSegment,
+                                                       Set<org.apache.maven.artifact.Artifact> projectArtifacts)
+                    throws PluginNotFoundException, PluginResolutionException, LifecyclePhaseNotFoundException,
+                    PluginDescriptorParsingException, MojoNotFoundException, InvalidPluginDescriptorException,
+                    NoPluginFoundForPrefixException, LifecycleNotFoundException, PluginVersionResolutionException,
+                    LifecycleExecutionException {
+                final MavenExecutionPlan result;
+                result = bc.resolveBuildPlan(session, project, taskSegment, projectArtifacts);
+                return filter? filtered(result) : result;
+            }
+
+            public void handleBuildError(final ReactorContext buildContext, final MavenSession rootSession,
+                                         final MavenProject mavenProject, Exception e, final long buildStartTime) {
+                bc.handleBuildError(buildContext, rootSession, mavenProject, e, buildStartTime);
+            }
+        });
+
+        try {
+            result = maven.execute(request);
+        } finally {
+            f.set(b, bc);
+        }
+
         exception = null;
         for (Throwable e : result.getExceptions()) {
             if (exception == null) {
@@ -185,6 +242,57 @@ public class Maven {
         }
         if (exception != null) {
             throw exception;
+        }
+    }
+
+    public void deployOnly(Prerelease prerelease, MavenProjectHelper projectHelper) throws Exception {
+        build(prerelease.checkout, new RestoreState(prerelease, projectHelper, executionListener), true, "deploy");
+
+        /* TODO
+        mandatories = Separator.COMMA.split(mandatory);
+        MavenExecutionPlan executionPlan =
+                builderCommon.resolveBuildPlan(session, project, new TaskSegment(false, new LifecycleTask("deploy")), new HashSet<org.apache.maven.artifact.Artifact>());
+        mandatoryExecutions = new ArrayList<>();
+        optionalExecutions = new ArrayList<>();
+        for (MojoExecution obj : executionPlan.getMojoExecutions()) {
+            if ("deploy".equals(obj.getLifecyclePhase())) {
+                if (mandatories.contains(obj.getPlugin().getArtifactId())) {
+                    log.info("mandatory: " + obj.getPlugin().getArtifactId() + ":" + obj.getGoal());
+                    mandatoryExecutions.add(obj);
+                } else {
+                    log.info("optional " + obj.getPlugin().getArtifactId() + ":" + obj.getGoal());
+                    optionalExecutions.add(obj);
+                }
+            } else {
+                log.info("unknown: " + obj.getPlugin().getArtifactId() + ":" + obj.getGoal());
+            }
+        }*/
+
+        /* TODO
+        try {
+            mojoExecutor.execute(session, optionalExecutions, index);
+        } catch (Exception e) {
+            log.warn("Promote succeeded: your artifacts have been deployed, and the svn tag was created. ");
+            log.warn("However, optional promote goals failed with this exception: ");
+            log.warn(e);
+            log.warn("Thus, you can use your release, but someone experienced should have a look.");
+        }*/
+    }
+
+    private MavenExecutionPlan filtered(MavenExecutionPlan base) {
+        List<ExecutionPlanItem> lst;
+
+        lst = new ArrayList<>();
+        for (ExecutionPlanItem item : base) {
+            if ("deploy".equals(item.getLifecyclePhase())) {
+                lst.add(item);
+                System.out.println("addint " + item);
+            }
+        }
+        try {
+            return new MavenExecutionPlan(lst, parentSession.getContainer().lookup(DefaultLifecycles.class));
+        } catch (ComponentLookupException e) {
+            throw new IllegalStateException(e);
         }
     }
 

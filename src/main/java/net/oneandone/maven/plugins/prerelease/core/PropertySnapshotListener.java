@@ -8,102 +8,26 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
-public class PropertySnapshotListener implements ExecutionListener {
-    private final ExecutionListener base;
+public class PropertySnapshotListener extends BaseExecutionListener {
     private final Prerelease prerelease;
     private final Map<String, String> initialProperties;
 
     public PropertySnapshotListener(Prerelease prerelease, ExecutionListener base) {
-        this.base = base;
+        super(base);
         this.prerelease = prerelease;
         this.initialProperties = new HashMap<>();
     }
 
     @Override
-    public void projectDiscoveryStarted(ExecutionEvent event) {
-        base.projectDiscoveryStarted(event);
-    }
-
-    @Override
-    public void sessionStarted(ExecutionEvent event) {
-        base.sessionStarted(event);
-    }
-
-    @Override
-    public void sessionEnded(ExecutionEvent event) {
-        base.sessionEnded(event);
-    }
-
-    @Override
-    public void projectSkipped(ExecutionEvent event) {
-        base.projectSkipped(event);
-    }
-
-    @Override
     public void projectStarted(ExecutionEvent event) {
         initialProperties(event.getSession().getCurrentProject());
-        base.projectStarted(event);
+        super.projectStarted(event);
     }
 
     @Override
     public void projectSucceeded(ExecutionEvent event) {
+        super.projectSucceeded(event);
         saveModified(event.getSession().getCurrentProject());
-        base.projectSucceeded(event);
-    }
-
-    @Override
-    public void projectFailed(ExecutionEvent event) {
-        base.projectFailed(event);
-    }
-
-    @Override
-    public void mojoSkipped(ExecutionEvent event) {
-        base.mojoSkipped(event);
-    }
-
-    @Override
-    public void mojoStarted(ExecutionEvent event) {
-        base.mojoStarted(event);
-    }
-
-    @Override
-    public void mojoSucceeded(ExecutionEvent event) {
-        base.mojoSucceeded(event);
-    }
-
-    @Override
-    public void mojoFailed(ExecutionEvent event) {
-        base.mojoFailed(event);
-    }
-
-    @Override
-    public void forkStarted(ExecutionEvent event) {
-        base.forkStarted(event);
-    }
-
-    @Override
-    public void forkSucceeded(ExecutionEvent event) {
-        base.forkSucceeded(event);
-    }
-
-    @Override
-    public void forkFailed(ExecutionEvent event) {
-        base.forkFailed(event);
-    }
-
-    @Override
-    public void forkedProjectStarted(ExecutionEvent event) {
-        base.forkedProjectStarted(event);
-    }
-
-    @Override
-    public void forkedProjectSucceeded(ExecutionEvent event) {
-        base.forkedProjectSucceeded(event);
-    }
-
-    @Override
-    public void forkedProjectFailed(ExecutionEvent event) {
-        base.forkedProjectFailed(event);
     }
 
     private void initialProperties(MavenProject project) {
