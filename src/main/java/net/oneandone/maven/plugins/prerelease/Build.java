@@ -46,6 +46,6 @@ public class Build extends ProjectBase {
         if (prerelease == null) {
             throw new MojoExecutionException("no prerelease for revision " + revision);
         }
-        maven().build(prerelease.checkout, false, session.getUserProperties(), arguments);
+        maven().build(prerelease.checkout, arguments);
     }
 }

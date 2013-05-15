@@ -45,7 +45,7 @@ public class BareUpdate extends BareBase {
         if (target.exists()) {
             getLog().info("prerelease already exists: " + descriptor.getName());
         } else {
-            prerelease = Prerelease.create(maven(), getLog(), descriptor, target, alwaysUpdate, session.getUserProperties());
+            prerelease = Prerelease.create(maven(), getLog(), descriptor, target);
             try {
                 descriptor.check(world, project);
             } catch (RuntimeException e) {

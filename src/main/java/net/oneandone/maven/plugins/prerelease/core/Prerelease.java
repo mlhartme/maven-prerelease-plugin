@@ -60,8 +60,7 @@ public class Prerelease {
         return new Prerelease(target, workingCopy, descriptor);
     }
 
-    public static Prerelease create(Maven maven, Log log, Descriptor descriptor, Target target, boolean update, Properties properties)
-            throws Exception {
+    public static Prerelease create(Maven maven, Log log, Descriptor descriptor, Target target) throws Exception {
         Prerelease prerelease;
         FileNode tags;
         FileNode checkout;
@@ -90,7 +89,7 @@ public class Prerelease {
             Transform.adjustPom(prerelease.checkout.join("pom.xml"), descriptor.previous, descriptor.project.version,
                     descriptor.svnOrig, descriptor.svnTag);
             Archive.adjustChanges(prerelease.checkout, prerelease.descriptor.project.version);
-            prerelease.create(maven, update, properties);
+            prerelease.create(maven);
             log.info("created prerelease in " + prerelease.target);
         } catch (Exception e) {
             target.scheduleRemove(log, "create failed: " + e.getMessage());
@@ -225,12 +224,12 @@ public class Prerelease {
 
     //--
 
-    public void create(Maven maven, boolean alwaysUpdate, Properties userProperties) throws Exception {
+    public void create(Maven maven) throws Exception {
         FileNode installed;
 
         // no "clean" because we have a vanilla directory from svn
         try {
-            maven.build(checkout, alwaysUpdate, userProperties, goal("do-checkpoint"), "install", goal("do-checkpoint"));
+            maven.build(checkout, goal("do-checkpoint"), "install", goal("do-checkpoint"));
         } finally {
             installed = descriptor.project.localRepo(checkout.getWorld());
             if (installed.exists()) {
@@ -294,8 +293,8 @@ public class Prerelease {
         }
     }
 
-    public void verify(Maven maven, String profile, boolean alwaysUpdate, Properties userProperties) throws Exception {
-        maven.build(checkout, alwaysUpdate, userProperties, "verify", /* to save disk space: */ "clean", "-P" + profile);
+    public void verify(Maven maven, String profile) throws Exception {
+        maven.build(checkout, "verify", /* to save disk space: */ "clean", "-P" + profile);
     }
 
     //-- promote

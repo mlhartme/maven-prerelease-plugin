@@ -58,8 +58,6 @@ public abstract class Base extends AbstractMojo {
 
     protected final World world;
 
-    protected boolean alwaysUpdate;
-
     public Base() {
         this.world = new World();
     }
@@ -67,7 +65,6 @@ public abstract class Base extends AbstractMojo {
     @Override
     public void execute() throws MojoExecutionException {
         getLog().debug("user-properties: " + session.getUserProperties());
-        alwaysUpdate = "always".equals(repositorySession.getUpdatePolicy());
         try {
             doExecute();
         } catch (RuntimeException | MojoExecutionException e) {

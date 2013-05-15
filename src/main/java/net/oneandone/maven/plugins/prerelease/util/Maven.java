@@ -118,7 +118,11 @@ public class Maven {
         this.remoteLegacy = remoteLegacy;
     }
 
-    public void build(FileNode basedir, boolean alwaysUpdate, Properties userProperties, String ... goals) throws Exception {
+    /**
+     * Creates an DefaultMaven instance, initializes it form parentRequest (in Maven, this is done by MavenCli - also by
+     * loading settings).
+     */
+    public void build(FileNode basedir, String ... goals) throws Exception {
         MavenExecutionRequest parentRequest;
         org.apache.maven.Maven maven;
         MavenExecutionRequest request;
@@ -162,11 +166,9 @@ public class Maven {
         request.setGoals(Arrays.asList(goals));
         request.setBaseDirectory(basedir.toPath().toFile());
         request.setSystemProperties(parentRequest.getSystemProperties());
-        request.setUserProperties(userProperties);
+        request.setUserProperties(parentRequest.getUserProperties());
         request.setExecutionListener(executionListener);
-        if (alwaysUpdate) {
-            request.setUpdateSnapshots(alwaysUpdate);
-        }
+        request.setUpdateSnapshots(parentRequest.isUpdateSnapshots());
         result = maven.execute(request);
         // TODO: log
         exception = null;

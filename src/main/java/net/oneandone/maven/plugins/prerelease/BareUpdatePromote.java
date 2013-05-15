@@ -49,7 +49,7 @@ public class BareUpdatePromote extends BareUpdate {
         prerelease = target.loadOpt();
         if (prerelease == null) {
             descriptor.check(world, project);
-            prerelease = Prerelease.create(maven(), getLog(), descriptor, target, alwaysUpdate, session.getUserProperties());
+            prerelease = Prerelease.create(maven(), getLog(), descriptor, target);
         }
         prerelease.promote(getLog(), getUser(), getMandatory(project), maven(), session, builderCommon, projectHelper, mojoExecutor);
     }
