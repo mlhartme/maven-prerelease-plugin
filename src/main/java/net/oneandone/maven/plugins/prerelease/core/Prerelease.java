@@ -235,13 +235,13 @@ public class Prerelease {
 
     //-- promote
 
-    public void promote(Log log, String user, String mandatory, Maven maven, MavenSession session) throws Exception {
+    public void promote(Log log, String user, String mandatory, Maven maven) throws Exception {
         FileNode origCommit;
 
         log.info("promoting revision " + descriptor.revision + " to " + descriptor.project);
         origCommit = prepareOrigCommit(log);
         try {
-            promoteLocked(log, user, mandatory, origCommit, maven, session);
+            promoteLocked(log, user, mandatory, origCommit, maven);
         } catch (Throwable e) { // CAUTION: catching exceptions is not enough -- in particular, out-of-memory during upload is an error!
             try {
                 origUnlock(origCommit);
@@ -262,28 +262,15 @@ public class Prerelease {
     }
 
     /** commit before deploy - because if deployment fails, we can reliably revert the commit. */
-    private void promoteLocked(Log log, String user, String mandatory, FileNode origCommit,
-                               Maven maven, MavenSession session) throws Exception {
-        MavenProject project;
-        MavenProject previous;
-
-        project = maven.loadPom(checkout.join("pom.xml"));
-        previous = session.getCurrentProject();
-        session.setCurrentProject(project);
-        // TODO: why?
-        project.setPluginArtifactRepositories(previous.getRemoteArtifactRepositories());
+    private void promoteLocked(Log log, String user, String mandatory, FileNode origCommit, Maven maven) throws Exception {
+        commit(log, user);
         try {
-            commit(log, user);
-            try {
-                maven.deployOnly(this);
-            } catch (Exception e) {
-                log.info("deployment failed - reverting tag");
-                revertCommit(log, user);
-                target.scheduleRemove(log, "deployment failed (tag has been reverted): " + e.getMessage());
-                throw e;
-            }
-        } finally {
-            session.setCurrentProject(previous);
+            maven.deployOnly(this);
+        } catch (Exception e) {
+            log.info("deployment failed - reverting tag");
+            revertCommit(log, user);
+            target.scheduleRemove(log, "deployment failed (tag has been reverted): " + e.getMessage());
+            throw e;
         }
         try {
             log.info("Update pom and changes ...");
