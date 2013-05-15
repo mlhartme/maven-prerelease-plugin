@@ -89,7 +89,7 @@ public class WorkingCopyIT extends IntegrationBase {
         Descriptor descriptor;
 
         dir = checkoutProject("svnmismatch");
-        maven = Maven.withDefaults(WORLD);
+        maven = Maven.forTests(WORLD);
         project = maven.loadPom(dir.join("pom.xml"));
         revision = WorkingCopy.load(dir).revision(); // TODO: expensive
         descriptor = Descriptor.checkedCreate(WORLD, project, revision);
@@ -105,7 +105,7 @@ public class WorkingCopyIT extends IntegrationBase {
         Descriptor descriptor;
 
         dir = checkoutProject("minimal");
-        maven = Maven.withDefaults(WORLD);
+        maven = Maven.forTests(WORLD);
         project = maven.loadPom(dir.join("pom.xml"));
         revision = WorkingCopy.load(dir).revision() + 1;
         descriptor = Descriptor.checkedCreate(WORLD, project, revision);

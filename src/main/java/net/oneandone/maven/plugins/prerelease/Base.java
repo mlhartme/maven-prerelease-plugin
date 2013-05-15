@@ -23,6 +23,7 @@ import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugins.annotations.Component;
 import org.apache.maven.plugins.annotations.Parameter;
+import org.apache.maven.project.MavenProjectHelper;
 import org.apache.maven.project.ProjectBuilder;
 import org.sonatype.aether.RepositorySystemSession;
 
@@ -43,6 +44,9 @@ public abstract class Base extends AbstractMojo {
 
     @Component
     private ProjectBuilder projectBuilder;
+
+    @Component
+    private MavenProjectHelper projectHelper;
 
     /**
      * The current repository/network configuration of Maven.
@@ -77,6 +81,6 @@ public abstract class Base extends AbstractMojo {
     public abstract void doExecute() throws Exception;
 
     protected Maven maven() {
-        return new Maven(world, session, session.getRequest().getExecutionListener(), repositorySession, projectBuilder, remoteRepositoriesLegacy);
+        return new Maven(world, session, session.getRequest().getExecutionListener(), projectHelper, repositorySession, projectBuilder, remoteRepositoriesLegacy);
     }
 }

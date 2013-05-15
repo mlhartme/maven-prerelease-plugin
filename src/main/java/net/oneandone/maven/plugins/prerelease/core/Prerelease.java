@@ -235,15 +235,13 @@ public class Prerelease {
 
     //-- promote
 
-    public void promote(Log log, String user, String mandatory,
-                        Maven maven, MavenSession session, BuilderCommon builderCommon, MavenProjectHelper projectHelper,
-                        MojoExecutor mojoExecutor) throws Exception {
+    public void promote(Log log, String user, String mandatory, Maven maven, MavenSession session) throws Exception {
         FileNode origCommit;
 
         log.info("promoting revision " + descriptor.revision + " to " + descriptor.project);
         origCommit = prepareOrigCommit(log);
         try {
-            promoteLocked(log, user, mandatory, origCommit, maven, session, projectHelper);
+            promoteLocked(log, user, mandatory, origCommit, maven, session);
         } catch (Throwable e) { // CAUTION: catching exceptions is not enough -- in particular, out-of-memory during upload is an error!
             try {
                 origUnlock(origCommit);
@@ -265,7 +263,7 @@ public class Prerelease {
 
     /** commit before deploy - because if deployment fails, we can reliably revert the commit. */
     private void promoteLocked(Log log, String user, String mandatory, FileNode origCommit,
-                               Maven maven, MavenSession session, MavenProjectHelper projectHelper) throws Exception {
+                               Maven maven, MavenSession session) throws Exception {
         MavenProject project;
         MavenProject previous;
 
@@ -277,7 +275,7 @@ public class Prerelease {
         try {
             commit(log, user);
             try {
-                maven.deployOnly(this, projectHelper);
+                maven.deployOnly(this);
             } catch (Exception e) {
                 log.info("deployment failed - reverting tag");
                 revertCommit(log, user);

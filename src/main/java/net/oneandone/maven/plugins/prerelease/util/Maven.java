@@ -63,7 +63,7 @@ import java.util.List;
 import java.util.Set;
 
 public class Maven {
-    public static Maven withDefaults(World world) {
+    public static Maven forTests(World world) {
         DefaultPlexusContainer container;
         RepositorySystem system;
         MavenRepositorySystemSession session;
@@ -82,7 +82,7 @@ public class Maven {
             session.setOffline(false);
             session.setLocalRepositoryManager(system.newLocalRepositoryManager(localRepository));
             session.setProxySelector(null);
-            return new Maven(world, null, null, session, container.lookup(ProjectBuilder.class), Arrays.asList(repository));
+            return new Maven(world, null, null, null, session, container.lookup(ProjectBuilder.class), Arrays.asList(repository));
         } catch (ComponentLookupException e) {
             throw new IllegalStateException(e);
         }
@@ -119,6 +119,7 @@ public class Maven {
     private final World world;
     private final MavenSession parentSession;
     private final ExecutionListener executionListener;
+    private final MavenProjectHelper projectHelper;
     private final RepositorySystemSession repositorySession;
     private final List<ArtifactRepository> remoteLegacy; // needed to load poms :(
 
@@ -126,11 +127,12 @@ public class Maven {
     // As far as I know, there's no such project builder in mvn 3.0.2.
     private final ProjectBuilder builder;
 
-    public Maven(World world, MavenSession parentSession, ExecutionListener executionListener,
+    public Maven(World world, MavenSession parentSession, ExecutionListener executionListener, MavenProjectHelper projectHelper,
                  RepositorySystemSession repositorySession, ProjectBuilder builder, List<ArtifactRepository> remoteLegacy) {
         this.world = world;
         this.parentSession = parentSession;
         this.executionListener = executionListener;
+        this.projectHelper = projectHelper;
         this.repositorySession = repositorySession;
         this.builder = builder;
         this.remoteLegacy = remoteLegacy;
@@ -237,7 +239,7 @@ public class Maven {
         }
     }
 
-    public void deployOnly(Prerelease prerelease, MavenProjectHelper projectHelper) throws Exception {
+    public void deployOnly(Prerelease prerelease) throws Exception {
         build(prerelease.checkout, new StateRestoreListener(prerelease, projectHelper, executionListener), true, "deploy");
 
         /* TODO

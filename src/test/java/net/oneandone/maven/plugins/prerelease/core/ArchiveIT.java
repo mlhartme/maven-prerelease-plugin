@@ -102,7 +102,7 @@ public class ArchiveIT extends IntegrationBase {
         Prerelease prerelease;
 
         dir = checkoutProject("minimal");
-        maven = Maven.withDefaults(WORLD);
+        maven = Maven.forTests(WORLD);
         project = maven.loadPom(dir.join("pom.xml"));
         revision = WorkingCopy.load(dir).revision();
         descriptor = Descriptor.checkedCreate(WORLD, project, revision);

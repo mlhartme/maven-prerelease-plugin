@@ -24,7 +24,6 @@ import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugins.annotations.Component;
 import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
-import org.apache.maven.project.MavenProjectHelper;
 
 /**
  * Promotes a prerelease by commuting the tag and deploying its artifact(s).
@@ -63,9 +62,6 @@ public class Promote extends ProjectBase {
     protected BuilderCommon builderCommon;
 
     @Component
-    protected MavenProjectHelper projectHelper;
-
-    @Component
     protected MojoExecutor mojoExecutor;
 
     public String getUser() {
@@ -84,7 +80,7 @@ public class Promote extends ProjectBase {
         if (prerelease == null) {
             throw new MojoExecutionException("no prerelease for revision " + revision);
         }
-        prerelease.promote(getLog(), user, mandatory, maven(), session, builderCommon, projectHelper, mojoExecutor);
+        prerelease.promote(getLog(), user, mandatory, maven(), session);
         workingCopy.update(getLog());
     }
 }

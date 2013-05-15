@@ -24,7 +24,6 @@ import org.apache.maven.lifecycle.internal.MojoExecutor;
 import org.apache.maven.plugins.annotations.Component;
 import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.project.MavenProject;
-import org.apache.maven.project.MavenProjectHelper;
 
 import java.lang.reflect.Field;
 
@@ -37,9 +36,6 @@ public class BareUpdatePromote extends BareUpdate {
     protected BuilderCommon builderCommon;
 
     @Component
-    protected MavenProjectHelper projectHelper;
-
-    @Component
     protected MojoExecutor mojoExecutor;
 
     public void doExecute(Maven maven, MavenProject project, Target target, Descriptor descriptor) throws Exception {
@@ -50,7 +46,7 @@ public class BareUpdatePromote extends BareUpdate {
             descriptor.check(world, project);
             prerelease = Prerelease.create(maven(), getLog(), descriptor, target);
         }
-        prerelease.promote(getLog(), getUser(), getMandatory(project), maven(), session, builderCommon, projectHelper, mojoExecutor);
+        prerelease.promote(getLog(), getUser(), getMandatory(project), maven(), session);
     }
 
     // TODO: move into promote goal
