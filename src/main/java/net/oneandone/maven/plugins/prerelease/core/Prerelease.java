@@ -93,7 +93,7 @@ public class Prerelease {
             Archive.adjustChanges(prerelease.checkout, prerelease.descriptor.project.version);
             // no "clean" because we have a vanilla directory from svn
             session = maven.subsession(checkout, "install");
-            prerelease.create(maven, session);
+            prerelease.create(log, maven, session);
             log.info("created prerelease in " + prerelease.target);
         } catch (Exception e) {
             target.scheduleRemove(log, "create failed: " + e.getMessage());
@@ -240,7 +240,7 @@ public class Prerelease {
         mvn.exec(new LogWriter(log));
     }
 
-    private void create(Maven maven, MavenSession session) throws Exception {
+    private void create(Log log, Maven maven, MavenSession session) throws Exception {
         MavenProject project;
         FileNode installed;
         Map<String, String> initialProperties;
@@ -248,7 +248,7 @@ public class Prerelease {
         project = session.getCurrentProject();
         initialProperties = stringProperties(project);
         try {
-            maven.execute(session);
+            maven.execute(log, session);
         } finally {
             installed = descriptor.project.localRepo(checkout.getWorld());
             if (installed.exists()) {

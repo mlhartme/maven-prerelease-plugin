@@ -1,12 +1,9 @@
 package net.oneandone.maven.plugins.prerelease.util;
 
-import net.oneandone.maven.plugins.prerelease.core.Archive;
-import net.oneandone.maven.plugins.prerelease.core.Descriptor;
-import net.oneandone.maven.plugins.prerelease.core.Prerelease;
-import net.oneandone.maven.plugins.prerelease.core.Target;
 import net.oneandone.sushi.fs.World;
 import net.oneandone.sushi.fs.file.FileNode;
 import net.oneandone.sushi.launcher.Launcher;
+import org.apache.maven.MavenExecutionException;
 import org.apache.maven.artifact.repository.ArtifactRepository;
 import org.apache.maven.artifact.repository.ArtifactRepositoryPolicy;
 import org.apache.maven.artifact.repository.DefaultArtifactRepository;
@@ -18,17 +15,9 @@ import org.apache.maven.execution.MavenExecutionRequest;
 import org.apache.maven.execution.MavenExecutionRequestPopulator;
 import org.apache.maven.execution.MavenExecutionResult;
 import org.apache.maven.execution.MavenSession;
-import org.apache.maven.lifecycle.MavenExecutionPlan;
-import org.apache.maven.lifecycle.internal.BuilderCommon;
+import org.apache.maven.execution.ProjectDependencyGraph;
 import org.apache.maven.lifecycle.internal.LifecycleStarter;
-import org.apache.maven.lifecycle.internal.LifecycleTask;
-import org.apache.maven.lifecycle.internal.MojoExecutor;
-import org.apache.maven.lifecycle.internal.ProjectIndex;
-import org.apache.maven.lifecycle.internal.TaskSegment;
 import org.apache.maven.model.building.ModelBuildingRequest;
-import org.apache.maven.model.building.ModelProblem;
-import org.apache.maven.model.building.ModelProblemUtils;
-import org.apache.maven.plugin.MojoExecution;
 import org.apache.maven.plugin.logging.Log;
 import org.apache.maven.project.DefaultProjectBuildingRequest;
 import org.apache.maven.project.MavenProject;
@@ -36,6 +25,7 @@ import org.apache.maven.project.ProjectBuilder;
 import org.apache.maven.project.ProjectBuildingException;
 import org.apache.maven.project.ProjectBuildingRequest;
 import org.apache.maven.project.ProjectBuildingResult;
+import org.apache.maven.project.ProjectSorter;
 import org.apache.maven.repository.DelegatingLocalArtifactRepository;
 import org.apache.maven.repository.internal.MavenRepositorySystemSession;
 import org.codehaus.plexus.util.StringUtils;
@@ -49,16 +39,15 @@ import org.codehaus.plexus.component.repository.exception.ComponentLookupExcepti
 import org.codehaus.plexus.logging.Logger;
 import org.sonatype.aether.RepositorySystem;
 import org.sonatype.aether.artifact.Artifact;
-import org.sonatype.aether.graph.Dependency;
 import org.sonatype.aether.repository.LocalRepository;
 import org.sonatype.aether.repository.RepositoryPolicy;
-import org.sonatype.aether.resolution.ArtifactResolutionException;
 
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
-import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
@@ -219,10 +208,214 @@ public class Maven {
 
         result.setTopologicallySortedProjects(session.getProjects());
         result.setProject(session.getTopLevelProject());
+
+        ProjectSorter projectSorter = new ProjectSorter( session.getProjects() );
+
+        ProjectDependencyGraph projectDependencyGraph = createDependencyGraph( projectSorter, request );
+        session.setProjects( projectDependencyGraph.getSortedProjects() );
+        session.setProjectDependencyGraph( projectDependencyGraph );
+
         return session;
     }
 
-    public void execute(MavenSession session) {
+    private ProjectDependencyGraph createDependencyGraph( ProjectSorter sorter, MavenExecutionRequest request )
+            throws MavenExecutionException
+    {
+        ProjectDependencyGraph graph = new DefaultProjectDependencyGraph( sorter );
+
+        List<MavenProject> activeProjects = sorter.getSortedProjects();
+
+        activeProjects = trimSelectedProjects( activeProjects, graph, request );
+        activeProjects = trimResumedProjects( activeProjects, request );
+
+        if (activeProjects.size() != sorter.getSortedProjects().size()) {
+            throw new IllegalStateException();
+        }
+
+        return graph;
+    }
+
+    private List<MavenProject> trimSelectedProjects( List<MavenProject> projects, ProjectDependencyGraph graph,
+                                                     MavenExecutionRequest request )
+            throws MavenExecutionException
+    {
+        List<MavenProject> result = projects;
+
+        if ( !request.getSelectedProjects().isEmpty() )
+        {
+            File reactorDirectory = null;
+            if ( request.getBaseDirectory() != null )
+            {
+                reactorDirectory = new File( request.getBaseDirectory() );
+            }
+
+            Collection<MavenProject> selectedProjects = new LinkedHashSet<MavenProject>( projects.size() );
+
+            for ( String selector : request.getSelectedProjects() )
+            {
+                MavenProject selectedProject = null;
+
+                for ( MavenProject project : projects )
+                {
+                    if ( isMatchingProject( project, selector, reactorDirectory ) )
+                    {
+                        selectedProject = project;
+                        break;
+                    }
+                }
+
+                if ( selectedProject != null )
+                {
+                    selectedProjects.add( selectedProject );
+                }
+                else
+                {
+                    throw new MavenExecutionException( "Could not find the selected project in the reactor: "
+                            + selector, request.getPom() );
+                }
+            }
+
+            boolean makeUpstream = false;
+            boolean makeDownstream = false;
+
+            if ( MavenExecutionRequest.REACTOR_MAKE_UPSTREAM.equals( request.getMakeBehavior() ) )
+            {
+                makeUpstream = true;
+            }
+            else if ( MavenExecutionRequest.REACTOR_MAKE_DOWNSTREAM.equals( request.getMakeBehavior() ) )
+            {
+                makeDownstream = true;
+            }
+            else if ( MavenExecutionRequest.REACTOR_MAKE_BOTH.equals( request.getMakeBehavior() ) )
+            {
+                makeUpstream = true;
+                makeDownstream = true;
+            }
+            else if ( StringUtils.isNotEmpty(request.getMakeBehavior()) )
+            {
+                throw new MavenExecutionException( "Invalid reactor make behavior: " + request.getMakeBehavior(),
+                        request.getPom() );
+            }
+
+            if ( makeUpstream || makeDownstream )
+            {
+                for ( MavenProject selectedProject : new ArrayList<MavenProject>( selectedProjects ) )
+                {
+                    if ( makeUpstream )
+                    {
+                        selectedProjects.addAll( graph.getUpstreamProjects( selectedProject, true ) );
+                    }
+                    if ( makeDownstream )
+                    {
+                        selectedProjects.addAll( graph.getDownstreamProjects( selectedProject, true ) );
+                    }
+                }
+            }
+
+            result = new ArrayList<MavenProject>( selectedProjects.size() );
+
+            for ( MavenProject project : projects )
+            {
+                if ( selectedProjects.contains( project ) )
+                {
+                    result.add( project );
+                }
+            }
+        }
+
+        return result;
+    }
+
+    private List<MavenProject> trimResumedProjects( List<MavenProject> projects, MavenExecutionRequest request )
+            throws MavenExecutionException
+    {
+        List<MavenProject> result = projects;
+
+        if ( StringUtils.isNotEmpty( request.getResumeFrom() ) )
+        {
+            File reactorDirectory = null;
+            if ( request.getBaseDirectory() != null )
+            {
+                reactorDirectory = new File( request.getBaseDirectory() );
+            }
+
+            String selector = request.getResumeFrom();
+
+            result = new ArrayList<MavenProject>( projects.size() );
+
+            boolean resumed = false;
+
+            for ( MavenProject project : projects )
+            {
+                if ( !resumed && isMatchingProject( project, selector, reactorDirectory ) )
+                {
+                    resumed = true;
+                }
+
+                if ( resumed )
+                {
+                    result.add( project );
+                }
+            }
+
+            if ( !resumed )
+            {
+                throw new MavenExecutionException( "Could not find project to resume reactor build from: " + selector
+                        + " vs " + projects, request.getPom() );
+            }
+        }
+
+        return result;
+    }
+
+    private boolean isMatchingProject( MavenProject project, String selector, File reactorDirectory )
+    {
+        // [groupId]:artifactId
+        if ( selector.indexOf( ':' ) >= 0 )
+        {
+            String id = ':' + project.getArtifactId();
+
+            if ( id.equals( selector ) )
+            {
+                return true;
+            }
+
+            id = project.getGroupId() + id;
+
+            if ( id.equals( selector ) )
+            {
+                return true;
+            }
+        }
+
+        // relative path, e.g. "sub", "../sub" or "."
+        else if ( reactorDirectory != null )
+        {
+            File selectedProject = new File( new File( reactorDirectory, selector ).toURI().normalize() );
+
+            if ( selectedProject.isFile() )
+            {
+                return selectedProject.equals( project.getFile() );
+            }
+            else if ( selectedProject.isDirectory() )
+            {
+                return selectedProject.equals( project.getBasedir() );
+            }
+        }
+
+        return false;
+    }
+
+
+    public void execute(Log log, MavenSession session) throws Exception {
         lifecycleStarter.execute(session);
+
+        if (session.getResult().hasExceptions()) {
+            for (Throwable t : session.getResult().getExceptions()) {
+                log.debug(t);
+                log.error(t.getMessage());
+            }
+            throw new Exception("build failed");
+        }
     }
 }
