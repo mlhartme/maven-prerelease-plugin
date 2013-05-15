@@ -12,7 +12,6 @@ import org.apache.maven.execution.MavenExecutionRequest;
 import org.apache.maven.execution.MavenExecutionResult;
 import org.apache.maven.execution.MavenSession;
 import org.apache.maven.model.building.ModelBuildingRequest;
-import org.apache.maven.plugin.logging.Log;
 import org.apache.maven.project.DefaultProjectBuildingRequest;
 import org.apache.maven.project.MavenProject;
 import org.apache.maven.project.ProjectBuilder;
@@ -23,8 +22,6 @@ import org.apache.maven.repository.internal.MavenRepositorySystemSession;
 import org.apache.maven.settings.Mirror;
 import org.apache.maven.settings.Proxy;
 import org.apache.maven.settings.Server;
-import org.apache.maven.settings.SettingsUtils;
-import org.codehaus.plexus.PlexusContainer;
 import org.sonatype.aether.RepositorySystemSession;
 import org.codehaus.plexus.DefaultContainerConfiguration;
 import org.codehaus.plexus.DefaultPlexusContainer;
@@ -42,7 +39,6 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Properties;
 
 public class Maven {
     public static Maven withDefaults(World world) {
@@ -118,11 +114,19 @@ public class Maven {
         this.remoteLegacy = remoteLegacy;
     }
 
+    public ExecutionListener getExecutionListener() {
+        return executionListener;
+    }
+
+    public void build(FileNode basedir, String ... goals) throws Exception {
+        build(basedir, executionListener, goals);
+    }
+
     /**
      * Creates an DefaultMaven instance, initializes it form parentRequest (in Maven, this is done by MavenCli - also by
      * loading settings).
      */
-    public void build(FileNode basedir, String ... goals) throws Exception {
+    public void build(FileNode basedir, ExecutionListener theExecutionListener, String ... goals) throws Exception {
         MavenExecutionRequest parentRequest;
         org.apache.maven.Maven maven;
         MavenExecutionRequest request;
@@ -167,7 +171,7 @@ public class Maven {
         request.setBaseDirectory(basedir.toPath().toFile());
         request.setSystemProperties(parentRequest.getSystemProperties());
         request.setUserProperties(parentRequest.getUserProperties());
-        request.setExecutionListener(executionListener);
+        request.setExecutionListener(theExecutionListener);
         request.setUpdateSnapshots(parentRequest.isUpdateSnapshots());
         result = maven.execute(request);
         // TODO: log

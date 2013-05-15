@@ -229,7 +229,7 @@ public class Prerelease {
 
         // no "clean" because we have a vanilla directory from svn
         try {
-            maven.build(checkout, goal("do-checkpoint"), "install", goal("do-checkpoint"));
+            maven.build(checkout, new PropertySnapshotListener(this, maven.getExecutionListener()), "install");
         } finally {
             installed = descriptor.project.localRepo(checkout.getWorld());
             if (installed.exists()) {
@@ -237,60 +237,6 @@ public class Prerelease {
             }
         }
         // TODO: check that the workspace is without modifications
-    }
-
-    //--
-
-    private String goal(String goal) {
-        return "net.oneandone.maven.plugins:prerelease:" + getVersion() + ":" + goal;
-    }
-
-    private String getVersion() {
-        return getClass().getPackage().getImplementationVersion();
-    }
-
-    public static class LogWriter extends Writer {
-        private final Log log;
-        private final StringBuffer buffer;
-
-        public LogWriter(Log log) {
-            this.log = log;
-            this.buffer = new StringBuffer();
-        }
-
-        @Override
-        public void write(int c) throws IOException {
-            if (c == '\n') {
-                logLine();
-            } else {
-                buffer.append((char) c);
-            }
-        }
-
-        @Override
-        public void write(char[] array, int ofs, int len) throws IOException {
-            for (int i = ofs; i < ofs + len; i++) {
-                write(array[i]);
-            }
-        }
-
-        @Override
-        public void flush() {
-            // no output, because I'd introduce a line break
-        }
-
-        @Override
-        public void close() {
-            // adds a line break, but that's better than losing the last line if it's not terminated with a line break
-            if (buffer.length() > 0) {
-                logLine();
-            }
-        }
-
-        private void logLine() {
-            log.info(buffer.toString());
-            buffer.setLength(0);
-        }
     }
 
     public void verify(Maven maven, String profile) throws Exception {
