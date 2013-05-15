@@ -61,7 +61,7 @@ public abstract class BareBase extends Base {
      * Revision to be processed. A revision number, or LATEST_PRERELEASE to get the last good prerelease,
      * or LAST_CHANGED.
      */
-    @Parameter(property = "prerelease.revision", required = true)
+    @Parameter(property = "prerelease.revision", defaultValue = LAST_CHANGED, required = true)
     private String revision;
 
     /**

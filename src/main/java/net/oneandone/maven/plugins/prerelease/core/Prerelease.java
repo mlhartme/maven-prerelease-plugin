@@ -49,13 +49,6 @@ import java.util.HashSet;
 import java.util.List;
 
 public class Prerelease {
-    public static Prerelease forCheckout(FileNode checkout) throws IOException {
-        FileNode node;
-
-        node = checkout.getParent().getParent();
-        return load(new Target(node, Long.parseLong(node.getName())));
-    }
-
     public static Prerelease load(Target target) throws IOException {
         Descriptor descriptor;
         FileNode workingCopy;
