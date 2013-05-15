@@ -18,18 +18,13 @@ package net.oneandone.maven.plugins.prerelease;
 import net.oneandone.maven.plugins.prerelease.core.Archive;
 import net.oneandone.maven.plugins.prerelease.core.Prerelease;
 import net.oneandone.maven.plugins.prerelease.core.WorkingCopy;
-import org.apache.maven.execution.MavenSession;
 import org.apache.maven.lifecycle.internal.BuilderCommon;
 import org.apache.maven.lifecycle.internal.MojoExecutor;
-import org.apache.maven.plugin.MojoExecution;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugins.annotations.Component;
 import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
-import org.apache.maven.project.MavenProject;
 import org.apache.maven.project.MavenProjectHelper;
-
-import java.io.IOException;
 
 /**
  * Promotes a prerelease by commuting the tag and deploying its artifact(s).

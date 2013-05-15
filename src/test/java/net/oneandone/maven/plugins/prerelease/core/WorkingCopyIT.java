@@ -15,8 +15,8 @@
  */
 package net.oneandone.maven.plugins.prerelease.core;
 
-import net.oneandone.maven.plugins.prerelease.util.Maven;
 import net.oneandone.maven.plugins.prerelease.util.IntegrationBase;
+import net.oneandone.maven.plugins.prerelease.util.Maven;
 import net.oneandone.sushi.fs.file.FileNode;
 import org.apache.maven.project.MavenProject;
 import org.junit.Test;

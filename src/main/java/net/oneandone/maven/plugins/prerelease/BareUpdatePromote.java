@@ -15,10 +15,10 @@
  */
 package net.oneandone.maven.plugins.prerelease;
 
-import net.oneandone.maven.plugins.prerelease.util.Maven;
 import net.oneandone.maven.plugins.prerelease.core.Descriptor;
 import net.oneandone.maven.plugins.prerelease.core.Prerelease;
 import net.oneandone.maven.plugins.prerelease.core.Target;
+import net.oneandone.maven.plugins.prerelease.util.Maven;
 import org.apache.maven.lifecycle.internal.BuilderCommon;
 import org.apache.maven.lifecycle.internal.MojoExecutor;
 import org.apache.maven.plugins.annotations.Component;
@@ -27,7 +27,6 @@ import org.apache.maven.project.MavenProject;
 import org.apache.maven.project.MavenProjectHelper;
 
 import java.lang.reflect.Field;
-import java.util.Properties;
 
 /**
  * Perform update-promote without a working copy. Svn url and revision are passed as arguments, not determined from a working copy.

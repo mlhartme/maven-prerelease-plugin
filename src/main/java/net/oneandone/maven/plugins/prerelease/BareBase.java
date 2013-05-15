@@ -15,10 +15,10 @@
  */
 package net.oneandone.maven.plugins.prerelease;
 
-import net.oneandone.maven.plugins.prerelease.util.Maven;
 import net.oneandone.maven.plugins.prerelease.core.Archive;
 import net.oneandone.maven.plugins.prerelease.core.Descriptor;
 import net.oneandone.maven.plugins.prerelease.core.Target;
+import net.oneandone.maven.plugins.prerelease.util.Maven;
 import net.oneandone.sushi.fs.file.FileNode;
 import net.oneandone.sushi.fs.svn.SvnNode;
 import org.apache.maven.lifecycle.internal.MojoDescriptorCreator;
@@ -42,7 +42,6 @@ import org.tmatesoft.svn.core.SVNException;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.Collection;
-import java.util.Properties;
 
 /**
  * Perform update-promote without a working copy. Svn url and revision are passed as arguments, not determined from a working copy.
