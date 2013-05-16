@@ -25,9 +25,6 @@ import net.oneandone.sushi.launcher.Failure;
 import net.oneandone.sushi.launcher.Launcher;
 import net.oneandone.sushi.util.Strings;
 import net.oneandone.sushi.xml.XmlException;
-import org.apache.maven.execution.MavenSession;
-import org.apache.maven.lifecycle.internal.BuilderCommon;
-import org.apache.maven.lifecycle.internal.MojoExecutor;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.logging.Log;
 import org.apache.maven.project.MavenProject;
@@ -215,7 +212,7 @@ public class Prerelease {
 
         // no "clean" because we have a vanilla directory from svn
         try {
-            maven.build(checkout, new HashMap<String, String>(), new StateStoreListener(this, maven.getExecutionListener()), false, "install");
+            maven.build(checkout, new HashMap<String, String>(), new PrepareExecutionListener(this, maven.getExecutionListener()), false, "install");
         } finally {
             installed = descriptor.project.localRepo(checkout.getWorld());
             if (installed.exists()) {
@@ -231,13 +228,13 @@ public class Prerelease {
 
     //-- promote
 
-    public void promote(Log log, String user, String mandatory, Maven maven) throws Exception {
+    public void promote(Log log, String user, Maven maven) throws Exception {
         FileNode origCommit;
 
         log.info("promoting revision " + descriptor.revision + " to " + descriptor.project);
         origCommit = prepareOrigCommit(log);
         try {
-            promoteLocked(log, user, mandatory, origCommit, maven);
+            promoteLocked(log, user, origCommit, maven);
         } catch (Throwable e) { // CAUTION: catching exceptions is not enough -- in particular, out-of-memory during upload is an error!
             try {
                 origUnlock(origCommit);
@@ -258,7 +255,7 @@ public class Prerelease {
     }
 
     /** commit before deploy - because if deployment fails, we can reliably revert the commit. */
-    private void promoteLocked(Log log, String user, String mandatory, FileNode origCommit, Maven maven) throws Exception {
+    private void promoteLocked(Log log, String user, FileNode origCommit, Maven maven) throws Exception {
         commit(log, user);
         try {
             maven.deployOnly(this);

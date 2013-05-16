@@ -31,9 +31,9 @@ import org.apache.maven.plugins.annotations.Parameter;
  * on the svn server) the project version in pom.xml to the next development version, and it updates your changes file (if you have one).
  * In your svn working directory, it runs "svn up" to get the adjusted pom and changes files.
  *
- * Artifacts are deployed by invoking all plugin goals tied to the deploy phase. These goals are either mandatory or optional, as configured
- * by the "mandatory" parameter. Mandatory goals have to succeed for this plugin to succeed. Optional goals may fail, which results in a
- * warning only. The maven-deploy plugin is typically (and by default) mandatory, other notification goals are optional.
+ * Artifacts are deployed by invoking all plugin goals tied to the deploy phase. The first goal is mandatory, because it's configured by
+ * the packaging. If it fails, promotion fails. All other goals (e.g. email notifications) are optional: they may fail (yielding the
+ * respective warning), but they don't cause the promote goal to fail.
  *
  * Error handling. In contrast to Maven's Release Plugin there's no rollback goal: when promote fails, artifacts and tags will be properly
  * removed. (If Tag creation fails, this goal fails with an error. If artifact deployment fails, the svn tag will be deleted from
@@ -48,12 +48,6 @@ public class Promote extends ProjectBase {
      */
     @Parameter(property = "prerelease.user", required = true)
     private String user;
-
-    /**
-     * Comma-separated list of plugin artifact ids that are mandatory for promotion.
-     */
-    @Parameter(property = "prerelease.promote.mandatory", defaultValue = "maven-deploy-plugin")
-    protected String mandatory;
 
     public String getUser() {
         return user;
@@ -71,7 +65,7 @@ public class Promote extends ProjectBase {
         if (prerelease == null) {
             throw new MojoExecutionException("no prerelease for revision " + revision);
         }
-        prerelease.promote(getLog(), user, mandatory, maven());
+        prerelease.promote(getLog(), user, maven());
         workingCopy.update(getLog());
     }
 }

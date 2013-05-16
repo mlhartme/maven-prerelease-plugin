@@ -1,7 +1,7 @@
 package net.oneandone.maven.plugins.prerelease.util;
 
+import net.oneandone.maven.plugins.prerelease.core.PromoteExecutionListener;
 import net.oneandone.maven.plugins.prerelease.core.Prerelease;
-import net.oneandone.maven.plugins.prerelease.core.StateRestoreListener;
 import net.oneandone.sushi.fs.World;
 import net.oneandone.sushi.fs.file.FileNode;
 import net.oneandone.sushi.util.Separator;
@@ -45,6 +45,7 @@ import org.apache.maven.settings.Proxy;
 import org.apache.maven.settings.Server;
 import org.codehaus.plexus.DefaultContainerConfiguration;
 import org.codehaus.plexus.DefaultPlexusContainer;
+import org.codehaus.plexus.PlexusContainer;
 import org.codehaus.plexus.PlexusContainerException;
 import org.codehaus.plexus.classworlds.ClassWorld;
 import org.codehaus.plexus.classworlds.realm.ClassRealm;
@@ -158,15 +159,20 @@ public class Maven {
      * Creates an DefaultMaven instance, initializes it form parentRequest (in Maven, this is done by MavenCli - also by
      * loading settings).
      */
-    public void build(FileNode basedir, Map<String, String> userProperties, ExecutionListener theExecutionListener, final boolean filter, String ... goals) throws Exception {
+    public void build(FileNode basedir, Map<String, String> userProperties, ExecutionListener theExecutionListener, final boolean filter, String ... goals) throws BuildException {
         MavenExecutionRequest parentRequest;
         org.apache.maven.Maven maven;
         MavenExecutionRequest request;
         MavenExecutionResult result;
-        Exception exception;
+        BuildException exception;
+        PatchedBuilderCommon bc;
 
         parentRequest = parentSession.getRequest();
-        maven = parentSession.getContainer().lookup(org.apache.maven.Maven.class);
+        try {
+            maven = parentSession.getContainer().lookup(org.apache.maven.Maven.class);
+        } catch (ComponentLookupException e) {
+            throw new IllegalStateException(e);
+        }
         request = new DefaultMavenExecutionRequest();
         request.setLoggingLevel(parentRequest.getLoggingLevel());
         request.setUserSettingsFile(parentRequest.getUserSettingsFile());
@@ -206,39 +212,18 @@ public class Maven {
         request.setExecutionListener(theExecutionListener);
         request.setUpdateSnapshots(parentRequest.isUpdateSnapshots());
 
-        LifecycleModuleBuilder b = parentSession.getContainer().lookup(LifecycleModuleBuilder.class);
-        Field f = b.getClass().getDeclaredField("builderCommon");
-        f.setAccessible(true);
-        final BuilderCommon bc = (BuilderCommon) f.get(b);
-        f.set(b, new BuilderCommon() {
-            public MavenExecutionPlan resolveBuildPlan(MavenSession session, MavenProject project, TaskSegment taskSegment,
-                                                       Set<org.apache.maven.artifact.Artifact> projectArtifacts)
-                    throws PluginNotFoundException, PluginResolutionException, LifecyclePhaseNotFoundException,
-                    PluginDescriptorParsingException, MojoNotFoundException, InvalidPluginDescriptorException,
-                    NoPluginFoundForPrefixException, LifecycleNotFoundException, PluginVersionResolutionException,
-                    LifecycleExecutionException {
-                MavenExecutionPlan result;
-                result = bc.resolveBuildPlan(session, project, taskSegment, projectArtifacts);
-                return filter? filtered(result) : result;
-            }
-
-            public void handleBuildError(ReactorContext buildContext, MavenSession rootSession,
-                                         MavenProject mavenProject, Exception e, long buildStartTime) {
-                bc.handleBuildError(buildContext, rootSession, mavenProject, e, buildStartTime);
-            }
-        });
-
+        bc = PatchedBuilderCommon.install(parentSession.getContainer(), filter);
         System.out.println("mvn " + Separator.SPACE.join(goals));
         try {
             result = maven.execute(request);
         } finally {
-            f.set(b, bc);
+            bc.uninstall();
         }
 
         exception = null;
         for (Throwable e : result.getExceptions()) {
             if (exception == null) {
-                exception = new Exception("build failed: " + e, e);
+                exception = new BuildException("build failed: " + e, e);
             } else {
                 exception.addSuppressed(e);
             }
@@ -247,6 +232,7 @@ public class Maven {
             throw exception;
         }
     }
+
 
     private static Properties merged(Properties left, Map<String, String> right) {
         Properties result;
@@ -257,55 +243,11 @@ public class Maven {
     }
 
     public void deployOnly(Prerelease prerelease) throws Exception {
-        build(prerelease.checkout, new HashMap<String, String>(),
-                new StateRestoreListener(prerelease, projectHelper, executionListener), true, "deploy");
+        PromoteExecutionListener listener;
 
-        /* TODO
-        mandatories = Separator.COMMA.split(mandatory);
-        MavenExecutionPlan executionPlan =
-                builderCommon.resolveBuildPlan(session, project, new TaskSegment(false, new LifecycleTask("deploy")), new HashSet<org.apache.maven.artifact.Artifact>());
-        mandatoryExecutions = new ArrayList<>();
-        optionalExecutions = new ArrayList<>();
-        for (MojoExecution obj : executionPlan.getMojoExecutions()) {
-            if ("deploy".equals(obj.getLifecyclePhase())) {
-                if (mandatories.contains(obj.getPlugin().getArtifactId())) {
-                    log.info("mandatory: " + obj.getPlugin().getArtifactId() + ":" + obj.getGoal());
-                    mandatoryExecutions.add(obj);
-                } else {
-                    log.info("optional " + obj.getPlugin().getArtifactId() + ":" + obj.getGoal());
-                    optionalExecutions.add(obj);
-                }
-            } else {
-                log.info("unknown: " + obj.getPlugin().getArtifactId() + ":" + obj.getGoal());
-            }
-        }*/
+        listener = new PromoteExecutionListener(prerelease, projectHelper, executionListener);
+        build(prerelease.checkout, new HashMap<String, String>(), listener, true, "deploy");
 
-        /* TODO
-        try {
-            mojoExecutor.execute(session, optionalExecutions, index);
-        } catch (Exception e) {
-            log.warn("Promote succeeded: your artifacts have been deployed, and the svn tag was created. ");
-            log.warn("However, optional promote goals failed with this exception: ");
-            log.warn(e);
-            log.warn("Thus, you can use your release, but someone experienced should have a look.");
-        }*/
-    }
-
-    private MavenExecutionPlan filtered(MavenExecutionPlan base) {
-        List<ExecutionPlanItem> lst;
-
-        lst = new ArrayList<>();
-        for (ExecutionPlanItem item : base) {
-            if ("deploy".equals(item.getLifecyclePhase())) {
-                lst.add(item);
-                System.out.println("addint " + item);
-            }
-        }
-        try {
-            return new MavenExecutionPlan(lst, parentSession.getContainer().lookup(DefaultLifecycles.class));
-        } catch (ComponentLookupException e) {
-            throw new IllegalStateException(e);
-        }
     }
 
     public List<FileNode> files(List<Artifact> artifacts) {
@@ -322,7 +264,7 @@ public class Maven {
         return world.file(artifact.getFile());
     }
 
-    //-- load poms
+    //-- load poms -- for testing only
 
     public MavenProject loadPom(FileNode file) throws ProjectBuildingException {
         ProjectBuildingRequest request;
