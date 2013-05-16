@@ -46,7 +46,6 @@ public class PromoteExecutionListener extends BaseExecutionListener {
     @Override
     public void mojoSucceeded(ExecutionEvent event) {
         if (mojosStarted == 1) {
-            System.out.println("first success: " + event);
             firstSuccess = true;
         }
         super.mojoSucceeded(event);

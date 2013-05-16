@@ -196,10 +196,11 @@ public class Maven {
         request.setUserProperties(merged(parentRequest.getUserProperties(), userProperties));
         request.setExecutionListener(theExecutionListener);
         request.setUpdateSnapshots(parentRequest.isUpdateSnapshots());
+        request.setTransferListener(parentRequest.getTransferListener());
 
         bc = PatchedBuilderCommon.install(parentSession.getContainer(), filter);
         Logger logger = getLogger((DefaultPlexusContainer) parentSession.getContainer());
-        setOutput(logger, indentPrintStream("       "));
+        setOutput(logger, indentPrintStream("  "));
         logger.info("[" + basedir + "] mvn " + props(request.getUserProperties()) + Separator.SPACE.join(goals));
         try {
             result = maven.execute(request);
