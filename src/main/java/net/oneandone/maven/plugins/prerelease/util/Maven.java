@@ -198,13 +198,14 @@ public class Maven {
         request.setUpdateSnapshots(parentRequest.isUpdateSnapshots());
 
         bc = PatchedBuilderCommon.install(parentSession.getContainer(), filter);
-        System.out.println("mvn " + Separator.SPACE.join(goals));
-        wrapOutput((DefaultPlexusContainer) parentSession.getContainer(), "       ");
+        Logger logger = getLogger((DefaultPlexusContainer) parentSession.getContainer());
+        setOutput(logger, indentPrintStream("       "));
+        logger.info("[" + basedir + "] mvn " + props(request.getUserProperties()) + Separator.SPACE.join(goals));
         try {
             result = maven.execute(request);
         } finally {
             bc.uninstall();
-            setOutput((DefaultPlexusContainer) parentSession.getContainer(), System.out);
+            setOutput(logger, System.out);
         }
         exception = null;
         for (Throwable e : result.getExceptions()) {
@@ -219,8 +220,22 @@ public class Maven {
         }
     }
 
-    private static void wrapOutput(DefaultPlexusContainer container, final String prefix) {
-        setOutput(container, new PrintStream(System.out) {
+    /** @return with tailing space */
+    private static String props(Properties props) {
+        StringBuilder builder;
+
+        builder = new StringBuilder();
+        for (Map.Entry<Object, Object> entry : props.entrySet()) {
+            builder.append("-D").append(entry.getKey()).append('=').append(entry.getValue());
+            builder.append(' ');
+        }
+        return builder.toString();
+    }
+
+    //--
+
+    private static PrintStream indentPrintStream(final String prefix) {
+        return new PrintStream(System.out) {
             private boolean start = true;
             public void print(String str) {
                 if (start) {
@@ -235,19 +250,22 @@ public class Maven {
                 super.println();
                 start = true;
             }
-        });
+        };
     }
 
-    private static void setOutput(DefaultPlexusContainer container, PrintStream dest) {
-        Logger logger;
+    private static Logger getLogger(DefaultPlexusContainer container) {
+        return container.getLoggerManager().getLoggerForComponent("notused");
+    }
 
-        logger = container.getLoggerManager().getLoggerForComponent("notused");
+    private static void setOutput(Logger logger, PrintStream dest) {
         try {
             logger.getClass().getDeclaredMethod("setStream", PrintStream.class).invoke(logger, dest);
         } catch (Exception e) {
             throw new IllegalStateException(e);
         }
     }
+
+    //--
 
     private static Properties merged(Properties left, Map<String, String> right) {
         Properties result;
