@@ -30,6 +30,7 @@ import org.apache.maven.plugin.MojoNotFoundException;
 import org.apache.maven.plugin.PluginDescriptorParsingException;
 import org.apache.maven.plugin.PluginNotFoundException;
 import org.apache.maven.plugin.PluginResolutionException;
+import org.apache.maven.plugin.logging.Log;
 import org.apache.maven.plugin.prefix.NoPluginFoundForPrefixException;
 import org.apache.maven.plugin.version.PluginVersionResolutionException;
 import org.apache.maven.project.DefaultProjectBuildingRequest;
@@ -242,12 +243,20 @@ public class Maven {
         return result;
     }
 
-    public void deployOnly(Prerelease prerelease) throws Exception {
+    public void deployOnly(Log log, Prerelease prerelease) throws Exception {
         PromoteExecutionListener listener;
 
         listener = new PromoteExecutionListener(prerelease, projectHelper, executionListener);
-        build(prerelease.checkout, new HashMap<String, String>(), listener, true, "deploy");
-
+        try {
+            build(prerelease.checkout, new HashMap<String, String>(), listener, true, "deploy");
+        } catch (BuildException e) {
+            if (listener.isFirstSuccess()) {
+                log.warn("Promote succeeded: your artifacts have been deployed, and your svn tag was created. ");
+                log.warn("However, some optional deploy goals failed with this exception:");
+                log.warn(e);
+                log.warn("Thus, you can use your release, but someone should have a look at this exception.");
+            }
+        }
     }
 
     public List<FileNode> files(List<Artifact> artifacts) {

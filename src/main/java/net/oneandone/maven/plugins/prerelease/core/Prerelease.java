@@ -258,7 +258,7 @@ public class Prerelease {
     private void promoteLocked(Log log, String user, FileNode origCommit, Maven maven) throws Exception {
         commit(log, user);
         try {
-            maven.deployOnly(this);
+            maven.deployOnly(log, this);
         } catch (Exception e) {
             log.info("deployment failed - reverting tag");
             revertCommit(log, user);
