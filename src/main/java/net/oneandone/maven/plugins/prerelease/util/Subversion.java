@@ -18,6 +18,7 @@ package net.oneandone.maven.plugins.prerelease.util;
 import net.oneandone.sushi.fs.file.FileNode;
 import net.oneandone.sushi.launcher.Failure;
 import net.oneandone.sushi.launcher.Launcher;
+import org.apache.maven.plugin.logging.Log;
 
 public final class Subversion {
     public static Launcher launcher(FileNode dir, String ... args) {
@@ -30,6 +31,16 @@ public final class Subversion {
             return true;
         } catch (Failure e) {
             return false;
+        }
+    }
+
+    public static void sparseCheckout(Log log, FileNode result, String svnurl, String revision, boolean tryChanges) throws Failure {
+        log.debug(Subversion.launcher(result.getParent(), "co", "-r", revision, "--depth", "empty", svnurl, result.getName()).exec());
+        log.debug(Subversion.launcher(result, "up", "-r", revision, "pom.xml").exec());
+        if (tryChanges) {
+            log.debug(Subversion.launcher(result, "up", "-r", revision, "--depth", "empty", "src").exec());
+            log.debug(Subversion.launcher(result, "up", "-r", revision, "--depth", "empty", "src/changes").exec());
+            log.debug(Subversion.launcher(result, "up", "-r", revision, "src/changes/changes.xml").exec());
         }
     }
 

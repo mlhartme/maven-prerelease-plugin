@@ -38,6 +38,7 @@ import org.xml.sax.SAXException;
 
 import java.io.IOException;
 import java.util.Date;
+import java.util.HashMap;
 
 public class Prerelease {
     public static Prerelease load(Target target) throws IOException {
@@ -181,12 +182,7 @@ public class Prerelease {
         ChangesXml changes;
 
         result = checkout.getWorld().getTemp().createTempDirectory();
-        log.debug(target.svnLauncher("co", "--depth", "empty", descriptor.svnOrig, result.getAbsolute()).exec());
-        log.debug(Subversion.launcher(result, "up", "pom.xml").exec());
-
-        log.debug(Subversion.launcher(result, "up", "--depth", "empty", "src").exec());
-        log.debug(Subversion.launcher(result, "up", "--depth", "empty", "src/changes").exec());
-        log.debug(Subversion.launcher(result, "up", "src/changes/changes.xml").exec());
+        Subversion.sparseCheckout(log, result, descriptor.svnOrig, "HEAD", true);
         try {
             changes = ChangesXml.load(result);
         } catch (FileNotFoundException e) {
@@ -219,7 +215,7 @@ public class Prerelease {
 
         // no "clean" because we have a vanilla directory from svn
         try {
-            maven.build(checkout, new StateStoreListener(this, maven.getExecutionListener()), false, "install");
+            maven.build(checkout, new HashMap<String, String>(), new StateStoreListener(this, maven.getExecutionListener()), false, "install");
         } finally {
             installed = descriptor.project.localRepo(checkout.getWorld());
             if (installed.exists()) {

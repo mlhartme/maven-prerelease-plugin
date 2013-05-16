@@ -18,9 +18,14 @@ package net.oneandone.maven.plugins.prerelease;
 import net.oneandone.maven.plugins.prerelease.core.Archive;
 import net.oneandone.maven.plugins.prerelease.core.Prerelease;
 import net.oneandone.maven.plugins.prerelease.core.WorkingCopy;
+import net.oneandone.sushi.fs.file.FileNode;
+import net.oneandone.sushi.fs.svn.SvnNode;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
+import org.tmatesoft.svn.core.SVNException;
+
+import java.io.IOException;
 
 /**
  * Executes a build on an existing prerelease.
@@ -33,19 +38,42 @@ public class Build extends ProjectBase {
     @Parameter(property = "prerelease.build", defaultValue = "verify")
     protected String[] arguments;
 
+    /**
+     * Revision to be processed. A revision number, or HEAD, or LATEST_PRERELEASE to get the last good prerelease.
+     */
+    @Parameter(property = "prerelease.buildRevision", required = false)
+    private String buildRevision;
+
     @Override
     public void doExecute(Archive archive) throws Exception {
         WorkingCopy workingCopy;
-        long revision;
         Prerelease prerelease;
 
-        workingCopy = checkedWorkingCopy();
-        revision = workingCopy.revision();
-        setTarget(archive.target(revision));
+        if (buildRevision == null) {
+            workingCopy = checkedWorkingCopy();
+            setTarget(archive.target(workingCopy.revision()));
+        } else {
+            setTarget(archive.target(revisionForDescriptor(archive.directory)));
+        }
         prerelease = target.loadOpt();
         if (prerelease == null) {
-            throw new MojoExecutionException("no prerelease for revision " + revision);
+            throw new MojoExecutionException("no prerelease for revision " + target.getRevision());
         }
         maven().build(prerelease.checkout, arguments);
     }
+
+    private long revisionForDescriptor(FileNode archiveDirectory) throws MojoExecutionException, IOException, SVNException {
+        long result;
+
+        if (BareBase.LASTEST_PRERELEASE.equals(buildRevision)) {
+            result = Archive.latest(archiveDirectory);
+            if (result == -1) {
+                throw new MojoExecutionException("no existing prerelease");
+            }
+            return result;
+        } else {
+            return Long.parseLong(buildRevision);
+        }
+    }
+
 }

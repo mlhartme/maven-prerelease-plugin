@@ -15,28 +15,22 @@
  */
 package net.oneandone.maven.plugins.prerelease;
 
-import net.oneandone.maven.plugins.prerelease.core.Descriptor;
-import net.oneandone.maven.plugins.prerelease.core.Prerelease;
-import net.oneandone.maven.plugins.prerelease.core.Target;
-import net.oneandone.maven.plugins.prerelease.util.Maven;
-import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugins.annotations.Mojo;
-import org.apache.maven.project.MavenProject;
+
+import java.util.Collections;
+import java.util.Map;
 
 /**
  * Preform build without a working copy.
- *
  */
 @Mojo(name = "bare-build", requiresProject = false)
 public class BareBuild extends BareBase {
-    @Override
-    public void doExecute(Maven maven, MavenProject project, Target target, Descriptor descriptor) throws Exception {
-        Prerelease prerelease;
+    public BareBuild() {
+        super("build");
+    }
 
-        prerelease = target.loadOpt();
-        if (prerelease == null) {
-            throw new MojoExecutionException("prerelease not found: " + descriptor.revision);
-        }
-        maven().build(prerelease.checkout, "net.oneandone.maven.plugins:prerelease:build");
+    @Override
+    public Map<String, String> userProperties() {
+        return Collections.singletonMap("prerelease.buildRevision", revision);
     }
 }

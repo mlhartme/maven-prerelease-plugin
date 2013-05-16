@@ -4,6 +4,7 @@ import net.oneandone.maven.plugins.prerelease.core.Prerelease;
 import net.oneandone.maven.plugins.prerelease.core.StateRestoreListener;
 import net.oneandone.sushi.fs.World;
 import net.oneandone.sushi.fs.file.FileNode;
+import net.oneandone.sushi.util.Separator;
 import org.apache.maven.artifact.repository.ArtifactRepository;
 import org.apache.maven.artifact.repository.ArtifactRepositoryPolicy;
 import org.apache.maven.artifact.repository.DefaultArtifactRepository;
@@ -59,7 +60,10 @@ import java.io.File;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Properties;
 import java.util.Set;
 
 public class Maven {
@@ -143,14 +147,18 @@ public class Maven {
     }
 
     public void build(FileNode basedir, String ... goals) throws Exception {
-        build(basedir, executionListener, false, goals);
+        build(basedir, new HashMap<String, String>(), executionListener, false, goals);
+    }
+
+    public void build(FileNode basedir, Map<String, String> userProperties, String ... goals) throws Exception {
+        build(basedir, userProperties, executionListener, false, goals);
     }
 
     /**
      * Creates an DefaultMaven instance, initializes it form parentRequest (in Maven, this is done by MavenCli - also by
      * loading settings).
      */
-    public void build(FileNode basedir, ExecutionListener theExecutionListener, final boolean filter, String ... goals) throws Exception {
+    public void build(FileNode basedir, Map<String, String> userProperties, ExecutionListener theExecutionListener, final boolean filter, String ... goals) throws Exception {
         MavenExecutionRequest parentRequest;
         org.apache.maven.Maven maven;
         MavenExecutionRequest request;
@@ -194,7 +202,7 @@ public class Maven {
         request.setGoals(Arrays.asList(goals));
         request.setBaseDirectory(basedir.toPath().toFile());
         request.setSystemProperties(parentRequest.getSystemProperties());
-        request.setUserProperties(parentRequest.getUserProperties());
+        request.setUserProperties(merged(parentRequest.getUserProperties(), userProperties));
         request.setExecutionListener(theExecutionListener);
         request.setUpdateSnapshots(parentRequest.isUpdateSnapshots());
 
@@ -209,17 +217,18 @@ public class Maven {
                     PluginDescriptorParsingException, MojoNotFoundException, InvalidPluginDescriptorException,
                     NoPluginFoundForPrefixException, LifecycleNotFoundException, PluginVersionResolutionException,
                     LifecycleExecutionException {
-                final MavenExecutionPlan result;
+                MavenExecutionPlan result;
                 result = bc.resolveBuildPlan(session, project, taskSegment, projectArtifacts);
                 return filter? filtered(result) : result;
             }
 
-            public void handleBuildError(final ReactorContext buildContext, final MavenSession rootSession,
-                                         final MavenProject mavenProject, Exception e, final long buildStartTime) {
+            public void handleBuildError(ReactorContext buildContext, MavenSession rootSession,
+                                         MavenProject mavenProject, Exception e, long buildStartTime) {
                 bc.handleBuildError(buildContext, rootSession, mavenProject, e, buildStartTime);
             }
         });
 
+        System.out.println("mvn " + Separator.SPACE.join(goals));
         try {
             result = maven.execute(request);
         } finally {
@@ -239,8 +248,17 @@ public class Maven {
         }
     }
 
+    private static Properties merged(Properties left, Map<String, String> right) {
+        Properties result;
+
+        result = new Properties(left);
+        result.putAll(right);
+        return result;
+    }
+
     public void deployOnly(Prerelease prerelease) throws Exception {
-        build(prerelease.checkout, new StateRestoreListener(prerelease, projectHelper, executionListener), true, "deploy");
+        build(prerelease.checkout, new HashMap<String, String>(),
+                new StateRestoreListener(prerelease, projectHelper, executionListener), true, "deploy");
 
         /* TODO
         mandatories = Separator.COMMA.split(mandatory);

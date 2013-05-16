@@ -28,31 +28,7 @@ import org.apache.maven.project.MavenProject;
  */
 @Mojo(name = "bare-update", requiresProject = false)
 public class BareUpdate extends BareBase {
-    /**
-     * Email of the user invoking this goal.
-     */
-    @Parameter(property = "prerelease.user", required = true)
-    private String user;
-
-    public String getUser() {
-        return user;
-    }
-
-    public void doExecute(Maven maven, MavenProject project, Target target, Descriptor descriptor) throws Exception {
-        Prerelease prerelease;
-
-        // TODO: duplicated code from update Mojo ...
-        if (target.exists()) {
-            getLog().info("prerelease already exists: " + descriptor.getName());
-        } else {
-            prerelease = Prerelease.create(maven(), getLog(), descriptor, target);
-            try {
-                descriptor.check(world, project);
-            } catch (RuntimeException e) {
-                throw e;
-            } catch (Exception e) {
-                prerelease.target.scheduleRemove(getLog(), "build ok, but prerelease is not promotable: " + e.getMessage());
-            }
-        }
+    public BareUpdate() {
+        super("update");
     }
 }

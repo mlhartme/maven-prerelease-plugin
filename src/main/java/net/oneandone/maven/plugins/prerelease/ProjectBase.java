@@ -20,8 +20,14 @@ import net.oneandone.maven.plugins.prerelease.core.Descriptor;
 import net.oneandone.maven.plugins.prerelease.core.Target;
 import net.oneandone.maven.plugins.prerelease.core.WorkingCopy;
 import net.oneandone.sushi.fs.file.FileNode;
+import net.oneandone.sushi.fs.svn.SvnNode;
+import org.apache.maven.plugin.MojoExecutionException;
+import org.apache.maven.plugin.logging.Log;
 import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.project.MavenProject;
+import org.tmatesoft.svn.core.SVNException;
+
+import java.io.IOException;
 
 public abstract class ProjectBase extends Base {
     @Parameter(property = "project", required = true, readonly = true)
@@ -77,12 +83,16 @@ public abstract class ProjectBase extends Base {
     }
 
     protected WorkingCopy checkedWorkingCopy() throws Exception {
+        Log log;
         WorkingCopy workingCopy;
 
-        getLog().info("checking working copy ...");
+        log = getLog();
+        log.info("checking working copy ...");
         workingCopy = WorkingCopy.load(basedir());
-        getLog().debug("revisions: " + workingCopy.revisions);
-        getLog().debug("changes: " + workingCopy.changes);
+        if (log.isDebugEnabled()) {
+            log.debug("revisions: " + workingCopy.revisions);
+            log.debug("changes: " + workingCopy.changes);
+        }
         workingCopy.check();
         return workingCopy;
     }
