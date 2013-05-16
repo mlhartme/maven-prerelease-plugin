@@ -1,6 +1,5 @@
 package net.oneandone.maven.plugins.prerelease.util;
 
-import net.oneandone.maven.plugins.prerelease.core.PromoteExecutionListener;
 import net.oneandone.maven.plugins.prerelease.core.Prerelease;
 import net.oneandone.sushi.fs.World;
 import net.oneandone.sushi.fs.file.FileNode;
@@ -14,25 +13,8 @@ import org.apache.maven.execution.ExecutionListener;
 import org.apache.maven.execution.MavenExecutionRequest;
 import org.apache.maven.execution.MavenExecutionResult;
 import org.apache.maven.execution.MavenSession;
-import org.apache.maven.lifecycle.DefaultLifecycles;
-import org.apache.maven.lifecycle.LifecycleExecutionException;
-import org.apache.maven.lifecycle.LifecycleNotFoundException;
-import org.apache.maven.lifecycle.LifecyclePhaseNotFoundException;
-import org.apache.maven.lifecycle.MavenExecutionPlan;
-import org.apache.maven.lifecycle.internal.BuilderCommon;
-import org.apache.maven.lifecycle.internal.ExecutionPlanItem;
-import org.apache.maven.lifecycle.internal.LifecycleModuleBuilder;
-import org.apache.maven.lifecycle.internal.ReactorContext;
-import org.apache.maven.lifecycle.internal.TaskSegment;
 import org.apache.maven.model.building.ModelBuildingRequest;
-import org.apache.maven.plugin.InvalidPluginDescriptorException;
-import org.apache.maven.plugin.MojoNotFoundException;
-import org.apache.maven.plugin.PluginDescriptorParsingException;
-import org.apache.maven.plugin.PluginNotFoundException;
-import org.apache.maven.plugin.PluginResolutionException;
 import org.apache.maven.plugin.logging.Log;
-import org.apache.maven.plugin.prefix.NoPluginFoundForPrefixException;
-import org.apache.maven.plugin.version.PluginVersionResolutionException;
 import org.apache.maven.project.DefaultProjectBuildingRequest;
 import org.apache.maven.project.MavenProject;
 import org.apache.maven.project.MavenProjectHelper;
@@ -46,12 +28,14 @@ import org.apache.maven.settings.Proxy;
 import org.apache.maven.settings.Server;
 import org.codehaus.plexus.DefaultContainerConfiguration;
 import org.codehaus.plexus.DefaultPlexusContainer;
-import org.codehaus.plexus.PlexusContainer;
 import org.codehaus.plexus.PlexusContainerException;
 import org.codehaus.plexus.classworlds.ClassWorld;
 import org.codehaus.plexus.classworlds.realm.ClassRealm;
 import org.codehaus.plexus.component.repository.exception.ComponentLookupException;
+import org.codehaus.plexus.logging.AbstractLogger;
 import org.codehaus.plexus.logging.Logger;
+import org.codehaus.plexus.logging.LoggerManager;
+import org.codehaus.plexus.logging.console.ConsoleLogger;
 import org.sonatype.aether.RepositorySystem;
 import org.sonatype.aether.RepositorySystemSession;
 import org.sonatype.aether.artifact.Artifact;
@@ -59,14 +43,14 @@ import org.sonatype.aether.repository.LocalRepository;
 import org.sonatype.aether.repository.RepositoryPolicy;
 
 import java.io.File;
-import java.lang.reflect.Field;
+import java.io.PrintStream;
+import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
-import java.util.Set;
 
 public class Maven {
     public static Maven forTests(World world) {
@@ -160,7 +144,7 @@ public class Maven {
      * Creates an DefaultMaven instance, initializes it form parentRequest (in Maven, this is done by MavenCli - also by
      * loading settings).
      */
-    public void build(FileNode basedir, Map<String, String> userProperties, ExecutionListener theExecutionListener, final boolean filter, String ... goals) throws BuildException {
+    public void build(FileNode basedir, Map<String, String> userProperties, ExecutionListener theExecutionListener, boolean filter, String ... goals) throws BuildException {
         MavenExecutionRequest parentRequest;
         org.apache.maven.Maven maven;
         MavenExecutionRequest request;
@@ -215,12 +199,13 @@ public class Maven {
 
         bc = PatchedBuilderCommon.install(parentSession.getContainer(), filter);
         System.out.println("mvn " + Separator.SPACE.join(goals));
+        wrapOutput((DefaultPlexusContainer) parentSession.getContainer(), "       ");
         try {
             result = maven.execute(request);
         } finally {
             bc.uninstall();
+            setOutput((DefaultPlexusContainer) parentSession.getContainer(), System.out);
         }
-
         exception = null;
         for (Throwable e : result.getExceptions()) {
             if (exception == null) {
@@ -234,6 +219,35 @@ public class Maven {
         }
     }
 
+    private static void wrapOutput(DefaultPlexusContainer container, final String prefix) {
+        setOutput(container, new PrintStream(System.out) {
+            private boolean start = true;
+            public void print(String str) {
+                if (start) {
+                    super.print(prefix);
+                    start = false;
+                }
+                super.print(str);
+            }
+
+            public void println(String str) {
+                print(str);
+                super.println();
+                start = true;
+            }
+        });
+    }
+
+    private static void setOutput(DefaultPlexusContainer container, PrintStream dest) {
+        Logger logger;
+
+        logger = container.getLoggerManager().getLoggerForComponent("notused");
+        try {
+            logger.getClass().getDeclaredMethod("setStream", PrintStream.class).invoke(logger, dest);
+        } catch (Exception e) {
+            throw new IllegalStateException(e);
+        }
+    }
 
     private static Properties merged(Properties left, Map<String, String> right) {
         Properties result;

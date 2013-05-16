@@ -1,5 +1,7 @@
-package net.oneandone.maven.plugins.prerelease.core;
+package net.oneandone.maven.plugins.prerelease.util;
 
+import net.oneandone.maven.plugins.prerelease.core.BaseExecutionListener;
+import net.oneandone.maven.plugins.prerelease.core.Prerelease;
 import org.apache.maven.execution.ExecutionEvent;
 import org.apache.maven.execution.ExecutionListener;
 import org.apache.maven.project.MavenProject;
