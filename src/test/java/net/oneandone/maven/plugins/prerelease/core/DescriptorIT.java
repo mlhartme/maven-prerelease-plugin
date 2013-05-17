@@ -35,7 +35,7 @@ public class DescriptorIT extends IntegrationBase {
         Descriptor descriptor;
 
         dir = checkoutProject("minimal");
-        maven = Maven.forTests(WORLD);
+        maven = maven(WORLD);
         project = maven.loadPom(dir.join("pom.xml"));
         revision = WorkingCopy.load(dir).revision(); // TODO: expensive
         descriptor = Descriptor.checkedCreate(WORLD, project, revision);
@@ -58,7 +58,7 @@ public class DescriptorIT extends IntegrationBase {
         URI tag;
 
         dir = checkoutProject("minimal");
-        maven = Maven.forTests(WORLD);
+        maven = maven(WORLD);
         project = maven.loadPom(dir.join("pom.xml"));
         revision = WorkingCopy.load(dir).revision(); // TODO: expensive
         Descriptor.checkedCreate(WORLD, project, revision);
@@ -79,7 +79,7 @@ public class DescriptorIT extends IntegrationBase {
         long revision;
 
         dir = checkoutProject("parentSnapshot");
-        maven = Maven.forTests(WORLD);
+        maven = maven(WORLD);
         project = maven.loadPom(dir.join("pom.xml"));
         revision = WorkingCopy.load(dir).revision(); // TODO: expensive
         Descriptor.checkedCreate(WORLD, project, revision);
@@ -93,7 +93,7 @@ public class DescriptorIT extends IntegrationBase {
         long revision;
 
         dir = checkoutProject("dependencySnapshot");
-        maven = Maven.forTests(WORLD);
+        maven = maven(WORLD);
         project = maven.loadPom(dir.join("pom.xml"));
         revision = WorkingCopy.load(dir).revision(); // TODO: expensive
         Descriptor.checkedCreate(WORLD, project, revision);
@@ -107,7 +107,7 @@ public class DescriptorIT extends IntegrationBase {
         long revision;
 
         dir = checkoutProject("pluginSnapshot");
-        maven = Maven.forTests(WORLD);
+        maven = maven(WORLD);
         project = maven.loadPom(dir.join("pom.xml"));
         revision = WorkingCopy.load(dir).revision(); // TODO: expensive
         Descriptor.checkedCreate(WORLD, project, revision);

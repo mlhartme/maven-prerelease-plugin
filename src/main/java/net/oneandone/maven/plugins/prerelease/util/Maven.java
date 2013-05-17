@@ -5,9 +5,6 @@ import net.oneandone.sushi.fs.World;
 import net.oneandone.sushi.fs.file.FileNode;
 import net.oneandone.sushi.util.Separator;
 import org.apache.maven.artifact.repository.ArtifactRepository;
-import org.apache.maven.artifact.repository.ArtifactRepositoryPolicy;
-import org.apache.maven.artifact.repository.DefaultArtifactRepository;
-import org.apache.maven.artifact.repository.layout.DefaultRepositoryLayout;
 import org.apache.maven.execution.DefaultMavenExecutionRequest;
 import org.apache.maven.execution.ExecutionListener;
 import org.apache.maven.execution.MavenExecutionRequest;
@@ -22,24 +19,15 @@ import org.apache.maven.project.ProjectBuilder;
 import org.apache.maven.project.ProjectBuildingException;
 import org.apache.maven.project.ProjectBuildingRequest;
 import org.apache.maven.project.ProjectBuildingResult;
-import org.apache.maven.repository.internal.MavenRepositorySystemSession;
 import org.apache.maven.settings.Mirror;
 import org.apache.maven.settings.Proxy;
 import org.apache.maven.settings.Server;
-import org.codehaus.plexus.DefaultContainerConfiguration;
 import org.codehaus.plexus.DefaultPlexusContainer;
-import org.codehaus.plexus.PlexusContainerException;
-import org.codehaus.plexus.classworlds.ClassWorld;
-import org.codehaus.plexus.classworlds.realm.ClassRealm;
 import org.codehaus.plexus.component.repository.exception.ComponentLookupException;
 import org.codehaus.plexus.logging.Logger;
-import org.sonatype.aether.RepositorySystem;
 import org.sonatype.aether.RepositorySystemSession;
 import org.sonatype.aether.artifact.Artifact;
-import org.sonatype.aether.repository.LocalRepository;
-import org.sonatype.aether.repository.RepositoryPolicy;
 
-import java.io.File;
 import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -49,59 +37,6 @@ import java.util.Map;
 import java.util.Properties;
 
 public class Maven {
-    public static Maven forTests(World world) {
-        DefaultPlexusContainer container;
-        RepositorySystem system;
-        MavenRepositorySystemSession session;
-        LocalRepository localRepository;
-        ArtifactRepository repository;
-
-        container = container(null, null, Logger.LEVEL_DISABLED);
-        repository = new DefaultArtifactRepository("central", "http://repo1.maven.org/maven2", new DefaultRepositoryLayout(),
-                new ArtifactRepositoryPolicy(false, RepositoryPolicy.UPDATE_POLICY_DAILY, RepositoryPolicy.CHECKSUM_POLICY_WARN),
-                new ArtifactRepositoryPolicy(true, RepositoryPolicy.UPDATE_POLICY_NEVER, RepositoryPolicy.CHECKSUM_POLICY_WARN)
-            );
-        try {
-            localRepository = new LocalRepository(defaultLocalRepositoryDir(world).getAbsolute());
-            system = container.lookup(RepositorySystem.class);
-            session = new MavenRepositorySystemSession();
-            session.setOffline(false);
-            session.setLocalRepositoryManager(system.newLocalRepositoryManager(localRepository));
-            session.setProxySelector(null);
-            return new Maven(world, null, null, null, session, container.lookup(ProjectBuilder.class), Arrays.asList(repository));
-        } catch (ComponentLookupException e) {
-            throw new IllegalStateException(e);
-        }
-    }
-
-    //--
-
-    public static FileNode defaultLocalRepositoryDir(World world) {
-        return world.file(new File(System.getProperty("user.home"))).join(".m2/repository");
-    }
-
-    public static DefaultPlexusContainer container(ClassWorld classWorld, ClassRealm realm, int loglevel) {
-        DefaultContainerConfiguration config;
-        DefaultPlexusContainer container;
-
-        config = new DefaultContainerConfiguration();
-        if (classWorld != null) {
-            config.setClassWorld(classWorld);
-        }
-        if (realm != null) {
-            config.setRealm(realm);
-        }
-        try {
-            container = new DefaultPlexusContainer(config);
-        } catch (PlexusContainerException e) {
-            throw new IllegalStateException(e);
-        }
-        container.getLoggerManager().setThreshold(loglevel);
-        return container;
-    }
-
-    //--
-
     private final World world;
     private final MavenSession parentSession;
     private final ExecutionListener executionListener;
