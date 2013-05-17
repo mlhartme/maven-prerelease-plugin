@@ -182,6 +182,9 @@
         <artifactId>maven-invoker-plugin</artifactId>
         <version>1.7</version>
         <configuration>
+          <profiles>
+            <profile>integration-test-profile</profile>
+          </profiles>
           <localRepositoryPath>${basedir}/target/it/maven-local-repository</localRepositoryPath>
         </configuration>
         <executions>

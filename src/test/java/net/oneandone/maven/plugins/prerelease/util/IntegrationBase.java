@@ -226,7 +226,7 @@ public class IntegrationBase {
                 new ArtifactRepositoryPolicy(false, RepositoryPolicy.UPDATE_POLICY_DAILY, RepositoryPolicy.CHECKSUM_POLICY_WARN),
                 new ArtifactRepositoryPolicy(true, RepositoryPolicy.UPDATE_POLICY_NEVER, RepositoryPolicy.CHECKSUM_POLICY_WARN)
         );
-        snapshots = new DefaultArtifactRepository("snapshots", "http://repository.apache.org/snapshots/", new DefaultRepositoryLayout(),
+        snapshots = new DefaultArtifactRepository("apache-snapshots", "http://repository.apache.org/snapshots/", new DefaultRepositoryLayout(),
                 new ArtifactRepositoryPolicy(true, RepositoryPolicy.UPDATE_POLICY_DAILY, RepositoryPolicy.CHECKSUM_POLICY_WARN),
                 new ArtifactRepositoryPolicy(false, RepositoryPolicy.UPDATE_POLICY_NEVER, RepositoryPolicy.CHECKSUM_POLICY_WARN)
         );
