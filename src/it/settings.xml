@@ -1,3 +1,19 @@
 <settings>
   <localRepository>@@TARGET@@/it/maven-local-repository</localRepository>
+  <profiles>
+    <profile>
+      <id>release-properties</id>
+      <activation>
+        <activeByDefault/>
+      </activation>
+      <repositories>
+        <repository>
+          <id>apachesnapshots</id>
+          <url>http://repository.apache.org/snapshots/</url>
+          <releases><enabled>false</enabled></releases>
+        </repository>
+      </repositories>
+    </profile>
+  </profiles>
 </settings>
+
