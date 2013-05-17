@@ -51,7 +51,6 @@ public class ArchiveIT extends IntegrationBase {
         final Archive archive;
         final Archive archive2;
 
-        System.out.println("starting");
         tmp = WORLD.getTemp().createTempDirectory();
         archive = Archive.open(tmp, 5, nullLog());
         new Thread() {
@@ -59,17 +58,13 @@ public class ArchiveIT extends IntegrationBase {
                 try {
                     Thread.sleep(5);
                     archive.close();
-                    System.out.println("closed by first thread");
                 } catch (Exception e) {
                     throw new IllegalStateException(e);
                 }
             }
         }.start();
-        System.out.println("try to open again");
         archive2 = Archive.open(tmp, 10, systemOutLog());
-        System.out.println("open again ok");
         archive2.close();
-        System.out.println("close again ok");
     }
 
     @Test
@@ -77,7 +72,6 @@ public class ArchiveIT extends IntegrationBase {
         final FileNode tmp;
         final Archive archive;
 
-        System.out.println("starting");
         tmp = WORLD.getTemp().createTempDirectory();
         archive = Archive.open(tmp, 5, nullLog());
         try {
@@ -89,27 +83,6 @@ public class ArchiveIT extends IntegrationBase {
             // ok
         }
         archive.close();
-    }
-
-    @Test
-    public void create() throws Exception {
-        FileNode dir;
-        Maven maven;
-        MavenProject project;
-        long revision;
-        Descriptor descriptor;
-        FileNode tmp;
-        Prerelease prerelease;
-
-        dir = checkoutProject("minimal");
-        maven = Maven.forTests(WORLD);
-        project = maven.loadPom(dir.join("pom.xml"));
-        revision = WorkingCopy.load(dir).revision();
-        descriptor = Descriptor.checkedCreate(WORLD, project, revision);
-        tmp = dir.getWorld().getTemp().createTempDirectory();
-        try (Archive archive = Archive.open(tmp, 5, nullLog())) {
-            prerelease = Prerelease.create(maven, nullLog(), descriptor, archive.target(descriptor.revision));
-        }
     }
 
     public static Log nullLog() {

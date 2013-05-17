@@ -32,10 +32,7 @@ import org.codehaus.plexus.PlexusContainerException;
 import org.codehaus.plexus.classworlds.ClassWorld;
 import org.codehaus.plexus.classworlds.realm.ClassRealm;
 import org.codehaus.plexus.component.repository.exception.ComponentLookupException;
-import org.codehaus.plexus.logging.AbstractLogger;
 import org.codehaus.plexus.logging.Logger;
-import org.codehaus.plexus.logging.LoggerManager;
-import org.codehaus.plexus.logging.console.ConsoleLogger;
 import org.sonatype.aether.RepositorySystem;
 import org.sonatype.aether.RepositorySystemSession;
 import org.sonatype.aether.artifact.Artifact;
@@ -44,7 +41,6 @@ import org.sonatype.aether.repository.RepositoryPolicy;
 
 import java.io.File;
 import java.io.PrintStream;
-import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
