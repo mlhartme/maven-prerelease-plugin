@@ -33,6 +33,7 @@ public class Update extends ProjectBase {
         long revision;
         Prerelease prerelease;
 
+        // code differs from Create because the descriptor check is deferred until after Prerelease.create
         workingCopy = checkedWorkingCopy();
         getLog().info("checking project ...");
         revision = workingCopy.revision();

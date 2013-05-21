@@ -37,7 +37,7 @@ public abstract class Base extends AbstractMojo {
     protected String archiveRoot;
 
     /**
-     * Where to store prereleases.
+     * Timeout in seconds for locking a prerelease archive.
      */
     @Parameter(property = "prerelease.lockTimeout", defaultValue = "3600", required = true)
     protected int lockTimeout;
@@ -55,7 +55,7 @@ public abstract class Base extends AbstractMojo {
     private RepositorySystemSession repositorySession;
 
     @Parameter(property = "project.remoteArtifactRepositories", readonly = true)
-    private List<ArtifactRepository> remoteRepositoriesLegacy;
+    private List<ArtifactRepository> remoteRepositories;
 
     @Component
     protected MavenSession session;
@@ -81,6 +81,6 @@ public abstract class Base extends AbstractMojo {
     public abstract void doExecute() throws Exception;
 
     protected Maven maven() {
-        return new Maven(world, session, session.getRequest().getExecutionListener(), projectHelper, repositorySession, projectBuilder, remoteRepositoriesLegacy);
+        return new Maven(world, session, session.getRequest().getExecutionListener(), projectHelper, repositorySession, projectBuilder, remoteRepositories);
     }
 }

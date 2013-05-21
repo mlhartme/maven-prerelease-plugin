@@ -29,8 +29,8 @@ public abstract class ProjectBase extends Base {
     protected MavenProject project;
 
     /**
-     * Specifies where to create a symlink to the prerelease checkout. No symlink is created if the prerelease has no checkout (and thus is
-     * broken). No symlink is created if not specified.
+     * Specifies where to create a symlink to the prerelease checkout. No symlink is created if the prerelease has no checkout yet
+     * (and thus is broken). No symlink is created if not specified.
      */
     @Parameter(property = "prerelease.checkoutLink", defaultValue = "${basedir}/target/checkout")
     private String checkoutLink;

@@ -11,7 +11,7 @@
         Dumped frischfleisch goal.
       </action>
       <action date="2013-04-30" dev="mhm" type="update">
-        Prepare runs clean install now, promote the final deploy step only. As a consequent,
+        Prepare runs "clean install" now, promote the final deploy step only. As a consequent,
         the schedule configuaration is no longer needed and was dumped now.
       </action>
       <action date="2013-05-15" dev="mhm" type="update">
