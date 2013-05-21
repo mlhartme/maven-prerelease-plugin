@@ -64,12 +64,14 @@ public abstract class BareBase extends Base {
         maven = maven();
         tempCheckout = tempCheckout();
         try {
+            // TODO: also specify prerelease version here?
             maven.build(tempCheckout, userProperties(), "net.oneandone.maven.plugins:prerelease:" + goal);
         } finally {
             tempCheckout.deleteTree();
         }
     }
 
+    /** override this to pass extra properties */
     public Map<String, String> userProperties() {
         return new HashMap<>();
     }
