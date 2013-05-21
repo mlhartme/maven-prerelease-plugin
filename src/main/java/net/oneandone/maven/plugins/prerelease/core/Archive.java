@@ -15,12 +15,12 @@
  */
 package net.oneandone.maven.plugins.prerelease.core;
 
-import net.oneandone.maven.plugins.prerelease.OnShutdown;
 import net.oneandone.maven.plugins.prerelease.util.ChangesXml;
 import net.oneandone.sushi.fs.DirectoryNotFoundException;
 import net.oneandone.sushi.fs.FileNotFoundException;
 import net.oneandone.sushi.fs.ListException;
 import net.oneandone.sushi.fs.MkfileException;
+import net.oneandone.sushi.fs.OnShutdown;
 import net.oneandone.sushi.fs.file.FileNode;
 import net.oneandone.sushi.xml.XmlException;
 import org.apache.maven.plugin.logging.Log;
