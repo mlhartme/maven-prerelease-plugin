@@ -15,35 +15,11 @@
  */
 package net.oneandone.maven.plugins.prerelease;
 
-import net.oneandone.maven.plugins.prerelease.core.Archive;
-import net.oneandone.maven.plugins.prerelease.core.Descriptor;
-import net.oneandone.maven.plugins.prerelease.core.Target;
 import net.oneandone.maven.plugins.prerelease.util.Maven;
 import net.oneandone.maven.plugins.prerelease.util.Subversion;
 import net.oneandone.sushi.fs.file.FileNode;
-import net.oneandone.sushi.fs.svn.SvnNode;
-import net.oneandone.sushi.util.Strings;
-import org.apache.maven.lifecycle.internal.MojoDescriptorCreator;
-import org.apache.maven.model.Plugin;
-import org.apache.maven.model.PluginExecution;
-import org.apache.maven.plugin.MavenPluginManager;
-import org.apache.maven.plugin.MojoExecution;
-import org.apache.maven.plugin.MojoExecutionException;
-import org.apache.maven.plugin.PluginManagerException;
-import org.apache.maven.plugin.PluginResolutionException;
-import org.apache.maven.plugin.descriptor.MojoDescriptor;
-import org.apache.maven.plugin.descriptor.PluginDescriptor;
-import org.apache.maven.plugins.annotations.Component;
 import org.apache.maven.plugins.annotations.Parameter;
-import org.apache.maven.project.MavenProject;
-import org.codehaus.plexus.classworlds.realm.ClassRealm;
-import org.codehaus.plexus.util.StringUtils;
-import org.codehaus.plexus.util.xml.Xpp3Dom;
-import org.tmatesoft.svn.core.SVNException;
 
-import java.io.IOException;
-import java.io.OutputStream;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
