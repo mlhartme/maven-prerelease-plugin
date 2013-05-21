@@ -37,7 +37,7 @@ public class DescriptorIT extends IntegrationBase {
         dir = checkoutProject("minimal");
         maven = maven(WORLD);
         project = maven.loadPom(dir.join("pom.xml"));
-        revision = WorkingCopy.load(dir).revision(); // TODO: expensive
+        revision = WorkingCopy.load(dir).revision();
         descriptor = Descriptor.checkedCreate(WORLD, project, revision);
         assertEquals(revision, descriptor.revision);
         assertEquals("1.0.0-SNAPSHOT", descriptor.previous);
@@ -60,7 +60,7 @@ public class DescriptorIT extends IntegrationBase {
         dir = checkoutProject("minimal");
         maven = maven(WORLD);
         project = maven.loadPom(dir.join("pom.xml"));
-        revision = WorkingCopy.load(dir).revision(); // TODO: expensive
+        revision = WorkingCopy.load(dir).revision();
         Descriptor.checkedCreate(WORLD, project, revision);
         tag = new URI(REPOSITORY_URL + "/minimal/tags/minimal-1.0.0");
         svnMkdir(tag);
@@ -81,7 +81,7 @@ public class DescriptorIT extends IntegrationBase {
         dir = checkoutProject("parentSnapshot");
         maven = maven(WORLD);
         project = maven.loadPom(dir.join("pom.xml"));
-        revision = WorkingCopy.load(dir).revision(); // TODO: expensive
+        revision = WorkingCopy.load(dir).revision();
         Descriptor.checkedCreate(WORLD, project, revision);
     }
 
@@ -95,7 +95,7 @@ public class DescriptorIT extends IntegrationBase {
         dir = checkoutProject("dependencySnapshot");
         maven = maven(WORLD);
         project = maven.loadPom(dir.join("pom.xml"));
-        revision = WorkingCopy.load(dir).revision(); // TODO: expensive
+        revision = WorkingCopy.load(dir).revision();
         Descriptor.checkedCreate(WORLD, project, revision);
     }
 
@@ -109,7 +109,7 @@ public class DescriptorIT extends IntegrationBase {
         dir = checkoutProject("pluginSnapshot");
         maven = maven(WORLD);
         project = maven.loadPom(dir.join("pom.xml"));
-        revision = WorkingCopy.load(dir).revision(); // TODO: expensive
+        revision = WorkingCopy.load(dir).revision();
         Descriptor.checkedCreate(WORLD, project, revision);
     }
 }

@@ -10,8 +10,15 @@
       <action date="2013-04-30" dev="mhm" type="remove">
         Dumped frischfleisch goal.
       </action>
+      <action date="2013-04-30" dev="mhm" type="update">
+        Prepare runs clean install now, promote the final deploy step only. As a consequent,
+        the schedule configuaration is no longer needed and was dumped now.
+      </action>
       <action date="2013-05-15" dev="mhm" type="update">
         Revision for bare commands defaults to LAST_CHANGED now.
+      </action>
+      <action date="2013-05-15" dev="mhm" type="update">
+        Maven is executed in-process, no extra Maven Process is needed.
       </action>
     </release>
     <release date="2013-04-09" version="1.4.2">

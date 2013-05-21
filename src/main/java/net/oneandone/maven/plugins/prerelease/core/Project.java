@@ -15,7 +15,7 @@
  */
 package net.oneandone.maven.plugins.prerelease.core;
 
-import net.oneandone.sushi.fs.World;
+import net.oneandone.maven.plugins.prerelease.util.Maven;
 import net.oneandone.sushi.fs.file.FileNode;
 import org.apache.maven.project.MavenProject;
 
@@ -25,10 +25,6 @@ public class Project {
     public final String groupId;
     public final String artifactId;
     public final String version;
-
-    public static Project forMavenProject(MavenProject project) {
-        return forMavenProject(project, project.getVersion());
-    }
 
     public static Project forMavenProject(MavenProject project, String version) {
         return new Project(project.getName(), project.getUrl(), project.getGroupId(), project.getArtifactId(), version);
@@ -42,9 +38,8 @@ public class Project {
         this.version = version;
     }
 
-    // TODO: use some maven component for this
-    public FileNode localRepo(World world) {
-        return (FileNode) world.getHome().join(".m2/repository", groupId.replace('.', '/'), artifactId, version);
+    public FileNode localRepo(Maven maven) {
+        return maven.getLocalRepositoryDir().join(groupId.replace('.', '/'), artifactId, version);
     }
 
     public String toString() {

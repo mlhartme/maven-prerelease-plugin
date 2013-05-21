@@ -59,6 +59,14 @@ public class Maven {
         this.remoteLegacy = remoteLegacy;
     }
 
+    public FileNode getLocalRepositoryDir() {
+        return world.file(repositorySession.getLocalRepository().getBasedir());
+    }
+
+    public FileNode getLocalRepositoryFile(Artifact artifact) {
+        return getLocalRepositoryDir().join(repositorySession.getLocalRepositoryManager().getPathForLocalArtifact(artifact));
+    }
+
     public ExecutionListener getExecutionListener() {
         return executionListener;
     }

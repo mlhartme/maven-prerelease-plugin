@@ -91,7 +91,7 @@ public class WorkingCopyIT extends IntegrationBase {
         dir = checkoutProject("svnmismatch");
         maven = maven(WORLD);
         project = maven.loadPom(dir.join("pom.xml"));
-        revision = WorkingCopy.load(dir).revision(); // TODO: expensive
+        revision = WorkingCopy.load(dir).revision();
         descriptor = Descriptor.checkedCreate(WORLD, project, revision);
         WorkingCopy.load(dir).checkCompatibility(descriptor);
     }
