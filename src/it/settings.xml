@@ -2,10 +2,7 @@
   <localRepository>@@TARGET@@/it/maven-local-repository</localRepository>
   <profiles>
     <profile>
-      <id>release-properties</id>
-      <activation>
-        <activeByDefault/>
-      </activation>
+      <id>extrarepos</id>
       <repositories>
         <repository>
           <id>apachesnapshots</id>

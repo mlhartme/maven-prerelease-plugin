@@ -183,6 +183,7 @@
         <version>1.7</version>
         <configuration>
           <settingsFile>${basedir}/src/it/settings.xml</settingsFile>
+          <profiles><profile>extrarepos</profile></profiles>
           <localRepositoryPath>${basedir}/target/it/maven-local-repository</localRepositoryPath>
         </configuration>
         <executions>
