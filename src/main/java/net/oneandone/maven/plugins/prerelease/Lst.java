@@ -24,7 +24,7 @@ import org.apache.maven.plugins.annotations.Mojo;
  * Lists available pre-preleases and display up-to-date information.
  */
 @Mojo(name = "status")
-public class Status extends ProjectBase {
+public class Lst extends ProjectBase {
     @Override
     public void doExecute(Archive archive) throws Exception {
         String revision;
