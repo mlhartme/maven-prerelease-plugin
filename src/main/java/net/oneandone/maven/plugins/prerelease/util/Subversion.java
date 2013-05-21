@@ -20,6 +20,9 @@ import net.oneandone.sushi.launcher.Failure;
 import net.oneandone.sushi.launcher.Launcher;
 import org.apache.maven.plugin.logging.Log;
 
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 public final class Subversion {
     public static Launcher launcher(FileNode dir, String ... args) {
         return new Launcher(dir, "svn", "--non-interactive", "--no-auth-cache").arg(args);
@@ -46,4 +49,21 @@ public final class Subversion {
 
     private Subversion() {
     }
+
+    //--
+
+    private static final Pattern PATTERN = Pattern.compile("^URL:(.*)$", Pattern.CASE_INSENSITIVE| Pattern.MULTILINE);
+
+    public static String workspaceUrl(FileNode directory) throws Failure {
+        String str;
+        Matcher matcher;
+
+        str = Subversion.launcher(directory, "info").exec();
+        matcher = PATTERN.matcher(str);
+        if (!matcher.find()) {
+            throw new IllegalStateException("cannot determine checkout url in " + str);
+        }
+        return matcher.group(1).trim();
+    }
+
 }

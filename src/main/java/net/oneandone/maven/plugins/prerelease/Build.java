@@ -22,7 +22,6 @@ import net.oneandone.sushi.fs.file.FileNode;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
-import org.tmatesoft.svn.core.SVNException;
 
 import java.io.IOException;
 
@@ -61,7 +60,7 @@ public class Build extends ProjectBase {
         maven().build(prerelease.checkout, arguments);
     }
 
-    private long revisionForDescriptor(FileNode archiveDirectory) throws MojoExecutionException, IOException, SVNException {
+    private long revisionForDescriptor(FileNode archiveDirectory) throws MojoExecutionException, IOException {
         long result;
 
         if (BareBase.LASTEST_PRERELEASE.equals(buildRevision)) {

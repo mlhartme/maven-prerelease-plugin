@@ -18,7 +18,6 @@ package net.oneandone.maven.plugins.prerelease.core;
 import net.oneandone.maven.plugins.prerelease.util.Subversion;
 import net.oneandone.sushi.fs.World;
 import net.oneandone.sushi.fs.file.FileNode;
-import net.oneandone.sushi.fs.svn.SvnNode;
 import net.oneandone.sushi.launcher.Failure;
 import net.oneandone.sushi.util.Strings;
 import net.oneandone.sushi.xml.Selector;
@@ -88,7 +87,7 @@ public class WorkingCopy {
         if (changes.last() > revisions.last()) {
             throw new IllegalStateException(changes.last() + " vs " + revisions.last());
         }
-        pendings = new ArrayList<String>();
+        pendings = new ArrayList<>();
         for (Map.Entry<String, Long> entry : maybePendings.entrySet()) {
             if (entry.getValue() < revisions.last()) {
                 output = Subversion.launcher(workingCopy, "log", "--xml", "-q", "-r" + (entry.getValue() + 1) + ":" + revisions.last(),
@@ -135,7 +134,7 @@ public class WorkingCopy {
     public Descriptor checkCompatibility(Descriptor descriptor) throws Exception {
         String svnurlWorkspace;
 
-        svnurlWorkspace = SvnNode.fromWorkspace(directory).getSvnurl().toString();
+        svnurlWorkspace = Subversion.workspaceUrl(directory);
         svnurlWorkspace = Strings.removeRightOpt(svnurlWorkspace, "/");
         if (!svnurlWorkspace.equals(descriptor.svnOrig)) {
             throw new SvnUrlMismatch(svnurlWorkspace, descriptor.svnOrig);

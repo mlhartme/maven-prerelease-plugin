@@ -18,6 +18,9 @@
         Revision for bare commands defaults to LAST_CHANGED now.
       </action>
       <action date="2013-05-15" dev="mhm" type="update">
+        Dumped svnkit dependency, all svn communication used the svn command line client now.
+      </action>
+      <action date="2013-05-15" dev="mhm" type="update">
         Maven is executed in-process, no extra Maven Process is needed.
       </action>
     </release>
