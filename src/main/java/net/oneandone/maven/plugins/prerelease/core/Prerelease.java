@@ -290,7 +290,7 @@ public class Prerelease {
 
         variables = new HashMap<>();
         variables.put("revision", Long.toString(descriptor.revision));
-        variables.put("release", descriptor.project.version);
+        variables.put("release", descriptor.project.toString());
         return Substitution.ant().apply(message, variables);
     }
 
