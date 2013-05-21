@@ -260,12 +260,12 @@ public class Prerelease {
     /** commit before deploy - because if deployment fails, we can reliably revert the commit. */
     private void promoteLocked(Log log, String commitTagMessage, String revertTagMessage, String commitNextMessage,
             FileNode origCommit, Maven maven) throws Exception {
-        commit(log, commitTagMessage);
+        commit(log, renderMessage(commitTagMessage));
         try {
             maven.deployOnly(log, this);
         } catch (Exception e) {
             log.info("deployment failed - reverting tag");
-            revertCommit(log, revertTagMessage);
+            revertCommit(log, renderMessage(revertTagMessage));
             target.scheduleRemove(log, "deployment failed (tag has been reverted): " + e.getMessage());
             throw e;
         }

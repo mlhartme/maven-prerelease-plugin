@@ -25,7 +25,7 @@ public class MojoIT extends IntegrationBase {
         FileNode checkout;
 
         checkout = checkoutProject("minimal");
-        mvn(checkout, "prerelease:status");
+        mvn(checkout, "prerelease:list");
         mvn(checkout, "prerelease:create");
         mvn(checkout, "prerelease:update");
         mvn(checkout, "prerelease:update");

@@ -79,7 +79,7 @@ public class WorkingCopy {
             }
         }
         if (changes.size() == 0) {
-            throw new IllegalStateException();
+            throw new IllegalStateException("no changes at all");
         }
         if (revisions.size() == 0) {
             throw new IllegalStateException();

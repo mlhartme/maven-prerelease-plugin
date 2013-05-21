@@ -21,9 +21,9 @@ import net.oneandone.sushi.fs.file.FileNode;
 import org.apache.maven.plugins.annotations.Mojo;
 
 /**
- * Lists available pre-preleases and display up-to-date information.
+ * Lists available prepreleases and display up-to-date information.
  */
-@Mojo(name = "status")
+@Mojo(name = "list")
 public class Lst extends ProjectBase {
     @Override
     public void doExecute(Archive archive) throws Exception {
