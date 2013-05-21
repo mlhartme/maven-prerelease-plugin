@@ -25,6 +25,8 @@ import net.oneandone.sushi.fs.file.FileNode;
 import net.oneandone.sushi.launcher.Failure;
 import net.oneandone.sushi.launcher.Launcher;
 import net.oneandone.sushi.util.Strings;
+import net.oneandone.sushi.util.Substitution;
+import net.oneandone.sushi.util.SubstitutionException;
 import net.oneandone.sushi.xml.XmlException;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.logging.Log;
@@ -37,6 +39,7 @@ import org.xml.sax.SAXException;
 import java.io.IOException;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.Map;
 
 public class Prerelease {
     public static Prerelease load(Target target) throws IOException {
@@ -109,12 +112,11 @@ public class Prerelease {
         return target.join("frischfleisch.properties");
     }
 
-    public void commit(Log log, String by) throws Failure {
+    public void commit(Log log, String commitMessage) throws Failure {
         Launcher launcher;
 
         log.info("committing tag:");
-        launcher = Subversion.launcher(checkout, "commit", "-m",
-                "Prerelease " + descriptor.revision + " promoted to " + descriptor.project.version + " by " + by);
+        launcher = Subversion.launcher(checkout, "commit", "-m", commitMessage);
         log.info(launcher.toString());
         log.info(launcher.exec());
     }
@@ -229,13 +231,13 @@ public class Prerelease {
 
     //-- promote
 
-    public void promote(Log log, String user, Maven maven) throws Exception {
+    public void promote(Log log, String createTagMessage, String revertTagMessage, String nextIterationMessage, Maven maven) throws Exception {
         FileNode origCommit;
 
         log.info("promoting revision " + descriptor.revision + " to " + descriptor.project);
         origCommit = prepareOrigCommit(log);
         try {
-            promoteLocked(log, user, origCommit, maven);
+            promoteLocked(log, createTagMessage, revertTagMessage, nextIterationMessage, origCommit, maven);
         } catch (Throwable e) { // CAUTION: catching exceptions is not enough -- in particular, out-of-memory during upload is an error!
             try {
                 origUnlock(origCommit);
@@ -256,20 +258,20 @@ public class Prerelease {
     }
 
     /** commit before deploy - because if deployment fails, we can reliably revert the commit. */
-    private void promoteLocked(Log log, String user, FileNode origCommit, Maven maven) throws Exception {
-        commit(log, user);
+    private void promoteLocked(Log log, String commitTagMessage, String revertTagMessage, String commitNextMessage,
+            FileNode origCommit, Maven maven) throws Exception {
+        commit(log, commitTagMessage);
         try {
             maven.deployOnly(log, this);
         } catch (Exception e) {
             log.info("deployment failed - reverting tag");
-            revertCommit(log, user);
+            revertCommit(log, revertTagMessage);
             target.scheduleRemove(log, "deployment failed (tag has been reverted): " + e.getMessage());
             throw e;
         }
         try {
             log.info("Update pom and changes ...");
-            log.debug(Subversion.launcher(origCommit, "commit", "-m", "Prerelease " + descriptor.revision
-                    + " promoted to release " + descriptor.project + " by " + user + ", starting next development iteration.").exec());
+            log.debug(Subversion.launcher(origCommit, "commit", "-m", renderMessage(commitNextMessage)).exec());
             origCommit.deleteTree();
             // Move prerelease directory into REMOVE directory because it's invalid now:
             // tag was committed, and artifacts have been deployed. It's not removed immediately to make
@@ -281,6 +283,15 @@ public class Prerelease {
             log.warn(e);
             log.warn("Thus, you can use your release, but someone should have a look at this exception.");
         }
+    }
+
+    public String renderMessage(String message) throws SubstitutionException {
+        Map<String, String> variables;
+
+        variables = new HashMap<>();
+        variables.put("revision", Long.toString(descriptor.revision));
+        variables.put("release", descriptor.project.version);
+        return Substitution.ant().apply(message, variables);
     }
 
     //--

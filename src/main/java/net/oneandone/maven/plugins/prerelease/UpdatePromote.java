@@ -35,7 +35,7 @@ public class UpdatePromote extends Promote {
         if (prerelease == null) {
             prerelease = Prerelease.create(maven(), getLog(), checkedDescriptor(workingCopy), target);
         }
-        prerelease.promote(getLog(), getUser(), maven());
+        prerelease.promote(getLog(), createTagMessage, revertTagMessage, nextIterationMessage, maven());
         workingCopy.update(getLog());
     }
 }

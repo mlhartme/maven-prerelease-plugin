@@ -18,9 +18,13 @@ package net.oneandone.maven.plugins.prerelease;
 import net.oneandone.maven.plugins.prerelease.core.Archive;
 import net.oneandone.maven.plugins.prerelease.core.Prerelease;
 import net.oneandone.maven.plugins.prerelease.core.WorkingCopy;
+import net.oneandone.maven.plugins.prerelease.util.Subversion;
+import net.oneandone.sushi.util.Substitution;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
+
+import java.util.Map;
 
 /**
  * Promotes a prerelease by commuting the tag and deploying its artifact(s).
@@ -44,14 +48,25 @@ import org.apache.maven.plugins.annotations.Parameter;
 @Mojo(name = "promote")
 public class Promote extends ProjectBase {
     /**
-     * Email of the user invoking this goal.
+     * Message for svn commit of the new tag.
      */
-    @Parameter(property = "prerelease.user", required = true)
-    private String user;
+    @Parameter(property = "prerelease.createTagMessage", defaultValue =
+            "Prerelease ${revision} promoted to release ${release}.")
+    protected String createTagMessage;
 
-    public String getUser() {
-        return user;
-    }
+    /**
+     * Svn commit message when reverting the tag.
+     */
+    @Parameter(property = "prerelease.revertTagMessage", defaultValue =
+            "Reverting tag for release ${release} because the deployment failed.")
+    protected String revertTagMessage;
+
+    /**
+     * Message for svn commit to start new development iteration.
+     */
+    @Parameter(property = "prerelease.nextIterationMessage", defaultValue =
+            "Prerelease ${revision} promoted to release ${release}, starting next development iteration.")
+    protected String nextIterationMessage;
 
     public void doExecute(Archive archive) throws Exception {
         WorkingCopy workingCopy;
@@ -65,7 +80,7 @@ public class Promote extends ProjectBase {
         if (prerelease == null) {
             throw new MojoExecutionException("no prerelease for revision " + revision);
         }
-        prerelease.promote(getLog(), user, maven());
+        prerelease.promote(getLog(), createTagMessage, revertTagMessage, nextIterationMessage, maven());
         workingCopy.update(getLog());
     }
 }

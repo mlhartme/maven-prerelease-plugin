@@ -19,6 +19,7 @@ import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
 
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -27,10 +28,22 @@ import java.util.Map;
 @Mojo(name = "bare-update-promote", requiresProject = false)
 public class BareUpdatePromote extends BareBase {
     /**
-     * Email of the user invoking this goal.
+     * Passed to the promote goal when specified.
      */
-    @Parameter(property = "prerelease.user", required = true)
-    private String user;
+    @Parameter
+    protected String createTagMessage;
+
+    /**
+     * Passed to the promote goal when specified.
+     */
+    @Parameter
+    protected String revertTagMessage;
+
+    /**
+     * Passed to the promote goal when specified.
+     */
+    @Parameter
+    protected String nextIterationMessage;
 
     public BareUpdatePromote() {
         super("update-promote");
@@ -38,6 +51,18 @@ public class BareUpdatePromote extends BareBase {
 
     @Override
     public Map<String, String> userProperties() {
-        return Collections.singletonMap("prerelease.user", user);
+        Map<String, String> result;
+
+        result = new HashMap<>();
+        if (createTagMessage != null) {
+            result.put("prerelease.createTagMessage", createTagMessage);
+        }
+        if (revertTagMessage != null) {
+            result.put("prerelease.revertTagMessage", revertTagMessage);
+        }
+        if (nextIterationMessage != null) {
+            result.put("prerelease.nextIterationMessage", nextIterationMessage);
+        }
+        return result;
     }
 }
