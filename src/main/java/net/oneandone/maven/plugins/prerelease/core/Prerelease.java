@@ -320,7 +320,7 @@ public class Prerelease {
                         project.getArtifact().setFile(file.toPath().toFile());
                     } else {
                         classifier = Strings.removeLeft(str, "-");
-                        projectHelper.attachArtifact(project, file.toPath().toFile(), classifier);
+                        projectHelper.attachArtifact(project, type, classifier, file.toPath().toFile());
                     }
                 }
             }
