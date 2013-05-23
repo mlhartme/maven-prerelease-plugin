@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<pmd version="4.3" timestamp="2013-05-23T21:36:24.557">
+<file name="/Users/mhm/Projects/foss/maven-prerelease-plugin/src/main/java/net/oneandone/maven/plugins/prerelease/BareBase.java">
+<violation beginline="57" endline="57" begincolumn="20" endcolumn="31" rule="UnusedPrivateField" ruleset="Unused Code Rules" package="net.oneandone.maven.plugins.prerelease" class="BareBase" variable="checkoutLink" externalInfoUrl="http://pmd.sourceforge.net/rules/unusedcode.html#UnusedPrivateField" priority="3">
+Avoid unused private fields such as 'checkoutLink'.
+</violation>
+</file>
+<file name="/Users/mhm/Projects/foss/maven-prerelease-plugin/src/main/java/net/oneandone/maven/plugins/prerelease/BareUpdatePromote.java">
+<violation beginline="21" endline="21" begincolumn="1" endcolumn="29" rule="UnusedImports" ruleset="Import Statement Rules" package="net.oneandone.maven.plugins.prerelease" externalInfoUrl="http://pmd.sourceforge.net/rules/imports.html#UnusedImports" priority="4">
+Avoid unused imports such as 'java.util.Collections'
+</violation>
+</file>
+<file name="/Users/mhm/Projects/foss/maven-prerelease-plugin/src/main/java/net/oneandone/maven/plugins/prerelease/ProjectBase.java">
+<violation beginline="58" endline="60" begincolumn="17" endcolumn="17" rule="CollapsibleIfStatements" ruleset="Basic Rules" package="net.oneandone.maven.plugins.prerelease" class="ProjectBase" method="doExecute" externalInfoUrl="http://pmd.sourceforge.net/rules/basic.html#CollapsibleIfStatements" priority="3">
+These nested if statements could be combined
+</violation>
+</file>
+<file name="/Users/mhm/Projects/foss/maven-prerelease-plugin/src/main/java/net/oneandone/maven/plugins/prerelease/Promote.java">
+<violation beginline="21" endline="21" begincolumn="1" endcolumn="62" rule="UnusedImports" ruleset="Import Statement Rules" package="net.oneandone.maven.plugins.prerelease" externalInfoUrl="http://pmd.sourceforge.net/rules/imports.html#UnusedImports" priority="4">
+Avoid unused imports such as 'net.oneandone.maven.plugins.prerelease.util.Subversion'
+</violation>
+<violation beginline="22" endline="22" begincolumn="1" endcolumn="45" rule="UnusedImports" ruleset="Import Statement Rules" package="net.oneandone.maven.plugins.prerelease" externalInfoUrl="http://pmd.sourceforge.net/rules/imports.html#UnusedImports" priority="4">
+Avoid unused imports such as 'net.oneandone.sushi.util.Substitution'
+</violation>
+<violation beginline="27" endline="27" begincolumn="1" endcolumn="21" rule="UnusedImports" ruleset="Import Statement Rules" package="net.oneandone.maven.plugins.prerelease" externalInfoUrl="http://pmd.sourceforge.net/rules/imports.html#UnusedImports" priority="4">
+Avoid unused imports such as 'java.util.Map'
+</violation>
+</file>
+<file name="/Users/mhm/Projects/foss/maven-prerelease-plugin/src/main/java/net/oneandone/maven/plugins/prerelease/core/Descriptor.java">
+<violation beginline="139" endline="141" begincolumn="127" endcolumn="13" rule="EmptyIfStmt" ruleset="Basic Rules" package="net.oneandone.maven.plugins.prerelease.core" class="Descriptor" method="check" externalInfoUrl="http://pmd.sourceforge.net/rules/basic.html#EmptyIfStmt" priority="3">
+Avoid empty if statements
+</violation>
+</file>
+<file name="/Users/mhm/Projects/foss/maven-prerelease-plugin/src/main/java/net/oneandone/maven/plugins/prerelease/core/Prerelease.java">
+<violation beginline="309" endline="311" begincolumn="129" endcolumn="13" rule="EmptyIfStmt" ruleset="Basic Rules" package="net.oneandone.maven.plugins.prerelease.core" class="Prerelease" method="artifactFiles" externalInfoUrl="http://pmd.sourceforge.net/rules/basic.html#EmptyIfStmt" priority="3">
+Avoid empty if statements
+</violation>
+<violation beginline="313" endline="315" begincolumn="82" endcolumn="17" rule="EmptyIfStmt" ruleset="Basic Rules" package="net.oneandone.maven.plugins.prerelease.core" class="Prerelease" method="artifactFiles" externalInfoUrl="http://pmd.sourceforge.net/rules/basic.html#EmptyIfStmt" priority="3">
+Avoid empty if statements
+</violation>
+</file>
+<file name="/Users/mhm/Projects/foss/maven-prerelease-plugin/src/main/java/net/oneandone/maven/plugins/prerelease/util/ChangesXml.java">
+<violation beginline="39" endline="39" begincolumn="43" endcolumn="54" rule="UnusedPrivateField" ruleset="Unused Code Rules" package="net.oneandone.maven.plugins.prerelease.util" class="ChangesXml" variable="MONTH_FORMAT" externalInfoUrl="http://pmd.sourceforge.net/rules/unusedcode.html#UnusedPrivateField" priority="3">
+Avoid unused private fields such as 'MONTH_FORMAT'.
+</violation>
+</file>
+<file name="/Users/mhm/Projects/foss/maven-prerelease-plugin/src/main/java/net/oneandone/maven/plugins/prerelease/util/PromoteExecutionListener.java">
+<violation beginline="70" endline="72" begincolumn="12" endcolumn="5" rule="UselessOverridingMethod" ruleset="Basic Rules" package="net.oneandone.maven.plugins.prerelease.util" class="PromoteExecutionListener" externalInfoUrl="http://pmd.sourceforge.net/rules/basic.html#UselessOverridingMethod" priority="3">
+Overriding method merely calls super
+</violation>
+</file>
+<file name="/Users/mhm/Projects/foss/maven-prerelease-plugin/target/generated-sources/plugin/net/oneandone/maven/plugins/prerelease/HelpMojo.java">
+<violation beginline="20" endline="20" begincolumn="1" endcolumn="26" rule="UnusedImports" ruleset="Import Statement Rules" package="net.oneandone.maven.plugins.prerelease" externalInfoUrl="http://pmd.sourceforge.net/rules/imports.html#UnusedImports" priority="4">
+Avoid unused imports such as 'java.util.Iterator'
+</violation>
+</file>
+</pmd>
