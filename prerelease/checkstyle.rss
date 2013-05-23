@@ -1,0 +1,569 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+
+<rss version="0.91">
+  <channel>
+    <title>Maven Prerelease Plugin - Checkstyle report</title>
+    <link>https://github.com/mlhartme/maven-application-plugin</link>
+    <description>Maven Prerelease Plugin - Checkstyle report</description>
+    <language>en-us</language>
+    <copyright>&#169;2012 - 2013 1&1</copyright>
+    <item>
+      <title>File: 38,
+             Errors: 1,
+             Warnings: 0,
+             Infos: 417
+      </title>
+            <link>https://github.com/mlhartme/maven-application-plugin/checkstyle.html</link>
+      <description>
+        <p>Click <a href="https://github.com/mlhartme/maven-application-plugin/checkstyle.html">here</a> for the full Checkstyle report.</p>
+
+        <table summary="Files" boder="1">
+          <thead>
+            <tr>
+              <th>Files</th>
+              <th style="width:30px;"><abbr title="Info">I</abbr></th>
+              <th style="width:30px;"><abbr title="Warning">W</abbr></th>
+              <th style="width:30px;"><abbr title="Error">E</abbr></th>
+            </tr>
+          </thead>
+          <tbody>
+                          <tr>
+                <td>
+                  <a href="https://github.com/mlhartme/maven-application-plugin/checkstyle.html#net.oneandone.maven.plugins.prerelease.Build.java">net/oneandone/maven/plugins/prerelease/Build.java</a>
+                </td>
+                <td>
+                  4
+                </td>
+                <td>
+                  0
+                </td>
+                <td>
+                  0
+                </td>
+              </tr>
+                          <tr>
+                <td>
+                  <a href="https://github.com/mlhartme/maven-application-plugin/checkstyle.html#net.oneandone.maven.plugins.prerelease.util.PromoteExecutionListener.java">net/oneandone/maven/plugins/prerelease/util/PromoteExecutionListener.java</a>
+                </td>
+                <td>
+                  7
+                </td>
+                <td>
+                  0
+                </td>
+                <td>
+                  0
+                </td>
+              </tr>
+                          <tr>
+                <td>
+                  <a href="https://github.com/mlhartme/maven-application-plugin/checkstyle.html#net.oneandone.maven.plugins.prerelease.Update.java">net/oneandone/maven/plugins/prerelease/Update.java</a>
+                </td>
+                <td>
+                  1
+                </td>
+                <td>
+                  0
+                </td>
+                <td>
+                  0
+                </td>
+              </tr>
+                          <tr>
+                <td>
+                  <a href="https://github.com/mlhartme/maven-application-plugin/checkstyle.html#net.oneandone.maven.plugins.prerelease.BareUpdate.java">net/oneandone/maven/plugins/prerelease/BareUpdate.java</a>
+                </td>
+                <td>
+                  2
+                </td>
+                <td>
+                  0
+                </td>
+                <td>
+                  0
+                </td>
+              </tr>
+                          <tr>
+                <td>
+                  <a href="https://github.com/mlhartme/maven-application-plugin/checkstyle.html#net.oneandone.maven.plugins.prerelease.core.WorkingCopy.java">net/oneandone/maven/plugins/prerelease/core/WorkingCopy.java</a>
+                </td>
+                <td>
+                  23
+                </td>
+                <td>
+                  0
+                </td>
+                <td>
+                  1
+                </td>
+              </tr>
+                          <tr>
+                <td>
+                  <a href="https://github.com/mlhartme/maven-application-plugin/checkstyle.html#net.oneandone.maven.plugins.prerelease.util.ChangesXml.java">net/oneandone/maven/plugins/prerelease/util/ChangesXml.java</a>
+                </td>
+                <td>
+                  17
+                </td>
+                <td>
+                  0
+                </td>
+                <td>
+                  0
+                </td>
+              </tr>
+                          <tr>
+                <td>
+                  <a href="https://github.com/mlhartme/maven-application-plugin/checkstyle.html#net.oneandone.maven.plugins.prerelease.core.TagAlreadyExists.java">net/oneandone/maven/plugins/prerelease/core/TagAlreadyExists.java</a>
+                </td>
+                <td>
+                  4
+                </td>
+                <td>
+                  0
+                </td>
+                <td>
+                  0
+                </td>
+              </tr>
+                          <tr>
+                <td>
+                  <a href="https://github.com/mlhartme/maven-application-plugin/checkstyle.html#net.oneandone.maven.plugins.prerelease.UpdatePromote.java">net/oneandone/maven/plugins/prerelease/UpdatePromote.java</a>
+                </td>
+                <td>
+                  2
+                </td>
+                <td>
+                  0
+                </td>
+                <td>
+                  0
+                </td>
+              </tr>
+                          <tr>
+                <td>
+                  <a href="https://github.com/mlhartme/maven-application-plugin/checkstyle.html#net.oneandone.maven.plugins.prerelease.core.MissingDeveloperConnection.java">net/oneandone/maven/plugins/prerelease/core/MissingDeveloperConnection.java</a>
+                </td>
+                <td>
+                  2
+                </td>
+                <td>
+                  0
+                </td>
+                <td>
+                  0
+                </td>
+              </tr>
+                          <tr>
+                <td>
+                  <a href="https://github.com/mlhartme/maven-application-plugin/checkstyle.html#net.oneandone.maven.plugins.prerelease.core.CannotDeterminTagBase.java">net/oneandone/maven/plugins/prerelease/core/CannotDeterminTagBase.java</a>
+                </td>
+                <td>
+                  4
+                </td>
+                <td>
+                  0
+                </td>
+                <td>
+                  0
+                </td>
+              </tr>
+                          <tr>
+                <td>
+                  <a href="https://github.com/mlhartme/maven-application-plugin/checkstyle.html#net.oneandone.maven.plugins.prerelease.Promote.java">net/oneandone/maven/plugins/prerelease/Promote.java</a>
+                </td>
+                <td>
+                  13
+                </td>
+                <td>
+                  0
+                </td>
+                <td>
+                  0
+                </td>
+              </tr>
+                          <tr>
+                <td>
+                  <a href="https://github.com/mlhartme/maven-application-plugin/checkstyle.html#net.oneandone.maven.plugins.prerelease.core.MissingScmTag.java">net/oneandone/maven/plugins/prerelease/core/MissingScmTag.java</a>
+                </td>
+                <td>
+                  2
+                </td>
+                <td>
+                  0
+                </td>
+                <td>
+                  0
+                </td>
+              </tr>
+                          <tr>
+                <td>
+                  <a href="https://github.com/mlhartme/maven-application-plugin/checkstyle.html#net.oneandone.maven.plugins.prerelease.core.Target.java">net/oneandone/maven/plugins/prerelease/core/Target.java</a>
+                </td>
+                <td>
+                  17
+                </td>
+                <td>
+                  0
+                </td>
+                <td>
+                  0
+                </td>
+              </tr>
+                          <tr>
+                <td>
+                  <a href="https://github.com/mlhartme/maven-application-plugin/checkstyle.html#net.oneandone.maven.plugins.prerelease.core.UncommitedChanges.java">net/oneandone/maven/plugins/prerelease/core/UncommitedChanges.java</a>
+                </td>
+                <td>
+                  4
+                </td>
+                <td>
+                  0
+                </td>
+                <td>
+                  0
+                </td>
+              </tr>
+                          <tr>
+                <td>
+                  <a href="https://github.com/mlhartme/maven-application-plugin/checkstyle.html#net.oneandone.maven.plugins.prerelease.util.PrepareExecutionListener.java">net/oneandone/maven/plugins/prerelease/util/PrepareExecutionListener.java</a>
+                </td>
+                <td>
+                  6
+                </td>
+                <td>
+                  0
+                </td>
+                <td>
+                  0
+                </td>
+              </tr>
+                          <tr>
+                <td>
+                  <a href="https://github.com/mlhartme/maven-application-plugin/checkstyle.html#net.oneandone.maven.plugins.prerelease.core.Archive.java">net/oneandone/maven/plugins/prerelease/core/Archive.java</a>
+                </td>
+                <td>
+                  28
+                </td>
+                <td>
+                  0
+                </td>
+                <td>
+                  0
+                </td>
+              </tr>
+                          <tr>
+                <td>
+                  <a href="https://github.com/mlhartme/maven-application-plugin/checkstyle.html#net.oneandone.maven.plugins.prerelease.Base.java">net/oneandone/maven/plugins/prerelease/Base.java</a>
+                </td>
+                <td>
+                  14
+                </td>
+                <td>
+                  0
+                </td>
+                <td>
+                  0
+                </td>
+              </tr>
+                          <tr>
+                <td>
+                  <a href="https://github.com/mlhartme/maven-application-plugin/checkstyle.html#net.oneandone.maven.plugins.prerelease.BareBase.java">net/oneandone/maven/plugins/prerelease/BareBase.java</a>
+                </td>
+                <td>
+                  14
+                </td>
+                <td>
+                  0
+                </td>
+                <td>
+                  0
+                </td>
+              </tr>
+                          <tr>
+                <td>
+                  <a href="https://github.com/mlhartme/maven-application-plugin/checkstyle.html#net.oneandone.maven.plugins.prerelease.ProjectBase.java">net/oneandone/maven/plugins/prerelease/ProjectBase.java</a>
+                </td>
+                <td>
+                  14
+                </td>
+                <td>
+                  0
+                </td>
+                <td>
+                  0
+                </td>
+              </tr>
+                          <tr>
+                <td>
+                  <a href="https://github.com/mlhartme/maven-application-plugin/checkstyle.html#net.oneandone.maven.plugins.prerelease.core.PendingUpdates.java">net/oneandone/maven/plugins/prerelease/core/PendingUpdates.java</a>
+                </td>
+                <td>
+                  6
+                </td>
+                <td>
+                  0
+                </td>
+                <td>
+                  0
+                </td>
+              </tr>
+                          <tr>
+                <td>
+                  <a href="https://github.com/mlhartme/maven-application-plugin/checkstyle.html#net.oneandone.maven.plugins.prerelease.BareBuild.java">net/oneandone/maven/plugins/prerelease/BareBuild.java</a>
+                </td>
+                <td>
+                  2
+                </td>
+                <td>
+                  0
+                </td>
+                <td>
+                  0
+                </td>
+              </tr>
+                          <tr>
+                <td>
+                  <a href="https://github.com/mlhartme/maven-application-plugin/checkstyle.html#net.oneandone.maven.plugins.prerelease.util.PatchedBuilderCommon.java">net/oneandone/maven/plugins/prerelease/util/PatchedBuilderCommon.java</a>
+                </td>
+                <td>
+                  16
+                </td>
+                <td>
+                  0
+                </td>
+                <td>
+                  0
+                </td>
+              </tr>
+                          <tr>
+                <td>
+                  <a href="https://github.com/mlhartme/maven-application-plugin/checkstyle.html#net.oneandone.maven.plugins.prerelease.util.Subversion.java">net/oneandone/maven/plugins/prerelease/util/Subversion.java</a>
+                </td>
+                <td>
+                  10
+                </td>
+                <td>
+                  0
+                </td>
+                <td>
+                  0
+                </td>
+              </tr>
+                          <tr>
+                <td>
+                  <a href="https://github.com/mlhartme/maven-application-plugin/checkstyle.html#net.oneandone.maven.plugins.prerelease.util.Transform.java">net/oneandone/maven/plugins/prerelease/util/Transform.java</a>
+                </td>
+                <td>
+                  15
+                </td>
+                <td>
+                  0
+                </td>
+                <td>
+                  0
+                </td>
+              </tr>
+                          <tr>
+                <td>
+                  <a href="https://github.com/mlhartme/maven-application-plugin/checkstyle.html#net.oneandone.maven.plugins.prerelease.util.Maven.java">net/oneandone/maven/plugins/prerelease/util/Maven.java</a>
+                </td>
+                <td>
+                  35
+                </td>
+                <td>
+                  0
+                </td>
+                <td>
+                  0
+                </td>
+              </tr>
+                          <tr>
+                <td>
+                  <a href="https://github.com/mlhartme/maven-application-plugin/checkstyle.html#net.oneandone.maven.plugins.prerelease.BareUpdatePromote.java">net/oneandone/maven/plugins/prerelease/BareUpdatePromote.java</a>
+                </td>
+                <td>
+                  7
+                </td>
+                <td>
+                  0
+                </td>
+                <td>
+                  0
+                </td>
+              </tr>
+                          <tr>
+                <td>
+                  <a href="https://github.com/mlhartme/maven-application-plugin/checkstyle.html#net.oneandone.maven.plugins.prerelease.Locksmith.java">net/oneandone/maven/plugins/prerelease/Locksmith.java</a>
+                </td>
+                <td>
+                  10
+                </td>
+                <td>
+                  0
+                </td>
+                <td>
+                  0
+                </td>
+              </tr>
+                          <tr>
+                <td>
+                  <a href="https://github.com/mlhartme/maven-application-plugin/checkstyle.html#net.oneandone.maven.plugins.prerelease.core.RevisionMismatch.java">net/oneandone/maven/plugins/prerelease/core/RevisionMismatch.java</a>
+                </td>
+                <td>
+                  2
+                </td>
+                <td>
+                  0
+                </td>
+                <td>
+                  0
+                </td>
+              </tr>
+                          <tr>
+                <td>
+                  <a href="https://github.com/mlhartme/maven-application-plugin/checkstyle.html#net.oneandone.maven.plugins.prerelease.util.BuildException.java">net/oneandone/maven/plugins/prerelease/util/BuildException.java</a>
+                </td>
+                <td>
+                  3
+                </td>
+                <td>
+                  0
+                </td>
+                <td>
+                  0
+                </td>
+              </tr>
+                          <tr>
+                <td>
+                  <a href="https://github.com/mlhartme/maven-application-plugin/checkstyle.html#net.oneandone.maven.plugins.prerelease.core.VersioningProblem.java">net/oneandone/maven/plugins/prerelease/core/VersioningProblem.java</a>
+                </td>
+                <td>
+                  4
+                </td>
+                <td>
+                  0
+                </td>
+                <td>
+                  0
+                </td>
+              </tr>
+                          <tr>
+                <td>
+                  <a href="https://github.com/mlhartme/maven-application-plugin/checkstyle.html#net.oneandone.maven.plugins.prerelease.core.BaseExecutionListener.java">net/oneandone/maven/plugins/prerelease/core/BaseExecutionListener.java</a>
+                </td>
+                <td>
+                  3
+                </td>
+                <td>
+                  0
+                </td>
+                <td>
+                  0
+                </td>
+              </tr>
+                          <tr>
+                <td>
+                  <a href="https://github.com/mlhartme/maven-application-plugin/checkstyle.html#net.oneandone.maven.plugins.prerelease.core.SvnUrlMismatch.java">net/oneandone/maven/plugins/prerelease/core/SvnUrlMismatch.java</a>
+                </td>
+                <td>
+                  2
+                </td>
+                <td>
+                  0
+                </td>
+                <td>
+                  0
+                </td>
+              </tr>
+                          <tr>
+                <td>
+                  <a href="https://github.com/mlhartme/maven-application-plugin/checkstyle.html#net.oneandone.maven.plugins.prerelease.core.Prerelease.java">net/oneandone/maven/plugins/prerelease/core/Prerelease.java</a>
+                </td>
+                <td>
+                  35
+                </td>
+                <td>
+                  0
+                </td>
+                <td>
+                  0
+                </td>
+              </tr>
+                          <tr>
+                <td>
+                  <a href="https://github.com/mlhartme/maven-application-plugin/checkstyle.html#net.oneandone.maven.plugins.prerelease.core.Project.java">net/oneandone/maven/plugins/prerelease/core/Project.java</a>
+                </td>
+                <td>
+                  15
+                </td>
+                <td>
+                  0
+                </td>
+                <td>
+                  0
+                </td>
+              </tr>
+                          <tr>
+                <td>
+                  <a href="https://github.com/mlhartme/maven-application-plugin/checkstyle.html#net.oneandone.maven.plugins.prerelease.core.Descriptor.java">net/oneandone/maven/plugins/prerelease/core/Descriptor.java</a>
+                </td>
+                <td>
+                  64
+                </td>
+                <td>
+                  0
+                </td>
+                <td>
+                  0
+                </td>
+              </tr>
+                          <tr>
+                <td>
+                  <a href="https://github.com/mlhartme/maven-application-plugin/checkstyle.html#net.oneandone.maven.plugins.prerelease.Lst.java">net/oneandone/maven/plugins/prerelease/Lst.java</a>
+                </td>
+                <td>
+                  1
+                </td>
+                <td>
+                  0
+                </td>
+                <td>
+                  0
+                </td>
+              </tr>
+                          <tr>
+                <td>
+                  <a href="https://github.com/mlhartme/maven-application-plugin/checkstyle.html#net.oneandone.maven.plugins.prerelease.core.CannotBumpVersion.java">net/oneandone/maven/plugins/prerelease/core/CannotBumpVersion.java</a>
+                </td>
+                <td>
+                  5
+                </td>
+                <td>
+                  0
+                </td>
+                <td>
+                  0
+                </td>
+              </tr>
+                          <tr>
+                <td>
+                  <a href="https://github.com/mlhartme/maven-application-plugin/checkstyle.html#net.oneandone.maven.plugins.prerelease.Create.java">net/oneandone/maven/plugins/prerelease/Create.java</a>
+                </td>
+                <td>
+                  4
+                </td>
+                <td>
+                  0
+                </td>
+                <td>
+                  0
+                </td>
+              </tr>
+                      </tbody>
+        </table>
+        
+      </description>
+    </item>
+  </channel>
+</rss>
+
