@@ -15,20 +15,24 @@
  */
 package net.oneandone.maven.plugins.prerelease;
 
+import net.oneandone.maven.plugins.prerelease.core.Prerelease;
 import net.oneandone.maven.plugins.prerelease.util.IntegrationBase;
+import net.oneandone.sushi.fs.World;
 import net.oneandone.sushi.fs.file.FileNode;
 import org.junit.Test;
 
 public class MojoIT extends IntegrationBase {
+    private final String PREFIX = "net.oneandone.maven.plugins:prerelease:" + System.getProperty("prerelease.version") + ":";
+
     @Test
     public void minimal() throws Exception {
         FileNode checkout;
 
         checkout = checkoutProject("minimal");
-        mvn(checkout, "prerelease:list");
-        mvn(checkout, "prerelease:create");
-        mvn(checkout, "prerelease:update");
-        mvn(checkout, "prerelease:update");
-        mvn(checkout, "prerelease:promote");
+        mvn(checkout, PREFIX + "list");
+        mvn(checkout, PREFIX + "create");
+        mvn(checkout, PREFIX + "update");
+        mvn(checkout, PREFIX + "update");
+        mvn(checkout, PREFIX + "promote");
     }
 }

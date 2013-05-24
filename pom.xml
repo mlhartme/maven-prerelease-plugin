@@ -202,13 +202,9 @@
       </plugin>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-jar-plugin</artifactId>
+        <artifactId>maven-failsafe-plugin</artifactId>
         <configuration>
-          <archive>
-            <manifest>
-              <addDefaultImplementationEntries>true</addDefaultImplementationEntries>
-            </manifest>
-          </archive>
+          <argLine>-Dprerelease.version=${project.version}</argLine>
         </configuration>
       </plugin>
     </plugins>
