@@ -9,7 +9,7 @@
   </parent>
   <groupId>net.oneandone.maven.plugins</groupId>
   <artifactId>prerelease</artifactId>
-  <version>1.5.1-SNAPSHOT</version>
+  <version>1.5.1</version>
   <packaging>maven-plugin</packaging>
 
   <name>Maven Prerelease Plugin</name>
@@ -37,7 +37,7 @@
     <connection>scm:git:ssh://git@github.com/mlhartme/maven-prerelease-plugin.git</connection>
     <developerConnection>scm:git:ssh://git@github.com/mlhartme/maven-prerelease-plugin.git</developerConnection>
     <url>scm:git:ssh://git@github.com/mlhartme/maven-prerelease-plugin</url>
-    <tag>HEAD</tag>
+    <tag>prerelease-1.5.1</tag>
   </scm>
   <dependencies>
     <dependency>
