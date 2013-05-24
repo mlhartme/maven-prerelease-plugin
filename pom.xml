@@ -18,7 +18,7 @@
   <url>https://github.com/mlhartme/maven-application-plugin</url>
   <properties>
     <aetherVersion>1.13.1</aetherVersion>
-    <mavenVersion>3.0.5</mavenVersion>
+    <mavenVersion>3.0.4</mavenVersion>
     <wsd.ypid>20236</wsd.ypid>
     <oneandone.java.source>1.7</oneandone.java.source>
     <oneandone.java.target>1.7</oneandone.java.target>
@@ -81,15 +81,21 @@
       <groupId>org.apache.maven</groupId>
       <artifactId>maven-compat</artifactId>
       <version>${mavenVersion}</version>
+      <exclusions>
+        <exclusion><!-- exclude 2.2, the other dependencies bring 2.4 -->
+          <groupId>org.apache.maven.wagon</groupId>
+          <artifactId>wagon-provider-api</artifactId>
+        </exclusion>
+      </exclusions>
     </dependency>
 
     <dependency>
       <groupId>org.sonatype.sisu</groupId>
       <artifactId>sisu-inject-plexus</artifactId>
-      <version>2.2.3</version>
+      <version>2.3.0</version>
     </dependency>
 
-    <!-- repository access: aether -->
+    <!-- repository access: -->
     <dependency>
       <groupId>org.sonatype.aether</groupId>
       <artifactId>aether-api</artifactId>
