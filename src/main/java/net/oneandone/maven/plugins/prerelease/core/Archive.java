@@ -176,8 +176,8 @@ public class Archive implements AutoCloseable {
         return pid;
     }
 
-    /** @return true to indicate missing actions */
-    public static boolean adjustChanges(FileNode workingCopy, String version) throws XmlException, IOException, SAXException {
+    /** @return true when a changes file was found */
+    public static boolean adjustChangesOpt(FileNode workingCopy, String version) throws XmlException, IOException, SAXException {
         ChangesXml changes;
 
         try {
@@ -187,6 +187,6 @@ public class Archive implements AutoCloseable {
         }
         changes.releaseDate(version, new Date());
         changes.save();
-        return changes.actions(version) == 0;
+        return true;
     }
 }

@@ -4,6 +4,9 @@
       <action date="2013-05-23" dev="mhm" type="fix">
         Attached artifacts got the wrong type.
       </action>
+      <action date="2013-05-23" dev="mhm" type="fix">
+        Automatically adds a new release to the changes file when necessary.
+      </action>
     </release>
     <release date="2013-05-21" version="1.5.0">
       <action date="2013-04-30" dev="mhm" type="update">

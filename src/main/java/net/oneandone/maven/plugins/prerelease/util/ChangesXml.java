@@ -15,7 +15,6 @@
  */
 package net.oneandone.maven.plugins.prerelease.util;
 
-import net.oneandone.sushi.cli.ArgumentException;
 import net.oneandone.sushi.fs.file.FileNode;
 import net.oneandone.sushi.xml.Selector;
 import net.oneandone.sushi.xml.XmlException;
@@ -36,7 +35,6 @@ public class ChangesXml {
     public static final String PATH = "src/changes/changes.xml";
 
     private static final SimpleDateFormat FORMAT = new SimpleDateFormat("yyyy-MM-dd");
-    private static final SimpleDateFormat MONTH_FORMAT = new SimpleDateFormat("yyyy-MM");
 
     public static ChangesXml load(FileNode basedir) throws IOException, SAXException {
         FileNode dest;
@@ -74,78 +72,18 @@ public class ChangesXml {
         });
     }
 
-    public void addAction(String version, Date date, String type, String message, String username) throws XmlException {
-        Element firstRelease;
-        Element release;
-        Element action;
-        String str;
-
-        firstRelease = selector.element(doc, "/a:document/a:body/a:release[1]");
-        str = firstRelease.getAttribute("version");
-        if (version.equals(str)) {
-            release = firstRelease;
-        } else {
-            release = doc.createElementNS(NAMESPACE_URI, "release");
-            release.setAttribute("version", version);
-            firstRelease.getParentNode().insertBefore(release, firstRelease);
-        }
-        action = doc.createElementNS(NAMESPACE_URI, "action");
-        action.setAttribute("dev", username);
-        action.setAttribute("type", type);
-        action.setAttribute("date", FORMAT.format(date));
-        action.setTextContent("\n        " + message + "\n      ");
-        release.insertBefore(action, selector.elementOpt(release, "a:action[1]"));
-    }
-
-    public String getDescription(String version) throws XmlException {
-        Element release;
-
-        release = releaseOpt(version);
-        if (release == null) {
-            throw new ArgumentException("no such version: " + version);
-        }
-        return release.getAttribute("description");
-    }
-
-    public void setDescription(String version, String message) throws XmlException {
+    public void releaseDate(String version, Date date) throws XmlException {
         Element release;
         Element body;
 
-        release = releaseOpt(version);
+        release = selector.elementOpt(doc, "/a:document/a:body/a:release[@version='" + version + "']");
         if (release == null) {
             release = doc.createElementNS(NAMESPACE_URI, "release");
             release.setAttribute("version", version);
             body = selector.element(doc, "/a:document/a:body");
             body.insertBefore(release, body.getFirstChild());
         }
-        if (message == null) {
-            release.removeAttribute("description");
-        } else {
-            release.setAttribute("description", message);
-        }
-    }
-
-    public boolean releaseDate(String version, Date date) throws XmlException {
-        Element release;
-
-        release = releaseOpt(version);
-        if (release == null) {
-            return false;
-        } else {
-            release.setAttribute("date", FORMAT.format(date));
-            return true;
-        }
-    }
-
-    public int actions(String version) throws XmlException {
-        Element release;
-
-        release = releaseOpt(version);
-        return release == null ? 0 : selector.elements(release, "a:action").size();
-    }
-
-    private Element releaseOpt(String version) throws XmlException {
-        return selector.elementOpt(doc, "/a:document/a:body/a:release[@version='" + version + "']");
+        release.setAttribute("date", FORMAT.format(date));
     }
 
     public void save() throws IOException {

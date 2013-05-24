@@ -80,7 +80,7 @@ public class Prerelease {
             prerelease.descriptor.save(target);
             Transform.adjustPom(prerelease.checkout.join("pom.xml"), descriptor.previous, descriptor.project.version,
                     descriptor.svnOrig, descriptor.svnTag);
-            Archive.adjustChanges(prerelease.checkout, prerelease.descriptor.project.version);
+            Archive.adjustChangesOpt(prerelease.checkout, prerelease.descriptor.project.version);
             prerelease.create(maven);
             log.info("created prerelease in " + prerelease.target);
         } catch (Exception e) {
