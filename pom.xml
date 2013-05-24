@@ -22,7 +22,6 @@
     <wsd.ypid>20236</wsd.ypid>
     <oneandone.java.source>1.7</oneandone.java.source>
     <oneandone.java.target>1.7</oneandone.java.target>
-    <enforcer.skip>true</enforcer.skip><!-- TODO: dependency convergence -->
   </properties>
   <developers>
     <developer>
@@ -51,12 +50,6 @@
       <version>2.4</version>
     </dependency>
 
-    <dependency>
-      <!-- not used directly, but I want to force using the latest version in the dependency tree:-->
-      <groupId>org.codehaus.plexus</groupId>
-      <artifactId>plexus-utils</artifactId>
-      <version>2.0.7</version>
-    </dependency>
     <dependency>
       <!-- not used directly, but I want to force using the latest version in the dependency tree:-->
       <!-- https://docs.sonatype.org/display/AETHER/Home also adds
