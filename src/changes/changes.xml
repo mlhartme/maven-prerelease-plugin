@@ -1,6 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?><document xmlns="http://maven.apache.org/changes/1.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/changes/1.0.0 http://maven.apache.org/xsd/changes-1.0.0.xsd">
   <body>
-    <release date="2013-05-23" version="1.5.0">
+    <release date="2013-06-17" version="1.5.2">
+      <action date="2013-06-17" dev="mhm" type="fix">
+        performRelease property was missing.
+      </action>
+    </release>
+    <release date="2013-05-23" version="1.5.1">
       <action date="2013-05-23" dev="mhm" type="fix">
         Attached artifacts got the wrong type.
       </action>

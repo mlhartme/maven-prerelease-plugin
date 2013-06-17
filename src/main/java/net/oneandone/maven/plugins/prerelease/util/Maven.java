@@ -52,6 +52,14 @@ import java.util.Map;
 import java.util.Properties;
 
 public class Maven {
+    public static Map<String, String> releaseProps() {
+        Map<String, String> props;
+
+        props = new HashMap<>();
+        props.put("performRelease", "true");
+        return props;
+    }
+
     private final World world;
     private final MavenSession parentSession;
     private final ExecutionListener executionListener;
@@ -181,7 +189,10 @@ public class Maven {
 
         builder = new StringBuilder();
         for (Map.Entry<Object, Object> entry : props.entrySet()) {
-            builder.append("-D").append(entry.getKey()).append('=').append(entry.getValue());
+            builder.append("-D").append(entry.getKey());
+            if (!((String) entry.getValue()).isEmpty()) {
+                builder.append('=').append(entry.getValue());
+            }
             builder.append(' ');
         }
         return builder.toString();
@@ -235,7 +246,7 @@ public class Maven {
 
         listener = new PromoteExecutionListener(prerelease, projectHelper, executionListener);
         try {
-            build(prerelease.checkout, new HashMap<String, String>(), listener, true, "deploy");
+            build(prerelease.checkout, releaseProps(), listener, true, "deploy");
         } catch (BuildException e) {
             if (listener.isFirstSuccess()) {
                 log.warn("Promote succeeded: your artifacts have been deployed, and your svn tag was created. ");

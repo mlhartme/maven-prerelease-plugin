@@ -27,6 +27,15 @@
     </snapshotRepository>
   </distributionManagement>
 
+  <!-- TODO: this repo is in it/settings.xml !? -->
+  <repositories>
+    <repository>
+      <id>apachesnapshots</id>
+      <url>http://repository.apache.org/snapshots/</url>
+      <releases><enabled>false</enabled></releases>
+    </repository>
+  </repositories>
+
   <build>
     <plugins>
       <plugin>

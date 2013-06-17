@@ -215,7 +215,7 @@ public class Prerelease {
 
         // no "clean" because we have a vanilla directory from svn
         try {
-            maven.build(checkout, new HashMap<String, String>(), new PrepareExecutionListener(this, maven.getExecutionListener()), false, "install");
+            maven.build(checkout, maven.releaseProps(), new PrepareExecutionListener(this, maven.getExecutionListener()), false, "install");
         } finally {
             installed = descriptor.project.localRepo(maven);
             if (installed.exists()) {
