@@ -1,5 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?><document xmlns="http://maven.apache.org/changes/1.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/changes/1.0.0 http://maven.apache.org/xsd/changes-1.0.0.xsd">
   <body>
+    <release date="2013-07-xx" version="1.5.3">
+      <action date="2013-07-09" dev="mhm" type="fix">
+        Accept projects without url or name in their pom.
+      </action>
+    </release>
     <release date="2013-06-17" version="1.5.2">
       <action date="2013-06-17" dev="mhm" type="fix">
         performRelease property was missing.

@@ -173,8 +173,8 @@ public class Descriptor {
                 + "::" + deployRepository.getContentType() + "::" + deployRepository.getUrl());
         properties.setProperty(DEPLOY_PLUGIN_METADATA, Boolean.toString(deployPluginMetadata));
         properties.setProperty(PREVIOUS, previous);
-        properties.setProperty(PROJECT_NAME, project.name);
-        properties.setProperty(PROJECT_URL, project.url);
+        properties.setProperty(PROJECT_NAME, orEmpty(project.name));
+        properties.setProperty(PROJECT_URL, orEmpty(project.url));
         properties.setProperty(PROJECT_GROUP_ID, project.groupId);
         properties.setProperty(PROJECT_ARTIFACT_ID, project.artifactId);
         properties.setProperty(PROJECT_VERSION, project.version);
@@ -185,6 +185,10 @@ public class Descriptor {
         dest = file(target).createOutputStream(false);
         properties.store(dest, "");
         dest.close();
+    }
+
+    private static String orEmpty(String str) {
+        return str == null ? "" : str;
     }
 
     //-- utility code
