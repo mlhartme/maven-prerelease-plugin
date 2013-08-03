@@ -2,6 +2,9 @@
   <body>
     <release date="2013-07-xx" version="1.5.3">
       <action date="2013-07-09" dev="mhm" type="fix">
+        Proper error message when running in none-svn workspace.
+      </action>
+      <action date="2013-07-09" dev="mhm" type="fix">
         Accept projects without url or name in their pom.
       </action>
     </release>

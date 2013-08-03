@@ -79,7 +79,7 @@ public class WorkingCopy {
             }
         }
         if (changes.size() == 0) {
-            throw new IllegalStateException("no changes at all");
+            throw new IOException("Cannot determine svn status - is this directory under svn?");
         }
         if (revisions.size() == 0) {
             throw new IllegalStateException();
