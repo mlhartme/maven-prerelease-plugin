@@ -16,8 +16,8 @@
 package net.oneandone.maven.plugins.prerelease;
 
 import net.oneandone.maven.plugins.prerelease.core.Prerelease;
+import org.apache.maven.artifact.Artifact;
 import org.junit.Test;
-import org.sonatype.aether.artifact.Artifact;
 
 import static org.junit.Assert.assertEquals;
 
@@ -30,14 +30,14 @@ public class PrereleaseTest {
                 "net.oneandone.maven.plugins.prerelease.maven.plugins", "prerelease", "1.0.0", "jar", "foo");
     }
 
-    private void check(String path, String groupId, String artifactId, String version, String extension, String classifier) {
+    private void check(String path, String groupId, String artifactId, String version, String type, String classifier) {
         Artifact artifact;
 
         artifact = Prerelease.artifact(path);
         assertEquals(groupId, artifact.getGroupId());
         assertEquals(artifactId, artifact.getArtifactId());
         assertEquals(version, artifact.getVersion());
-        assertEquals(extension, artifact.getExtension());
+        assertEquals(type, artifact.getType());
         assertEquals(classifier, artifact.getClassifier());
     }
 }

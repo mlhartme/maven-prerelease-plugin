@@ -28,12 +28,12 @@ import net.oneandone.sushi.util.Strings;
 import net.oneandone.sushi.util.Substitution;
 import net.oneandone.sushi.util.SubstitutionException;
 import net.oneandone.sushi.xml.XmlException;
+import org.apache.maven.artifact.Artifact;
+import org.apache.maven.artifact.DefaultArtifact;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.logging.Log;
 import org.apache.maven.project.MavenProject;
 import org.apache.maven.project.MavenProjectHelper;
-import org.sonatype.aether.artifact.Artifact;
-import org.sonatype.aether.util.artifact.DefaultArtifact;
 import org.xml.sax.SAXException;
 
 import java.io.IOException;
@@ -174,7 +174,7 @@ public class Prerelease {
             }
             classifier = name.substring(1);
         }
-        return new DefaultArtifact(groupId, artifactId, classifier, extension, version);
+        return new DefaultArtifact(groupId, artifactId, version, null, extension, classifier, null /* TODO? */);
     }
 
     public FileNode prepareOrigCommit(Log log) throws IOException, XmlException, SAXException, MojoExecutionException {

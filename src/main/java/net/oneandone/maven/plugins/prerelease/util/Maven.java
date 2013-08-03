@@ -19,6 +19,7 @@ import net.oneandone.maven.plugins.prerelease.core.Prerelease;
 import net.oneandone.sushi.fs.World;
 import net.oneandone.sushi.fs.file.FileNode;
 import net.oneandone.sushi.util.Separator;
+import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.repository.ArtifactRepository;
 import org.apache.maven.execution.DefaultMavenExecutionRequest;
 import org.apache.maven.execution.ExecutionListener;
@@ -40,8 +41,6 @@ import org.apache.maven.settings.Server;
 import org.codehaus.plexus.DefaultPlexusContainer;
 import org.codehaus.plexus.component.repository.exception.ComponentLookupException;
 import org.codehaus.plexus.logging.Logger;
-import org.sonatype.aether.RepositorySystemSession;
-import org.sonatype.aether.artifact.Artifact;
 
 import java.io.PrintStream;
 import java.util.ArrayList;
@@ -62,32 +61,29 @@ public class Maven {
 
     private final World world;
     private final MavenSession parentSession;
+    private final ArtifactRepository localRepository;
     private final ExecutionListener executionListener;
     private final MavenProjectHelper projectHelper;
-    private final RepositorySystemSession repositorySession;
     private final List<ArtifactRepository> remoteLegacy; // needed to load poms :(
 
     // TODO: use a project builder that works without legacy classes, esp. without ArtifactRepository ...
     // As far as I know, there's no such project builder in mvn 3.0.2.
     private final ProjectBuilder builder;
 
-    public Maven(World world, MavenSession parentSession, ExecutionListener executionListener, MavenProjectHelper projectHelper,
-                 RepositorySystemSession repositorySession, ProjectBuilder builder, List<ArtifactRepository> remoteLegacy) {
+    public Maven(World world, MavenSession parentSession, ArtifactRepository localRepository,
+                 ExecutionListener executionListener, MavenProjectHelper projectHelper,
+                 ProjectBuilder builder, List<ArtifactRepository> remoteLegacy) {
         this.world = world;
         this.parentSession = parentSession;
+        this.localRepository = localRepository;
         this.executionListener = executionListener;
         this.projectHelper = projectHelper;
-        this.repositorySession = repositorySession;
         this.builder = builder;
         this.remoteLegacy = remoteLegacy;
     }
 
     public FileNode getLocalRepositoryDir() {
-        return world.file(repositorySession.getLocalRepository().getBasedir());
-    }
-
-    public FileNode getLocalRepositoryFile(Artifact artifact) {
-        return getLocalRepositoryDir().join(repositorySession.getLocalRepositoryManager().getPathForLocalArtifact(artifact));
+        return world.file(localRepository.getBasedir());
     }
 
     public ExecutionListener getExecutionListener() {
@@ -277,8 +273,8 @@ public class Maven {
         ProjectBuildingRequest request;
         ProjectBuildingResult result;
 
-        request = new DefaultProjectBuildingRequest();
-        request.setRepositorySession(repositorySession);
+        // session initializes the repository session in the build request
+        request = new DefaultProjectBuildingRequest(parentSession.getProjectBuildingRequest());
         request.setRemoteRepositories(remoteLegacy);
         request.setProcessPlugins(false);
         request.setValidationLevel(ModelBuildingRequest.VALIDATION_LEVEL_MINIMAL);

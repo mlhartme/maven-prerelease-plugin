@@ -25,7 +25,6 @@ import org.apache.maven.plugins.annotations.Component;
 import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.project.MavenProjectHelper;
 import org.apache.maven.project.ProjectBuilder;
-import org.sonatype.aether.RepositorySystemSession;
 
 import java.util.List;
 
@@ -48,14 +47,11 @@ public abstract class Base extends AbstractMojo {
     @Component
     private MavenProjectHelper projectHelper;
 
-    /**
-     * The current repository/network configuration of Maven.
-     */
-    @Parameter(property = "repositorySystemSession", readonly = true)
-    private RepositorySystemSession repositorySession;
-
     @Parameter(property = "project.remoteArtifactRepositories", readonly = true)
     private List<ArtifactRepository> remoteRepositories;
+
+    @Parameter( defaultValue = "${localRepository}", readonly = true, required = true )
+    private ArtifactRepository localRepository;
 
     @Component
     protected MavenSession session;
@@ -81,6 +77,7 @@ public abstract class Base extends AbstractMojo {
     public abstract void doExecute() throws Exception;
 
     protected Maven maven() {
-        return new Maven(world, session, session.getRequest().getExecutionListener(), projectHelper, repositorySession, projectBuilder, remoteRepositories);
+        return new Maven(world, session, localRepository,
+                session.getRequest().getExecutionListener(), projectHelper, projectBuilder, remoteRepositories);
     }
 }
