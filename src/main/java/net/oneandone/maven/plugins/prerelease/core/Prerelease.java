@@ -28,8 +28,6 @@ import net.oneandone.sushi.util.Strings;
 import net.oneandone.sushi.util.Substitution;
 import net.oneandone.sushi.util.SubstitutionException;
 import net.oneandone.sushi.xml.XmlException;
-import org.apache.maven.artifact.Artifact;
-import org.apache.maven.artifact.DefaultArtifact;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.logging.Log;
 import org.apache.maven.project.MavenProject;
@@ -128,53 +126,6 @@ public class Prerelease {
                 + " promoted by " + by, descriptor.svnTag);
         log.info(launcher.toString());
         log.info(launcher.exec());
-    }
-
-    public static Artifact artifact(String origPath) {
-        int idx;
-        String extension;
-        String path;
-        String version;
-        String name;
-        String artifactId;
-        String groupId;
-        String classifier;
-
-        idx = origPath.lastIndexOf('/');
-        if (idx == -1) {
-            throw new IllegalArgumentException(origPath);
-        }
-        path = origPath.substring(0, idx);
-        name = origPath.substring(idx + 1);
-
-        idx = path.lastIndexOf('/');
-        if (idx == -1) {
-            throw new IllegalArgumentException(origPath);
-        }
-        version = path.substring(idx + 1);
-        path = path.substring(0, idx);
-        idx = path.lastIndexOf('/');
-        if (idx == -1) {
-            throw new IllegalArgumentException(origPath);
-        }
-        artifactId = path.substring(idx + 1);
-        groupId = path.substring(0, idx).replace('/', '.');
-
-        idx = name.lastIndexOf('.');
-        if (idx == -1) {
-            throw new IllegalArgumentException(origPath);
-        }
-        extension = name.substring(idx + 1);
-        name = Strings.removeLeft(name.substring(0, idx), artifactId + "-" + version);
-        if (name.isEmpty()) {
-            classifier = null;
-        } else {
-            if (!name.startsWith("-")) {
-                throw new IllegalArgumentException(origPath);
-            }
-            classifier = name.substring(1);
-        }
-        return new DefaultArtifact(groupId, artifactId, version, null, extension, classifier, null /* TODO? */);
     }
 
     public FileNode prepareOrigCommit(Log log) throws IOException, XmlException, SAXException, MojoExecutionException {
