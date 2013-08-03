@@ -22,8 +22,8 @@ import net.oneandone.sushi.launcher.ExitCode;
 import net.oneandone.sushi.launcher.Failure;
 import net.oneandone.sushi.launcher.Launcher;
 import org.apache.maven.artifact.repository.ArtifactRepository;
+import org.apache.maven.artifact.repository.ArtifactRepositoryFactory;
 import org.apache.maven.artifact.repository.ArtifactRepositoryPolicy;
-import org.apache.maven.artifact.repository.DefaultArtifactRepository;
 import org.apache.maven.artifact.repository.layout.DefaultRepositoryLayout;
 import org.apache.maven.project.ProjectBuilder;
 import org.codehaus.plexus.DefaultContainerConfiguration;
@@ -211,20 +211,26 @@ public class IntegrationBase {
 
     public static Maven maven(World world) {
         DefaultPlexusContainer container;
+        ArtifactRepositoryFactory factory;
         ArtifactRepository central;
         ArtifactRepository snapshots;
         ArtifactRepository local;
 
         container = container(null, null, Logger.LEVEL_DISABLED);
-        central = new DefaultArtifactRepository("central", "http://repo1.maven.org/maven2", new DefaultRepositoryLayout(),
+        try {
+            factory = container.lookup(ArtifactRepositoryFactory.class);
+        } catch (ComponentLookupException e) {
+            throw new IllegalStateException(e);
+        }
+        central = factory.createArtifactRepository("central", "http://repo1.maven.org/maven2", new DefaultRepositoryLayout(),
                 new ArtifactRepositoryPolicy(false, ArtifactRepositoryPolicy.UPDATE_POLICY_DAILY, ArtifactRepositoryPolicy.CHECKSUM_POLICY_WARN),
                 new ArtifactRepositoryPolicy(true, ArtifactRepositoryPolicy.UPDATE_POLICY_NEVER, ArtifactRepositoryPolicy.CHECKSUM_POLICY_WARN)
         );
-        snapshots = new DefaultArtifactRepository("apache-snapshots", "http://repository.apache.org/snapshots/", new DefaultRepositoryLayout(),
+        snapshots = factory.createArtifactRepository("apache-snapshots", "http://repository.apache.org/snapshots/", new DefaultRepositoryLayout(),
                 new ArtifactRepositoryPolicy(true, ArtifactRepositoryPolicy.UPDATE_POLICY_DAILY, ArtifactRepositoryPolicy.CHECKSUM_POLICY_WARN),
                 new ArtifactRepositoryPolicy(false, ArtifactRepositoryPolicy.UPDATE_POLICY_NEVER, ArtifactRepositoryPolicy.CHECKSUM_POLICY_WARN)
         );
-        local = new DefaultArtifactRepository("local", defaultLocalRepositoryDir(world).getURI().toASCIIString(),
+        local = factory.createArtifactRepository("local", defaultLocalRepositoryDir(world).getURI().toASCIIString(),
                 new DefaultRepositoryLayout(),
                 new ArtifactRepositoryPolicy(true, ArtifactRepositoryPolicy.UPDATE_POLICY_DAILY, ArtifactRepositoryPolicy.CHECKSUM_POLICY_WARN),
                 new ArtifactRepositoryPolicy(true, ArtifactRepositoryPolicy.UPDATE_POLICY_NEVER, ArtifactRepositoryPolicy.CHECKSUM_POLICY_WARN));
