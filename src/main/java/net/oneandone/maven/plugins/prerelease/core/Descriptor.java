@@ -20,9 +20,6 @@ import net.oneandone.sushi.fs.World;
 import net.oneandone.sushi.fs.file.FileNode;
 import net.oneandone.sushi.util.Strings;
 import org.apache.maven.artifact.Artifact;
-import org.apache.maven.artifact.repository.ArtifactRepository;
-import org.apache.maven.artifact.repository.DefaultArtifactRepository;
-import org.apache.maven.artifact.repository.layout.DefaultRepositoryLayout;
 import org.apache.maven.model.Dependency;
 import org.apache.maven.model.DeploymentRepository;
 import org.apache.maven.model.Scm;
@@ -62,7 +59,7 @@ public class Descriptor {
         return new Descriptor(target.getRevision(), get(properties, SVN_ORIG), get(properties, SVN_TAG),
                 new Project(get(properties, PROJECT_NAME), get(properties, PROJECT_URL),
                         get(properties, PROJECT_GROUP_ID), get(properties, PROJECT_ARTIFACT_ID), get(properties, PROJECT_VERSION)),
-                repo(get(properties, DEPLOY_REPOSITORY)), "true".equals(get(properties, DEPLOY_PLUGIN_METADATA)),
+                get(properties, DEPLOY_REPOSITORY), "true".equals(get(properties, DEPLOY_PLUGIN_METADATA)),
                 get(properties, PREVIOUS), get(properties, NEXT),
                 getProperties(properties, DEPLOY_PROPERTIES));
     }
@@ -78,8 +75,7 @@ public class Descriptor {
         svnTag = tagurl(svnOrig, mavenProject);
         project = Project.forMavenProject(mavenProject, releaseVersion(mavenProject));
         repo = mavenProject.getDistributionManagement().getRepository();
-        return new Descriptor(revision, svnOrig, svnTag, project, new DefaultArtifactRepository(repo.getId(),
-                Strings.removeLeftOpt(repo.getUrl(), "dav:"), new DefaultRepositoryLayout()),
+        return new Descriptor(revision, svnOrig, svnTag, project, repo.getId() + "::" + repo.getUrl(),
                 "maven-plugin".equals(mavenProject.getPackaging()), mavenProject.getVersion(), next(project.version),
                 new HashMap<String, String>());
     }
@@ -97,13 +93,13 @@ public class Descriptor {
     public final String svnOrig;
     public final String svnTag;
     public final Project project;
-    public final ArtifactRepository deployRepository;
+    public final String deployRepository;
     public final boolean deployPluginMetadata;
     public final String previous;
     public final String next;
     public final Map<String, String> deployProperties;
 
-    public Descriptor(long revision, String svnOrig, String svnTag, Project project, ArtifactRepository deployRepository,
+    public Descriptor(long revision, String svnOrig, String svnTag, Project project, String deployRepository,
                       boolean deployPluginMetadata, String previous, String next, Map<String, String> deployProperties) {
         if (svnOrig.endsWith("/")) {
             throw new IllegalArgumentException(svnOrig);
@@ -171,7 +167,7 @@ public class Descriptor {
         properties = new Properties();
         properties.setProperty(SVN_ORIG, svnOrig);
         properties.setProperty(SVN_TAG, svnTag);
-        properties.setProperty(DEPLOY_REPOSITORY, deployRepository.getId() + "::" + deployRepository.getUrl());
+        properties.setProperty(DEPLOY_REPOSITORY, deployRepository);
         properties.setProperty(DEPLOY_PLUGIN_METADATA, Boolean.toString(deployPluginMetadata));
         properties.setProperty(PREVIOUS, previous);
         properties.setProperty(PROJECT_NAME, orEmpty(project.name));
@@ -256,17 +252,6 @@ public class Descriptor {
         return version.substring(0, idx + 1) + num + "-SNAPSHOT";
     }
 
-
-    private static ArtifactRepository repo(String str) throws IOException {
-        String[] parts;
-
-        parts = str.split("::");
-        if (parts.length != 2) {
-            throw new IllegalStateException(str);
-        }
-        // TODO: 3rd part is ignored
-        return new DefaultArtifactRepository(parts[0], parts[1], new DefaultRepositoryLayout());
-    }
 
     private static String get(Properties properties, String key) {
         String value;
