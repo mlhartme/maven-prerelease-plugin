@@ -38,9 +38,7 @@ import org.codehaus.plexus.classworlds.realm.ClassRealm;
 import org.codehaus.plexus.component.repository.exception.ComponentLookupException;
 import org.codehaus.plexus.logging.Logger;
 import org.junit.BeforeClass;
-import org.sonatype.aether.RepositorySystemSession;
 import org.sonatype.aether.impl.internal.SimpleLocalRepositoryManager;
-import org.sonatype.aether.repository.LocalRepositoryManager;
 
 import java.io.File;
 import java.io.IOException;
@@ -243,7 +241,7 @@ public class IntegrationBase {
         localDir = defaultLocalRepositoryDir(world);
         local = factory.createArtifactRepository("local", localDir.getURI().toASCIIString(),
                 new DefaultRepositoryLayout(),
-                new ArtifactRepositoryPolicy(true, ArtifactRepositoryPolicy.UPDATE_POLICY_DAILY, ArtifactRepositoryPolicy.CHECKSUM_POLICY_WARN),
+                new ArtifactRepositoryPolicy(true, ArtifactRepositoryPolicy.UPDATE_POLICY_ALWAYS, ArtifactRepositoryPolicy.CHECKSUM_POLICY_WARN),
                 new ArtifactRepositoryPolicy(true, ArtifactRepositoryPolicy.UPDATE_POLICY_NEVER, ArtifactRepositoryPolicy.CHECKSUM_POLICY_WARN));
 
 
