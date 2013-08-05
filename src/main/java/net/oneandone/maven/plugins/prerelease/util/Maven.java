@@ -35,9 +35,6 @@ import org.apache.maven.project.ProjectBuilder;
 import org.apache.maven.project.ProjectBuildingException;
 import org.apache.maven.project.ProjectBuildingRequest;
 import org.apache.maven.project.ProjectBuildingResult;
-import org.apache.maven.settings.Mirror;
-import org.apache.maven.settings.Proxy;
-import org.apache.maven.settings.Server;
 import org.codehaus.plexus.DefaultPlexusContainer;
 import org.codehaus.plexus.component.repository.exception.ComponentLookupException;
 import org.codehaus.plexus.logging.Logger;
@@ -103,58 +100,23 @@ public class Maven {
      * loading settings).
      */
     public void build(FileNode basedir, Map<String, String> userProperties, ExecutionListener theExecutionListener, boolean filter, String ... goals) throws BuildException {
-        MavenExecutionRequest parentRequest;
         org.apache.maven.Maven maven;
         MavenExecutionRequest request;
         MavenExecutionResult result;
         BuildException exception;
         PatchedBuilderCommon bc;
 
-        parentRequest = parentSession.getRequest();
+        request = DefaultMavenExecutionRequest.copy(parentSession.getRequest());
         try {
             maven = parentSession.getContainer().lookup(org.apache.maven.Maven.class);
         } catch (ComponentLookupException e) {
             throw new IllegalStateException(e);
         }
-        request = new DefaultMavenExecutionRequest();
-        request.setLoggingLevel(parentRequest.getLoggingLevel());
-        request.setUserSettingsFile(parentRequest.getUserSettingsFile());
-        request.setGlobalSettingsFile(parentRequest.getGlobalSettingsFile());
-        request.setUserToolchainsFile(parentRequest.getUserToolchainsFile());
-        request.setShowErrors(parentRequest.isShowErrors());
-
-        request.setOffline(parentRequest.isOffline());
-        request.setInteractiveMode(parentRequest.isInteractiveMode());
-        request.setPluginGroups(parentRequest.getPluginGroups());
-        request.setLocalRepository(parentRequest.getLocalRepository());
-
-        for (Server server : parentRequest.getServers()) {
-            server = server.clone();
-            request.addServer( server );
-        }
-        for (Proxy proxy : parentRequest.getProxies()) {
-            if (proxy.isActive()) {
-                request.addProxy(proxy.clone());
-            }
-        }
-
-        for (Mirror mirror : parentRequest.getMirrors()) {
-            request.addMirror(mirror.clone());
-        }
-
-        request.setActiveProfiles(parentRequest.getActiveProfiles());
-        for ( org.apache.maven.model.Profile profile : parentRequest.getProfiles() ) {
-            request.addProfile(profile.clone());
-        }
-
         request.setPom(basedir.join("pom.xml").toPath().toFile());
         request.setGoals(Arrays.asList(goals));
         request.setBaseDirectory(basedir.toPath().toFile());
-        request.setSystemProperties(parentRequest.getSystemProperties());
-        request.setUserProperties(merged(parentRequest.getUserProperties(), userProperties));
+        request.setUserProperties(merged(request.getUserProperties(), userProperties));
         request.setExecutionListener(theExecutionListener);
-        request.setUpdateSnapshots(parentRequest.isUpdateSnapshots());
-        request.setTransferListener(parentRequest.getTransferListener());
 
         bc = PatchedBuilderCommon.install(parentSession.getContainer(), filter);
         Logger logger = getLogger((DefaultPlexusContainer) parentSession.getContainer());
