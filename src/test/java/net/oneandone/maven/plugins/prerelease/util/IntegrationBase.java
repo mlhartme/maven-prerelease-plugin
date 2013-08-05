@@ -25,7 +25,11 @@ import org.apache.maven.artifact.repository.ArtifactRepository;
 import org.apache.maven.artifact.repository.ArtifactRepositoryFactory;
 import org.apache.maven.artifact.repository.ArtifactRepositoryPolicy;
 import org.apache.maven.artifact.repository.layout.DefaultRepositoryLayout;
+import org.apache.maven.execution.DefaultMavenExecutionRequest;
+import org.apache.maven.execution.DefaultMavenExecutionResult;
+import org.apache.maven.execution.MavenSession;
 import org.apache.maven.project.ProjectBuilder;
+import org.apache.maven.repository.internal.MavenRepositorySystemSession;
 import org.codehaus.plexus.DefaultContainerConfiguration;
 import org.codehaus.plexus.DefaultPlexusContainer;
 import org.codehaus.plexus.PlexusContainerException;
@@ -34,6 +38,9 @@ import org.codehaus.plexus.classworlds.realm.ClassRealm;
 import org.codehaus.plexus.component.repository.exception.ComponentLookupException;
 import org.codehaus.plexus.logging.Logger;
 import org.junit.BeforeClass;
+import org.sonatype.aether.RepositorySystemSession;
+import org.sonatype.aether.impl.internal.SimpleLocalRepositoryManager;
+import org.sonatype.aether.repository.LocalRepositoryManager;
 
 import java.io.File;
 import java.io.IOException;
@@ -214,7 +221,10 @@ public class IntegrationBase {
         ArtifactRepositoryFactory factory;
         ArtifactRepository central;
         ArtifactRepository snapshots;
+        FileNode localDir;
         ArtifactRepository local;
+        MavenSession session;
+        MavenRepositorySystemSession repoSession;
 
         container = container(null, null, Logger.LEVEL_DISABLED);
         try {
@@ -230,14 +240,18 @@ public class IntegrationBase {
                 new ArtifactRepositoryPolicy(true, ArtifactRepositoryPolicy.UPDATE_POLICY_DAILY, ArtifactRepositoryPolicy.CHECKSUM_POLICY_WARN),
                 new ArtifactRepositoryPolicy(false, ArtifactRepositoryPolicy.UPDATE_POLICY_NEVER, ArtifactRepositoryPolicy.CHECKSUM_POLICY_WARN)
         );
-        local = factory.createArtifactRepository("local", defaultLocalRepositoryDir(world).getURI().toASCIIString(),
+        localDir = defaultLocalRepositoryDir(world);
+        local = factory.createArtifactRepository("local", localDir.getURI().toASCIIString(),
                 new DefaultRepositoryLayout(),
                 new ArtifactRepositoryPolicy(true, ArtifactRepositoryPolicy.UPDATE_POLICY_DAILY, ArtifactRepositoryPolicy.CHECKSUM_POLICY_WARN),
                 new ArtifactRepositoryPolicy(true, ArtifactRepositoryPolicy.UPDATE_POLICY_NEVER, ArtifactRepositoryPolicy.CHECKSUM_POLICY_WARN));
 
 
         try {
-            return new Maven(world, null, local, null, null, container.lookup(ProjectBuilder.class), Arrays.asList(central, snapshots));
+            repoSession = new MavenRepositorySystemSession();
+            repoSession.setLocalRepositoryManager(new SimpleLocalRepositoryManager(localDir.toPath().toFile()));
+            session = new MavenSession(container, repoSession, new DefaultMavenExecutionRequest(), new DefaultMavenExecutionResult());
+            return new Maven(world, session, local, null, null, container.lookup(ProjectBuilder.class), Arrays.asList(central, snapshots));
         } catch (ComponentLookupException e) {
             throw new IllegalStateException(e);
         }
