@@ -257,7 +257,8 @@ public class Prerelease {
         artifacts = artifacts();
         for (FileNode file : artifacts.list()) {
             name = file.getName();
-            if (name.endsWith(".md5") || name.endsWith(".sha1") || name.endsWith(".asc") || name.equals("_maven.repositories")) {
+            if (name.endsWith(".md5") || name.endsWith(".sha1") || name.endsWith(".asc")
+                    || /* maven 3.0 */ name.equals("_maven.repositories") || /* maven 3.1 */ name.equals("_remote.repositories")) {
                 // skip
             } else {
                 type = file.getExtension();
