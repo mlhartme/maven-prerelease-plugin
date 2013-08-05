@@ -182,11 +182,12 @@ public class Maven {
     }
 
     private static void setOutput(Logger logger, PrintStream dest) {
+        /*
         try {
             logger.getClass().getDeclaredMethod("setStream", PrintStream.class).invoke(logger, dest);
         } catch (Exception e) {
             throw new IllegalStateException(e);
-        }
+        }*/
     }
 
     //--
@@ -211,6 +212,8 @@ public class Maven {
                 log.warn("However, some optional deploy goals failed with this exception:");
                 log.warn(e);
                 log.warn("Thus, you can use your release, but someone should have a look at this exception.");
+            } else {
+                throw e;
             }
         }
     }

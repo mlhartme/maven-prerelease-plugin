@@ -5,6 +5,9 @@
         Support Maven 3.1.
       </action>
       <action date="2013-08-03" dev="mhm" type="fix">
+        Failures during deploy goal were not reported properly.
+      </action>
+      <action date="2013-08-03" dev="mhm" type="fix">
         Proper error message when running in none-svn workspace.
       </action>
       <action date="2013-07-09" dev="mhm" type="fix">
