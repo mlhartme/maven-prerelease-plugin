@@ -60,14 +60,6 @@ public class Target {
         directory = remove;
     }
 
-    public void removeOthers() throws IOException {
-        for (FileNode prerelease : directory.getParent().list()) {
-            if (!directory.equals(prerelease)) {
-                wipe(prerelease);
-            }
-        }
-    }
-
     public long getRevision() {
         return revision;
     }
@@ -128,7 +120,7 @@ public class Target {
     }
 
     /** delete prerelease if it exists; also deletes directories references by symlinks */
-    private static void wipe(FileNode dest) throws IOException {
+    public static void wipe(FileNode dest) throws IOException {
         if (!dest.isDirectory()) {
             return;
         }

@@ -85,7 +85,6 @@ public class Prerelease {
             target.scheduleRemove(log, "create failed: " + e.getMessage());
             throw e;
         }
-        target.removeOthers();
         return prerelease;
     }
 

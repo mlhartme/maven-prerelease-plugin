@@ -29,7 +29,13 @@ import org.xml.sax.SAXException;
 
 import java.io.IOException;
 import java.lang.management.ManagementFactory;
+import java.util.Collection;
+import java.util.Comparator;
 import java.util.Date;
+import java.util.Iterator;
+import java.util.SortedSet;
+import java.util.TreeMap;
+import java.util.TreeSet;
 
 /**
  * The archive stores prereleases for one given groupId/artifactId.
@@ -212,5 +218,38 @@ public class Archive implements AutoCloseable {
         changes.releaseDate(version, new Date());
         changes.save();
         return true;
+    }
+
+    /**
+     * Also wipes REMOVE directories, not matter what's specified to keep.
+     *
+     * @param keep number of prereleases after this method
+     * @param current is always considered the latest; may be null
+     */
+    public void wipe(int keep, FileNode current) throws IOException {
+        TreeMap<Long, FileNode> prereleases;
+        String name;
+        long revision;
+
+        prereleases = new TreeMap<>();
+        for (FileNode prerelease : directory.list()) {
+            name = prerelease.getName();
+            if (name.equals(Target.REMOVE)) {
+                Target.wipe(prerelease);
+            } else {
+                revision = Long.parseLong(name);
+                if (current.equals(prerelease)) {
+                    if (keep == 0) {
+                        throw new IllegalArgumentException();
+                    }
+                    keep--;
+                } else {
+                    prereleases.put(revision, prerelease);
+                }
+            }
+        }
+        while (prereleases.size() > keep) {
+            Target.wipe(prereleases.remove(prereleases.firstKey()));
+        }
     }
 }

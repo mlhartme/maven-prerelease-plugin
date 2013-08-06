@@ -25,7 +25,7 @@ import org.apache.maven.plugins.annotations.Parameter;
 import java.util.List;
 
 /**
- * Moves directories from the primary archive to a secondary archive.
+ * Moves directories from the primary archive to a secondary archive. Also wipes all archives.
  */
 @Mojo(name = "swap", requiresProject = false)
 public class Swap extends Base {
@@ -58,6 +58,7 @@ public class Swap extends Base {
                 getLog().info("skipped: " + dir);
             } else {
                 try {
+                    archive.wipe(keep, null);
                     for (Node src : dir.list()) {
                         if (src.isLink()) {
                             continue;

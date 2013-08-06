@@ -34,6 +34,7 @@ public class UpdatePromote extends Promote {
         prerelease = target.loadOpt();
         if (prerelease == null) {
             prerelease = Prerelease.create(maven(), propertyArgs(), getLog(), checkedDescriptor(workingCopy), target);
+            archive.wipe(keep, target.join());
         }
         prerelease.promote(getLog(), propertyArgs(), createTagMessage, revertTagMessage, nextIterationMessage, maven());
         workingCopy.update(getLog());

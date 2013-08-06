@@ -45,6 +45,12 @@ public abstract class Base extends AbstractMojo {
     protected int lockTimeout;
 
     /**
+     * Number of prereleases to keep in archive. 0 to keep all, which should only be used together with swap and keep.
+     */
+    @Parameter(property = "prerelease.keep", defaultValue = "1", required = true)
+    protected int keep;
+
+    /**
      * Extra arguments to pass to the sub-maven build. A space-separated list with entries of the form -Dkey=value.
      * Similar to "arguments" parameter of the Maven Release Plugin, but restricted to -D properties.
      */

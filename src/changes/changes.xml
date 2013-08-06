@@ -6,6 +6,9 @@
         directories.
       </action>
       <action date="2013-08-06" dev="mhm" type="add">
+        Configurable number of prerelease to be kept in archives.
+      </action>
+      <action date="2013-08-06" dev="mhm" type="add">
         Added -Dprerelease.args to pass property arguments to maven invocations.
       </action>
       <action date="2013-08-06" dev="mhm" type="fix">

@@ -44,6 +44,7 @@ public class Update extends ProjectBase {
             getLog().info("prerelease already exists: " + descriptor.getName());
         } else {
             prerelease = Prerelease.create(maven(), propertyArgs(), getLog(), descriptor, target);
+            archive.wipe(keep, target.join());
             try {
                 descriptor.check(world, project);
             } catch (RuntimeException e) {

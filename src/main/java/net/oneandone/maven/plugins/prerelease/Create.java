@@ -55,5 +55,6 @@ public class Create extends ProjectBase {
         }
         descriptor = checkedDescriptor(workingCopy);
         Prerelease.create(maven(), propertyArgs(), getLog(), descriptor, target);
+        archive.wipe(keep, target.join());
     }
 }
