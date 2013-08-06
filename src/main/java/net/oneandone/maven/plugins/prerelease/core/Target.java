@@ -16,6 +16,7 @@
 package net.oneandone.maven.plugins.prerelease.core;
 
 import net.oneandone.maven.plugins.prerelease.util.Subversion;
+import net.oneandone.sushi.fs.Node;
 import net.oneandone.sushi.fs.file.FileNode;
 import net.oneandone.sushi.launcher.Launcher;
 import org.apache.maven.plugin.logging.Log;
@@ -60,7 +61,7 @@ public class Target {
     public void removeOthers() throws IOException {
         for (FileNode prerelease : directory.getParent().list()) {
             if (!directory.equals(prerelease)) {
-                prerelease.deleteTree();
+                wipe(prerelease);
             }
         }
     }
@@ -70,7 +71,7 @@ public class Target {
     }
 
     public void create() throws IOException {
-        removeDirectory().deleteTreeOpt();
+        wipe(removeDirectory());
         directory.mkdirs();
     }
 
@@ -122,5 +123,16 @@ public class Target {
 
     public String toString() {
         return directory.toString();
+    }
+
+    /** delete prerelease if it exists; also deletes directories references by symlinks */
+    private static void wipe(FileNode dest) throws IOException {
+        if (!dest.isDirectory()) {
+            return;
+        }
+        if (dest.isLink()) {
+            dest.resolveLink().deleteTree();
+        }
+        dest.deleteTree();
     }
 }

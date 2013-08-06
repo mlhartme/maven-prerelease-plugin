@@ -33,8 +33,8 @@ import java.util.Date;
 
 /* Manages prereleases for one given groupId/artifactId.
  * Directory layout:
- *   groupId/artifactId.LOCK  <- optional
- *   groupId/artifactId/      <- archive.directory
+ *   groupId/artifactId.LOCK  <- optional, indicates that a process operates on this archive
+ *   groupId/artifactId/      <- archive directory
  *     |- revision1           <- prerelease directory, ready to promote; promoting the prerelease removes this directory
  *     |     |- tags
  *     |     |    - <tagname>
@@ -46,6 +46,9 @@ import java.util.Date;
  *     :     :                   optional - only when the last create call failed (because the mvn call failed) or promote succeeded
  *     :     |- CAUSE         <- why this directory is to be removed
  *     :     :
+ *
+ *  Prerelease directories have the svn revision number as their directory name; it may be a symlink to an arbitrary location
+ *
  */
 public class Archive implements AutoCloseable {
     public static FileNode directory(FileNode archiveRoot, MavenProject project) {
