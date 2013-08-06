@@ -17,6 +17,7 @@ package net.oneandone.maven.plugins.prerelease;
 
 import net.oneandone.sushi.fs.Node;
 import net.oneandone.sushi.fs.file.FileNode;
+import net.oneandone.sushi.io.OS;
 import net.oneandone.sushi.util.Separator;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugins.annotations.Mojo;
@@ -104,8 +105,10 @@ public class Locksmith extends Base {
 
     private static final SimpleDateFormat TODAY = new SimpleDateFormat("HH:mm:ss");
     private static final SimpleDateFormat OTHER = new SimpleDateFormat("MMM dd", Locale.US);
+    private static final SimpleDateFormat MAC = new SimpleDateFormat("EEE MMM d HH:mm:ss yyyy", Locale.US);
 
     private Map<String, Long> startedMap() throws IOException {
+        String[] cmd;
         Map<String, Long> result;
         boolean first;
         int idx;
@@ -115,7 +118,13 @@ public class Locksmith extends Base {
 
         result = new HashMap<>();
         first = true;
-        for (String line : Separator.RAW_LINE.split(((FileNode) world.getWorking()).exec("ps", "ax", "--format", "pid,start"))) {
+        if (OS.CURRENT == OS.MAC) {
+            cmd = new String[] { "ps", "ax", "-o", "pid", "-o", "lstart"};
+        } else {
+            cmd = new String[] { "ps", "ax", "--format", "pid,start" };
+        }
+
+        for (String line : Separator.RAW_LINE.split(((FileNode) world.getWorking()).exec(cmd))) {
             if (first) {
                 if (!line.contains("PID")) {
                     throw new IllegalStateException(line);
@@ -130,7 +139,11 @@ public class Locksmith extends Base {
                 pid = line.substring(0, idx);
                 startedStr = line.substring(idx + 1).trim();
                 try {
-                    startedDate = (startedStr.indexOf(':') == -1 ? OTHER: TODAY).parse(startedStr);
+                    if (OS.CURRENT == OS.MAC) {
+                        startedDate = MAC.parse(startedStr);
+                    } else {
+                        startedDate = (startedStr.indexOf(':') == -1 ? OTHER: TODAY).parse(startedStr);
+                    }
                 } catch (ParseException e) {
                     throw new IllegalStateException("invalid date in line " + line, e);
                 }
