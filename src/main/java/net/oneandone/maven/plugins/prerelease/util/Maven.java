@@ -48,10 +48,11 @@ import java.util.Map;
 import java.util.Properties;
 
 public class Maven {
-    public static Map<String, String> releaseProps() {
+    public static Map<String, String> releaseProps(Map<String, String> initial) {
         Map<String, String> props;
 
         props = new HashMap<>();
+        props.putAll(initial);
         props.put("performRelease", "true");
         return props;
     }
@@ -87,10 +88,6 @@ public class Maven {
         return executionListener;
     }
 
-    public void build(FileNode basedir, String ... goals) throws Exception {
-        build(basedir, new HashMap<String, String>(), executionListener, false, goals);
-    }
-
     public void build(FileNode basedir, Map<String, String> userProperties, String ... goals) throws Exception {
         build(basedir, userProperties, executionListener, false, goals);
     }
@@ -113,6 +110,7 @@ public class Maven {
             throw new IllegalStateException(e);
         }
         request.setPom(basedir.join("pom.xml").toPath().toFile());
+        request.setProjectPresent(true);
         request.setGoals(Arrays.asList(goals));
         request.setBaseDirectory(basedir.toPath().toFile());
         request.setUserProperties(merged(request.getUserProperties(), userProperties));
@@ -200,12 +198,12 @@ public class Maven {
         return result;
     }
 
-    public void deployOnly(Log log, Prerelease prerelease) throws Exception {
+    public void deployOnly(Log log, Map<String, String> propertyArgs, Prerelease prerelease) throws Exception {
         PromoteExecutionListener listener;
 
         listener = new PromoteExecutionListener(prerelease, projectHelper, executionListener);
         try {
-            build(prerelease.checkout, releaseProps(), listener, true, "deploy");
+            build(prerelease.checkout, releaseProps(propertyArgs), listener, true, "deploy");
         } catch (BuildException e) {
             if (listener.isFirstSuccess()) {
                 log.warn("Promote succeeded: your artifacts have been deployed, and your svn tag was created. ");

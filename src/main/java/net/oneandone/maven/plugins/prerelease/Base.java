@@ -17,6 +17,7 @@ package net.oneandone.maven.plugins.prerelease;
 
 import net.oneandone.maven.plugins.prerelease.util.Maven;
 import net.oneandone.sushi.fs.World;
+import net.oneandone.sushi.util.Separator;
 import org.apache.maven.artifact.repository.ArtifactRepository;
 import org.apache.maven.execution.MavenSession;
 import org.apache.maven.plugin.AbstractMojo;
@@ -26,7 +27,9 @@ import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.project.MavenProjectHelper;
 import org.apache.maven.project.ProjectBuilder;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public abstract class Base extends AbstractMojo {
     /**
@@ -40,6 +43,13 @@ public abstract class Base extends AbstractMojo {
      */
     @Parameter(property = "prerelease.lockTimeout", defaultValue = "3600", required = true)
     protected int lockTimeout;
+
+    /**
+     * Extra arguments to pass to the sub-maven build. A space-separated list with entries of the form -Dkey=value.
+     * Similar to "arguments" parameter of the Maven Release Plugin, but restricted to -D properties.
+     */
+    @Parameter(property = "prerelease.args", defaultValue = "")
+    private String propertyArgs;
 
     @Component
     private ProjectBuilder projectBuilder;
@@ -75,6 +85,33 @@ public abstract class Base extends AbstractMojo {
     }
 
     public abstract void doExecute() throws Exception;
+
+    protected Map<String, String> propertyArgs() throws MojoExecutionException {
+        int idx;
+        Map<String, String> result;
+        String key;
+        String value;
+
+        result = new HashMap<>();
+        if (propertyArgs != null) {
+            for (String entry : Separator.SPACE.split(propertyArgs)) {
+                if (!entry.startsWith("-D")) {
+                    throw new MojoExecutionException("-Dkey=value expected, got " + entry);
+                }
+                entry = entry.substring(2);
+                idx = entry.indexOf('=');
+                if (idx == -1) {
+                    key = entry;
+                    value = "true";
+                } else {
+                    key = entry.substring(0, idx).trim();
+                    value = entry.substring(idx + 1).trim();
+                }
+                result.put(key, value);
+            }
+        }
+        return result;
+    }
 
     protected Maven maven() {
         return new Maven(world, session, localRepository,

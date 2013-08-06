@@ -50,7 +50,7 @@ public class Prerelease {
         return new Prerelease(target, workingCopy, descriptor);
     }
 
-    public static Prerelease create(Maven maven, Log log, Descriptor descriptor, Target target) throws Exception {
+    public static Prerelease create(Maven maven, Map<String, String> propertyArgs, Log log, Descriptor descriptor, Target target) throws Exception {
         Prerelease prerelease;
         FileNode tags;
         FileNode checkout;
@@ -79,7 +79,7 @@ public class Prerelease {
             Transform.adjustPom(prerelease.checkout.join("pom.xml"), descriptor.previous, descriptor.project.version,
                     descriptor.svnOrig, descriptor.svnTag);
             Archive.adjustChangesOpt(prerelease.checkout, prerelease.descriptor.project.version);
-            prerelease.create(maven);
+            prerelease.create(maven, propertyArgs);
             log.info("created prerelease in " + prerelease.target);
         } catch (Exception e) {
             target.scheduleRemove(log, "create failed: " + e.getMessage());
@@ -161,12 +161,12 @@ public class Prerelease {
 
     //--
 
-    public void create(Maven maven) throws Exception {
+    public void create(Maven maven, Map<String, String> propertyArgs) throws Exception {
         FileNode installed;
 
         // no "clean" because we have a vanilla directory from svn
         try {
-            maven.build(checkout, maven.releaseProps(), new PrepareExecutionListener(this, maven.getExecutionListener()), false, "install");
+            maven.build(checkout, maven.releaseProps(propertyArgs), new PrepareExecutionListener(this, maven.getExecutionListener()), false, "install");
         } finally {
             installed = descriptor.project.localRepo(maven);
             if (installed.exists()) {
@@ -176,19 +176,19 @@ public class Prerelease {
         // TODO: check that the workspace is without modifications
     }
 
-    public void verify(Maven maven, String profile) throws Exception {
-        maven.build(checkout, "verify", /* to save disk space: */ "clean", "-P" + profile);
+    public void verify(Maven maven, String profile, Map<String, String> propertyArgs) throws Exception {
+        maven.build(checkout, propertyArgs, "verify", /* to save disk space: */ "clean", "-P" + profile);
     }
 
     //-- promote
 
-    public void promote(Log log, String createTagMessage, String revertTagMessage, String nextIterationMessage, Maven maven) throws Exception {
+    public void promote(Log log, Map<String, String> propertyArgs, String createTagMessage, String revertTagMessage, String nextIterationMessage, Maven maven) throws Exception {
         FileNode origCommit;
 
         log.info("promoting revision " + descriptor.revision + " to " + descriptor.project);
         origCommit = prepareOrigCommit(log);
         try {
-            promoteLocked(log, createTagMessage, revertTagMessage, nextIterationMessage, origCommit, maven);
+            promoteLocked(log, propertyArgs, createTagMessage, revertTagMessage, nextIterationMessage, origCommit, maven);
         } catch (Throwable e) { // CAUTION: catching exceptions is not enough -- in particular, out-of-memory during upload is an error!
             try {
                 origUnlock(origCommit);
@@ -209,11 +209,11 @@ public class Prerelease {
     }
 
     /** commit before deploy - because if deployment fails, we can reliably revert the commit. */
-    private void promoteLocked(Log log, String commitTagMessage, String revertTagMessage, String commitNextMessage,
+    private void promoteLocked(Log log, Map<String, String> propertyArgs, String commitTagMessage, String revertTagMessage, String commitNextMessage,
             FileNode origCommit, Maven maven) throws Exception {
         commit(log, renderMessage(commitTagMessage));
         try {
-            maven.deployOnly(log, this);
+            maven.deployOnly(log, propertyArgs, this);
         } catch (Exception e) {
             log.info("deployment failed - reverting tag");
             revertCommit(log, renderMessage(revertTagMessage));
