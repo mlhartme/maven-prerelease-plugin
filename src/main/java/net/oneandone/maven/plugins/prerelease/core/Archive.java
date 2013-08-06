@@ -31,8 +31,10 @@ import java.io.IOException;
 import java.lang.management.ManagementFactory;
 import java.util.Date;
 
-/* Manages prereleases for one given groupId/artifactId.
- * Directory layout:
+/**
+ * The archive stores prereleases for one given groupId/artifactId.
+ *
+ * ~/.m2/prereleases          <- default location for all archives; this directory is called archive root.
  *   groupId/artifactId.LOCK  <- optional, indicates that a process operates on this archive
  *   groupId/artifactId/      <- archive directory
  *     |- revision1           <- prerelease directory, ready to promote; promoting the prerelease removes this directory
@@ -53,6 +55,14 @@ import java.util.Date;
 public class Archive implements AutoCloseable {
     public static FileNode directory(FileNode archiveRoot, MavenProject project) {
         return archiveRoot.join(project.getGroupId(), project.getArtifactId());
+    }
+
+    public static Archive tryOpen(FileNode directory) {
+        try {
+            return open(directory, -1, null);
+        } catch (IOException e) {
+            return null;
+        }
     }
 
     public static Archive open(FileNode directory, int timeout, Log log) throws IOException {
@@ -102,7 +112,10 @@ public class Archive implements AutoCloseable {
         return directory.getParent().join(directory.getName() + ".LOCK");
     }
 
-    /** @param timeout in seconds */
+    /**
+     * @param timeout in seconds; -1 to try only once and never wait.
+     * @param log may be null
+     */
     private void open(int timeout, Log log) throws IOException {
         FileNode file;
         int seconds;
@@ -121,23 +134,31 @@ public class Archive implements AutoCloseable {
                     OnShutdown.get().deleteAtExit(file);
                     opened = true;
                     file.writeString(Integer.toString(pid()));
-                    log.debug("locked for pid " + pid());
+                    if (log != null) {
+                        log.debug("locked for pid " + pid());
+                    }
                     return;
                 } catch (MkfileException e) {
                     if (seconds > timeout) {
-                        log.warn("Lock timed out after " + seconds + "s.");
+                        if (log != null) {
+                            log.warn("Lock timed out after " + seconds + "s.");
+                        }
                         throw e;
                     }
                     if (seconds % 10 == 0) {
-                        log.info("Waiting for " + file + ": " + seconds + "s");
-                        log.debug(e);
+                        if (log != null) {
+                            log.info("Waiting for " + file + ": " + seconds + "s");
+                            log.debug(e);
+                        }
                     }
                     seconds++;
                     Thread.sleep(1000);
                 }
             }
         } catch (InterruptedException e) {
-            log.warn("interrupted");
+            if (log != null) {
+                log.warn("interrupted");
+            }
         }
     }
 

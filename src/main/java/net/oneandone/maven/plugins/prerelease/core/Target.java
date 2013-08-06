@@ -28,6 +28,8 @@ import java.io.IOException;
  * might already be promoted).
  */
 public class Target {
+    public static final String REMOVE = "REMOVE";
+
     private FileNode directory;
     private final long revision;
 
@@ -80,7 +82,7 @@ public class Target {
     }
 
     private FileNode removeDirectory() {
-        return directory.getParent().join("REMOVE");
+        return directory.getParent().join(REMOVE);
     }
 
     public boolean checkoutLinkOpt(String path) throws IOException {
