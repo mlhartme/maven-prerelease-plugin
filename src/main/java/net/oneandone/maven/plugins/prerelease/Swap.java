@@ -71,6 +71,7 @@ public class Swap extends Base {
                         src.copyDirectory(dest);
                         src.deleteTree();
                         getLog().info(archive + " swapped out to " + dest.getAbsolute());
+                        src.link(dest);
                     }
                 } finally {
                     archive.close();
