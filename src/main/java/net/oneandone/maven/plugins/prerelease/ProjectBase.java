@@ -28,6 +28,10 @@ public abstract class ProjectBase extends Base {
     @Parameter(property = "project", required = true, readonly = true)
     protected MavenProject project;
 
+    /** Set to true to deploy snapshots for every successfully built prerelease */
+    @Parameter(property = "prerelease.snapshot", defaultValue = "true")
+    protected boolean snapshots;
+
     /**
      * Specifies where to create a symlink to the prerelease checkout. No symlink is created if the prerelease has no checkout yet
      * (and thus is broken). No symlink is created if not specified.

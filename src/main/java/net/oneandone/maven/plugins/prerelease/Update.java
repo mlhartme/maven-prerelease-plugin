@@ -19,6 +19,7 @@ import net.oneandone.maven.plugins.prerelease.core.Archive;
 import net.oneandone.maven.plugins.prerelease.core.Descriptor;
 import net.oneandone.maven.plugins.prerelease.core.Prerelease;
 import net.oneandone.maven.plugins.prerelease.core.WorkingCopy;
+import net.oneandone.maven.plugins.prerelease.util.Maven;
 import org.apache.maven.plugins.annotations.Mojo;
 
 /**
@@ -32,6 +33,7 @@ public class Update extends ProjectBase {
         Descriptor descriptor;
         long revision;
         Prerelease prerelease;
+        Maven maven;
 
         // code differs from Create because the descriptor check is deferred until after Prerelease.create
         workingCopy = checkedWorkingCopy();
@@ -43,7 +45,8 @@ public class Update extends ProjectBase {
         if (target.exists()) {
             getLog().info("prerelease already exists: " + descriptor.getName());
         } else {
-            prerelease = Prerelease.create(maven(), propertyArgs(), getLog(), descriptor, target);
+            maven = maven();
+            prerelease = Prerelease.create(maven, propertyArgs(), getLog(), descriptor, target);
             archive.wipe(keep, target.join());
             try {
                 descriptor.check(world, project);
@@ -51,6 +54,10 @@ public class Update extends ProjectBase {
                 throw e;
             } catch (Exception e) {
                 prerelease.target.scheduleRemove(getLog(), "build ok, but prerelease is not promotable: " + e.getMessage());
+                getLog().debug(e);
+            }
+            if (snapshots) {
+                prerelease.deploySnapshot(maven, propertyArgs(), project);
             }
         }
     }

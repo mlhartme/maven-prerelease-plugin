@@ -28,15 +28,28 @@ import net.oneandone.sushi.util.Strings;
 import net.oneandone.sushi.util.Substitution;
 import net.oneandone.sushi.util.SubstitutionException;
 import net.oneandone.sushi.xml.XmlException;
+import org.apache.maven.artifact.deployer.ArtifactDeployer;
+import org.apache.maven.artifact.installer.ArtifactInstaller;
+import org.apache.maven.artifact.repository.ArtifactRepository;
+import org.apache.maven.artifact.repository.metadata.GroupRepositoryMetadata;
+import org.apache.maven.artifact.repository.metadata.MetadataBridge;
+import org.apache.maven.model.DeploymentRepository;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.logging.Log;
 import org.apache.maven.project.MavenProject;
 import org.apache.maven.project.MavenProjectHelper;
+import org.sonatype.aether.artifact.Artifact;
+import org.sonatype.aether.deployment.DeployRequest;
+import org.sonatype.aether.deployment.DeploymentException;
+import org.sonatype.aether.repository.RemoteRepository;
 import org.xml.sax.SAXException;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 
 public class Prerelease {
@@ -109,7 +122,85 @@ public class Prerelease {
         return target.join("frischfleisch.properties");
     }
 
+    /**
+     * Deploy by invoking deploy:deploy-file. I don't use the ArtifactDeployer because
+     * a) it only one artifact at a time
+     * b) deploy-file is more transparent
+     */
+    public void deploySnapshot(Maven maven, Map<String, String> userProperties, MavenProject originalProject) throws Exception {
+        DeploymentRepository dest;
+        Map<FileNode, String[]> artifacts;
+        FileNode pom;
+        FileNode main;
+        String[] args;
+
+        artifacts = artifactFiles();
+        removeNullClassifier(artifacts, "pom");
+        main = removeNullClassifier(artifacts, null);
+        pom = checkout.getWorld().file(originalProject.getFile().getAbsolutePath());
+        if (main == null) {
+            main = pom;
+        }
+        dest = originalProject.getDistributionManagement().getSnapshotRepository();
+        args = new String[] { "org.apache.maven.plugins:maven-deploy-plugin:deploy-file",
+                "-Durl=" + dest.getUrl(), "-DrepositoryId=" + dest.getId(), "-DgeneratePom=false", "-DuniqueVersion=true",
+                "-Dfile=" + main.getAbsolute(),
+                "-DpomFile=" + pom.getAbsolute() };
+        if (!artifacts.isEmpty()) {
+            args = Strings.append(args, sideArtifacts(artifacts));
+        }
+        maven.build(checkout, userProperties, args);
+    }
+
+    private static String[] sideArtifacts(Map<FileNode, String[]> artifacts) {
+        boolean first;
+        StringBuilder files;
+        StringBuilder classifiers;
+        StringBuilder types;
+        String[] tmp;
+
+        first = true;
+        files = new StringBuilder("-Dfiles=");
+        classifiers = new StringBuilder("-Dclassifiers=");
+        types = new StringBuilder("-Dtypes=");
+        for (Map.Entry<FileNode, String[]> entry : artifacts.entrySet()) {
+            if (first) {
+                first = false;
+            } else {
+                files.append(',');
+                classifiers.append(',');
+                types.append(',');
+            }
+            tmp = entry.getValue();
+            files.append(entry.getKey().getAbsolute());
+            classifiers.append(tmp[0]);
+            types.append(tmp[1]);
+        }
+        return new String[] { files.toString(), classifiers.toString(), types.toString() };
+    }
+
+    private static FileNode removeNullClassifier(Map<FileNode, String[]> artifacts, String type) {
+        Iterator<Map.Entry<FileNode, String[]>> iter;
+        String[] tmp;
+        Map.Entry<FileNode, String[]> entry;
+
+        iter = artifacts.entrySet().iterator();
+        while (iter.hasNext()) {
+            entry = iter.next();
+            tmp = entry.getValue();
+            if (tmp[0] == null) {
+                if (type == null || type.equals(tmp[1])) {
+                    iter.remove();
+                    return entry.getKey();
+                }
+            }
+        }
+        return null;
+    }
+
+
     public void commit(Log log, String commitMessage) throws Failure {
+
         Launcher launcher;
 
         log.info("committing tag:");
@@ -255,13 +346,38 @@ public class Prerelease {
     //--
 
     public void artifactFiles(MavenProject project, MavenProjectHelper projectHelper) throws IOException {
+        FileNode file;
+        String type;
+        String classifier;
+        String[] tmp;
+
+        for (Map.Entry<FileNode, String[]> entry : artifactFiles().entrySet()) {
+            file = entry.getKey();
+            tmp = entry.getValue();
+            classifier = tmp[0];
+            type = tmp[1];
+            if ("pom".equals(type) && !project.getPackaging().equals("pom")) {
+                // ignored
+            } else {
+                if (classifier == null) {
+                    project.getArtifact().setFile(file.toPath().toFile());
+                } else {
+                    projectHelper.attachArtifact(project, type, classifier, file.toPath().toFile());
+                }
+            }
+        }
+    }
+
+    public Map<FileNode, String[]> artifactFiles() throws IOException {
         FileNode artifacts;
         String name;
         String str;
         String type;
         String classifier;
+        Map<FileNode, String[]> result;
 
         artifacts = artifacts();
+        result = new HashMap<>();
         for (FileNode file : artifacts.list()) {
             name = file.getName();
             if (name.endsWith(".md5") || name.endsWith(".sha1") || name.endsWith(".asc")
@@ -269,20 +385,17 @@ public class Prerelease {
                 // skip
             } else {
                 type = file.getExtension();
-                if ("pom".equals(type) && !project.getPackaging().equals("pom")) {
-                    // ignored
+                str = name.substring(0, name.length() - type.length() - 1);
+                str = Strings.removeLeft(str, descriptor.project.artifactId + "-");
+                str = Strings.removeLeft(str, descriptor.project.version);
+                if (str.isEmpty()) {
+                    classifier = null;
                 } else {
-                    str = name.substring(0, name.length() - type.length() - 1);
-                    str = Strings.removeLeft(str, project.getArtifactId() + "-");
-                    str = Strings.removeLeft(str, project.getVersion());
-                    if (str.isEmpty()) {
-                        project.getArtifact().setFile(file.toPath().toFile());
-                    } else {
-                        classifier = Strings.removeLeft(str, "-");
-                        projectHelper.attachArtifact(project, type, classifier, file.toPath().toFile());
-                    }
+                    classifier = Strings.removeLeft(str, "-");
                 }
+                result.put(file, new String[] { classifier, type });
             }
         }
+        return result;
     }
 }
