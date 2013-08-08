@@ -28,28 +28,18 @@ import net.oneandone.sushi.util.Strings;
 import net.oneandone.sushi.util.Substitution;
 import net.oneandone.sushi.util.SubstitutionException;
 import net.oneandone.sushi.xml.XmlException;
-import org.apache.maven.artifact.deployer.ArtifactDeployer;
-import org.apache.maven.artifact.installer.ArtifactInstaller;
-import org.apache.maven.artifact.repository.ArtifactRepository;
-import org.apache.maven.artifact.repository.metadata.GroupRepositoryMetadata;
-import org.apache.maven.artifact.repository.metadata.MetadataBridge;
 import org.apache.maven.model.DeploymentRepository;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.logging.Log;
 import org.apache.maven.project.MavenProject;
 import org.apache.maven.project.MavenProjectHelper;
-import org.sonatype.aether.artifact.Artifact;
-import org.sonatype.aether.deployment.DeployRequest;
-import org.sonatype.aether.deployment.DeploymentException;
-import org.sonatype.aether.repository.RemoteRepository;
 import org.xml.sax.SAXException;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
-import java.util.List;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 public class Prerelease {
@@ -132,7 +122,6 @@ public class Prerelease {
         Map<FileNode, String[]> artifacts;
         FileNode pom;
         FileNode main;
-        String[] args;
 
         artifacts = artifactFiles();
         removeNullClassifier(artifacts, "pom");
@@ -142,17 +131,20 @@ public class Prerelease {
             main = pom;
         }
         dest = originalProject.getDistributionManagement().getSnapshotRepository();
-        args = new String[] { "org.apache.maven.plugins:maven-deploy-plugin:deploy-file",
-                "-Durl=" + dest.getUrl(), "-DrepositoryId=" + dest.getId(), "-DgeneratePom=false", "-DuniqueVersion=true",
-                "-Dfile=" + main.getAbsolute(),
-                "-DpomFile=" + pom.getAbsolute() };
+        userProperties = new LinkedHashMap<>(userProperties);
+        userProperties.put("url", dest.getUrl());
+        userProperties.put("repositoryId", dest.getId());
+        userProperties.put("generatePom", "false");
+        userProperties.put("uniqueVersion", "true");
+        userProperties.put("file", main.getAbsolute());
+        userProperties.put("pomFile", pom.getAbsolute());
         if (!artifacts.isEmpty()) {
-            args = Strings.append(args, sideArtifacts(artifacts));
+            addSideArtifacts(artifacts, userProperties);
         }
-        maven.build(checkout, userProperties, args);
+        maven.build(checkout, userProperties, "org.apache.maven.plugins:maven-deploy-plugin:deploy-file");
     }
 
-    private static String[] sideArtifacts(Map<FileNode, String[]> artifacts) {
+    private static void addSideArtifacts(Map<FileNode, String[]> artifacts, Map<String, String> userProperties) {
         boolean first;
         StringBuilder files;
         StringBuilder classifiers;
@@ -160,9 +152,9 @@ public class Prerelease {
         String[] tmp;
 
         first = true;
-        files = new StringBuilder("-Dfiles=");
-        classifiers = new StringBuilder("-Dclassifiers=");
-        types = new StringBuilder("-Dtypes=");
+        files = new StringBuilder();
+        classifiers = new StringBuilder();
+        types = new StringBuilder();
         for (Map.Entry<FileNode, String[]> entry : artifacts.entrySet()) {
             if (first) {
                 first = false;
@@ -176,7 +168,9 @@ public class Prerelease {
             classifiers.append(tmp[0]);
             types.append(tmp[1]);
         }
-        return new String[] { files.toString(), classifiers.toString(), types.toString() };
+        userProperties.put("files", files.toString());
+        userProperties.put("classifiers", classifiers.toString());
+        userProperties.put("types", types.toString());
     }
 
     private static FileNode removeNullClassifier(Map<FileNode, String[]> artifacts, String type) {
