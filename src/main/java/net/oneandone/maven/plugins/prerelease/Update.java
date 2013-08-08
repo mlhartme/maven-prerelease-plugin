@@ -57,7 +57,7 @@ public class Update extends ProjectBase {
                 getLog().debug(e);
             }
             if (snapshots) {
-                prerelease.deploySnapshot(maven, propertyArgs(), project);
+                prerelease.deploySnapshot(maven, getLog(), propertyArgs(), project);
             }
         }
     }

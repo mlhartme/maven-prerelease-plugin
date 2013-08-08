@@ -113,85 +113,19 @@ public class Prerelease {
     }
 
     /**
-     * Deploy by invoking deploy:deploy-file. I don't use the ArtifactDeployer because
-     * a) it only one artifact at a time
-     * b) deploy-file is more transparent
+     * Same as deployPrerelease, but the working directory is not the checkout of the prerelease. Instead, the original user checkout
+     * (or a temporary checkout for bare commands) is used, and this, the pom file is the original snapshot pom file.
+     *
+     * Alternative implementations:
+     * a) direct code with ArtifactDeployer
+     *    - cannot use normal deploy configuration (e.g. addtional goal tied to the deploy phase)
+     *    - cannot deploy more than one file at a time
+     * b) deploy-file invocation
+     *    - cannot use normal deploy configuration (e.g. addtional goal tied to the deploy phase)
      */
-    public void deploySnapshot(Maven maven, Map<String, String> userProperties, MavenProject originalProject) throws Exception {
-        DeploymentRepository dest;
-        Map<FileNode, String[]> artifacts;
-        FileNode pom;
-        FileNode main;
-
-        artifacts = artifactFiles();
-        removeNullClassifier(artifacts, "pom");
-        main = removeNullClassifier(artifacts, null);
-        pom = checkout.getWorld().file(originalProject.getFile().getAbsolutePath());
-        if (main == null) {
-            main = pom;
-        }
-        dest = originalProject.getDistributionManagement().getSnapshotRepository();
-        userProperties = new LinkedHashMap<>(userProperties);
-        userProperties.put("url", dest.getUrl());
-        userProperties.put("repositoryId", dest.getId());
-        userProperties.put("generatePom", "false");
-        userProperties.put("uniqueVersion", "true");
-        userProperties.put("file", main.getAbsolute());
-        userProperties.put("pomFile", pom.getAbsolute());
-        if (!artifacts.isEmpty()) {
-            addSideArtifacts(artifacts, userProperties);
-        }
-        maven.build(checkout, userProperties, "org.apache.maven.plugins:maven-deploy-plugin:deploy-file");
+    public void deploySnapshot(Maven maven, Log log, Map<String, String> userProperties, MavenProject originalProject) throws Exception {
+        maven.deploySnapshot(checkout.getWorld().file(originalProject.getFile()).getParent(), log, userProperties, this);
     }
-
-    private static void addSideArtifacts(Map<FileNode, String[]> artifacts, Map<String, String> userProperties) {
-        boolean first;
-        StringBuilder files;
-        StringBuilder classifiers;
-        StringBuilder types;
-        String[] tmp;
-
-        first = true;
-        files = new StringBuilder();
-        classifiers = new StringBuilder();
-        types = new StringBuilder();
-        for (Map.Entry<FileNode, String[]> entry : artifacts.entrySet()) {
-            if (first) {
-                first = false;
-            } else {
-                files.append(',');
-                classifiers.append(',');
-                types.append(',');
-            }
-            tmp = entry.getValue();
-            files.append(entry.getKey().getAbsolute());
-            classifiers.append(tmp[0]);
-            types.append(tmp[1]);
-        }
-        userProperties.put("files", files.toString());
-        userProperties.put("classifiers", classifiers.toString());
-        userProperties.put("types", types.toString());
-    }
-
-    private static FileNode removeNullClassifier(Map<FileNode, String[]> artifacts, String type) {
-        Iterator<Map.Entry<FileNode, String[]>> iter;
-        String[] tmp;
-        Map.Entry<FileNode, String[]> entry;
-
-        iter = artifacts.entrySet().iterator();
-        while (iter.hasNext()) {
-            entry = iter.next();
-            tmp = entry.getValue();
-            if (tmp[0] == null) {
-                if (type == null || type.equals(tmp[1])) {
-                    iter.remove();
-                    return entry.getKey();
-                }
-            }
-        }
-        return null;
-    }
-
 
     public void commit(Log log, String commitMessage) throws Failure {
 
@@ -299,7 +233,7 @@ public class Prerelease {
 
         commit(log, renderMessage(commitTagMessage));
         try {
-            maven.deployOnly(log, propertyArgs, this);
+            maven.deployPrerelease(log, propertyArgs, this);
         } catch (Exception e) {
             log.info("deployment failed - reverting tag");
             revertCommit(log, renderMessage(revertTagMessage));
@@ -362,6 +296,7 @@ public class Prerelease {
         }
     }
 
+    /** @return Mapping of Artifact File to [ classified, type ]. Classifier is null for the main artifact */
     public Map<FileNode, String[]> artifactFiles() throws IOException {
         FileNode artifacts;
         String name;

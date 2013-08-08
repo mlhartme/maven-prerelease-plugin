@@ -201,7 +201,8 @@ public class Maven {
         return result;
     }
 
-    public void deployOnly(Log log, Map<String, String> propertyArgs, Prerelease prerelease) throws Exception {
+    /** Executes the deploy phase only, with the prerelease pom */
+    public void deployPrerelease(Log log, Map<String, String> propertyArgs, Prerelease prerelease) throws Exception {
         PromoteExecutionListener listener;
 
         listener = new PromoteExecutionListener(prerelease, projectHelper, executionListener);
@@ -213,6 +214,25 @@ public class Maven {
                 log.warn("However, some optional deploy goals failed with this exception:");
                 log.warn(e);
                 log.warn("Thus, you can use your release, but someone should have a look at this exception.");
+            } else {
+                throw e;
+            }
+        }
+    }
+
+    /** executes the deploy phase only - with the snapshot pom */
+    public void deploySnapshot(FileNode directory, Log log, Map<String, String> propertyArgs, Prerelease prerelease) throws Exception {
+        PromoteExecutionListener listener;
+
+        listener = new PromoteExecutionListener(prerelease, projectHelper, executionListener);
+        try {
+            build(directory, propertyArgs, listener, true, "deploy");
+        } catch (BuildException e) {
+            if (listener.isFirstSuccess()) {
+                log.warn("Snapshot deployment succeeded.");
+                log.warn("However, some optional deploy goals failed with this exception:");
+                log.warn(e);
+                log.warn("Thus, you can use your snapshots, but someone should have a look at this exception.");
             } else {
                 throw e;
             }
