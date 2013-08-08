@@ -210,6 +210,8 @@ public class Prerelease {
     /** commit before deploy - because if deployment fails, we can reliably revert the commit. */
     private void promoteLocked(Log log, Map<String, String> propertyArgs, String commitTagMessage, String revertTagMessage, String commitNextMessage,
             FileNode origCommit, Maven maven) throws Exception {
+        FileNode installed;
+
         commit(log, renderMessage(commitTagMessage));
         try {
             maven.deployOnly(log, propertyArgs, this);
@@ -219,6 +221,12 @@ public class Prerelease {
             target.scheduleRemove(log, "deployment failed (tag has been reverted): " + e.getMessage());
             throw e;
         }
+
+        // local install
+        installed = descriptor.project.localRepo(maven);
+        installed.deleteTreeOpt();
+        artifacts().move(installed);
+
         try {
             log.info("Update pom and changes ...");
             log.debug(Subversion.launcher(origCommit, "commit", "-m", renderMessage(commitNextMessage)).exec());
