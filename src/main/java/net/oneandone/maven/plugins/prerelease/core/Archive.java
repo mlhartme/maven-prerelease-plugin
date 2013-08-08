@@ -59,8 +59,8 @@ import java.util.TreeSet;
  *
  */
 public class Archive implements AutoCloseable {
-    public static FileNode directory(FileNode archiveRoot, MavenProject project) {
-        return archiveRoot.join(project.getGroupId(), project.getArtifactId());
+    public static FileNode directory(FileNode storage, MavenProject project) {
+        return storage.join(project.getGroupId(), project.getArtifactId());
     }
 
     public static Archive tryOpen(FileNode directory) {

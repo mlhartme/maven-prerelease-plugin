@@ -36,6 +36,7 @@ import org.apache.maven.project.ProjectBuildingException;
 import org.apache.maven.project.ProjectBuildingRequest;
 import org.apache.maven.project.ProjectBuildingResult;
 import org.codehaus.plexus.DefaultPlexusContainer;
+import org.codehaus.plexus.PlexusContainer;
 import org.codehaus.plexus.component.repository.exception.ComponentLookupException;
 import org.codehaus.plexus.logging.Logger;
 
@@ -97,6 +98,7 @@ public class Maven {
      * loading settings).
      */
     public void build(FileNode basedir, Map<String, String> userProperties, ExecutionListener theExecutionListener, boolean filter, String ... goals) throws BuildException {
+        DefaultPlexusContainer container;
         org.apache.maven.Maven maven;
         MavenExecutionRequest request;
         MavenExecutionResult result;
@@ -104,8 +106,9 @@ public class Maven {
         PatchedBuilderCommon bc;
 
         request = DefaultMavenExecutionRequest.copy(parentSession.getRequest());
+        container = (DefaultPlexusContainer) parentSession.getContainer();
         try {
-            maven = parentSession.getContainer().lookup(org.apache.maven.Maven.class);
+            maven = container.lookup(org.apache.maven.Maven.class);
         } catch (ComponentLookupException e) {
             throw new IllegalStateException(e);
         }
@@ -116,8 +119,8 @@ public class Maven {
         request.setUserProperties(merged(request.getUserProperties(), userProperties));
         request.setExecutionListener(theExecutionListener);
 
-        bc = PatchedBuilderCommon.install(parentSession.getContainer(), filter);
-        Logger logger = getLogger((DefaultPlexusContainer) parentSession.getContainer());
+        bc = PatchedBuilderCommon.install(container, filter);
+        Logger logger = getLogger(container);
         setOutput(logger, indentPrintStream("  "));
         logger.info("[" + basedir + "] mvn " + props(request.getUserProperties()) + Separator.SPACE.join(goals));
         try {

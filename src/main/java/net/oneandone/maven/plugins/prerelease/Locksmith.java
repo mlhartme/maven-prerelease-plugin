@@ -67,7 +67,7 @@ public class Locksmith extends Base {
 
         started = startedMap();
         errors = 0;
-        root = world.file(archiveRoot);
+        root = world.file(storage);
         if (!root.exists()) {
             return;
         }

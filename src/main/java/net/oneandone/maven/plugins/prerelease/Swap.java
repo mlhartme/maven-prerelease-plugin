@@ -25,30 +25,30 @@ import org.apache.maven.plugins.annotations.Parameter;
 import java.util.List;
 
 /**
- * Moves directories from the primary archive to a secondary archive. Also wipes all archives.
+ * Wipes archives and moves prerelease directories from primary storage to secondary storage. Also wipes all archives.
  */
 @Mojo(name = "swap", requiresProject = false)
 public class Swap extends Base {
     /**
-     * Location of the secondary archive root.
+     * Location of the secondary storage.
      */
     @Parameter(property = "prerelease.swap", required = true)
     private String swap;
 
     @Override
     public void doExecute() throws Exception {
-        FileNode root;
+        FileNode primary;
         List<Node> directories;
         Archive archive;
-        FileNode swapRoot;
+        FileNode secondary;
         FileNode dest;
 
-        root = world.file(archiveRoot);
-        if (!root.exists()) {
+        primary = world.file(storage);
+        if (!primary.exists()) {
             return;
         }
-        swapRoot = world.file(swap);
-        directories = root.find("*/*");
+        secondary = world.file(swap);
+        directories = primary.find("*/*");
         for (Node dir : directories) {
             if (!dir.isDirectory()) {
                 continue;
@@ -66,7 +66,7 @@ public class Swap extends Base {
                         if (src.getName().equals(Target.REMOVE)) {
                             continue;
                         }
-                        dest = swapRoot.join(dir.getRelative(root), src.getName());
+                        dest = secondary.join(dir.getRelative(primary), src.getName());
                         dest.mkdirs();
                         src.copyDirectory(dest);
                         src.deleteTree();

@@ -35,8 +35,8 @@ public abstract class Base extends AbstractMojo {
     /**
      * Where to store prereleases.
      */
-    @Parameter(property = "prerelease.archive", defaultValue = "${settings.localRepository}/../prereleases", required = true)
-    protected String archiveRoot;
+    @Parameter(property = "prerelease.storage", defaultValue = "${settings.localRepository}/../prereleases", required = true)
+    protected String storage;
 
     /**
      * Timeout in seconds for locking a prerelease archive.
