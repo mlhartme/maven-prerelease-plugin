@@ -19,6 +19,7 @@ import net.oneandone.maven.plugins.prerelease.core.Archive;
 import net.oneandone.maven.plugins.prerelease.core.Target;
 import net.oneandone.sushi.fs.Node;
 import net.oneandone.sushi.fs.file.FileNode;
+import net.oneandone.sushi.fs.filter.Filter;
 import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
 
@@ -26,6 +27,7 @@ import java.util.List;
 
 /**
  * Wipes archives and moves prerelease directories from primary storage to secondary storage. Also wipes all archives.
+ * Useful when you use ram disks: use the ramdisk as primary storage, and a hardisk as secondary storage.
  */
 @Mojo(name = "swap", requiresProject = false)
 public class Swap extends Base {
@@ -44,6 +46,8 @@ public class Swap extends Base {
         FileNode dest;
 
         primary = world.file(storage);
+        // TODO: sushi bug?
+        primary = world.file(primary.toPath().toFile().getCanonicalFile());
         if (!primary.exists()) {
             return;
         }
@@ -68,10 +72,10 @@ public class Swap extends Base {
                         }
                         dest = secondary.join(dir.getRelative(primary), src.getName());
                         dest.mkdirs();
-                        src.copyDirectory(dest);
+                        src.copyDirectory(dest, new Filter().includeAll());
                         src.deleteTree();
-                        getLog().info(archive + " swapped out to " + dest.getAbsolute());
-                        src.link(dest);
+                        getLog().info("swapped " + ((FileNode) src).getAbsolute() + " -> " + dest.getAbsolute());
+                        dest.link(src);
                     }
                 } finally {
                     archive.close();

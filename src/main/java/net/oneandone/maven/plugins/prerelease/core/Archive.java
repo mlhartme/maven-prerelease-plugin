@@ -40,7 +40,7 @@ import java.util.TreeSet;
 /**
  * The archive stores prereleases for one given groupId/artifactId.
  *
- * ~/.m2/prereleases          <- default location for all archives; this directory is called archive root.
+ * ~/.m2/prereleases          <- default storage for all archives. This is the primary storage, swap also uses a secondary storage.
  *   groupId/artifactId.LOCK  <- optional, indicates that a process operates on this archive
  *   groupId/artifactId/      <- archive directory
  *     |- revision1           <- prerelease directory, ready to promote; promoting the prerelease removes this directory
@@ -221,7 +221,7 @@ public class Archive implements AutoCloseable {
     }
 
     /**
-     * Also wipes REMOVE directories, not matter what's specified to keep.
+     * Also wipes REMOVE directories, no matter what's specified to keep.
      *
      * @param keep number of prereleases after this method
      * @param current is always considered the latest; may be null
@@ -231,6 +231,9 @@ public class Archive implements AutoCloseable {
         String name;
         long revision;
 
+        if (keep < 1) {
+            throw new IllegalArgumentException("keep " + keep);
+        }
         prereleases = new TreeMap<>();
         for (FileNode prerelease : directory.list()) {
             name = prerelease.getName();
@@ -238,10 +241,7 @@ public class Archive implements AutoCloseable {
                 Target.wipe(prerelease);
             } else {
                 revision = Long.parseLong(name);
-                if (current.equals(prerelease)) {
-                    if (keep == 0) {
-                        throw new IllegalArgumentException();
-                    }
+                if (prerelease.equals(current)) {
                     keep--;
                 } else {
                     prereleases.put(revision, prerelease);
