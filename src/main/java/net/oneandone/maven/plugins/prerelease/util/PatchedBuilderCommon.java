@@ -105,7 +105,6 @@ public class PatchedBuilderCommon extends BuilderCommon {
         for (ExecutionPlanItem item : base) {
             if ("deploy".equals(item.getLifecyclePhase())) {
                 lst.add(item);
-                System.out.println("addint " + item);
             }
         }
         return new MavenExecutionPlan(lst, defaultLifecycles);
