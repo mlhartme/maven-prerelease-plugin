@@ -17,6 +17,10 @@ package net.oneandone.maven.plugins.prerelease.util;
 
 import net.oneandone.maven.plugins.prerelease.core.BaseExecutionListener;
 import net.oneandone.maven.plugins.prerelease.core.Prerelease;
+import org.apache.maven.artifact.Artifact;
+import org.apache.maven.artifact.repository.metadata.ArtifactRepositoryMetadata;
+import org.apache.maven.artifact.repository.metadata.GroupRepositoryMetadata;
+import org.apache.maven.artifact.repository.metadata.Versioning;
 import org.apache.maven.execution.ExecutionEvent;
 import org.apache.maven.execution.ExecutionListener;
 import org.apache.maven.project.MavenProject;
@@ -41,11 +45,29 @@ public class PromoteExecutionListener extends BaseExecutionListener {
     @Override
     public void projectStarted(ExecutionEvent event) {
         MavenProject project;
+        Artifact projectArtifact;
+        Versioning versioning;
+        ArtifactRepositoryMetadata metadata;
+        GroupRepositoryMetadata groupMetadata;
 
         project = event.getSession().getCurrentProject();
         try {
             prerelease.artifactFiles(project, projectHelper);
             project.getProperties().putAll(prerelease.descriptor.deployProperties);
+            if (prerelease.descriptor.deployPluginMetadata) {
+                // from http://svn.apache.org/viewvc/maven/plugin-tools/tags/maven-plugin-tools-3.2/maven-plugin-plugin/src/main/java/org/apache/maven/plugin/plugin/metadata/AddPluginArtifactMetadataMojo.java
+
+                projectArtifact = project.getArtifact();
+                versioning = new Versioning();
+                versioning.setLatest( projectArtifact.getVersion() );
+                versioning.updateTimestamp();
+                metadata = new ArtifactRepositoryMetadata( projectArtifact, versioning);
+                projectArtifact.addMetadata(metadata);
+                groupMetadata = new GroupRepositoryMetadata( project.getGroupId());
+                groupMetadata.addPluginMapping(prerelease.descriptor.project.name, project.getArtifactId(), project.getName());
+
+                projectArtifact.addMetadata(groupMetadata);
+            }
         } catch (IOException e) {
             throw new RuntimeException("TODO", e);
         }

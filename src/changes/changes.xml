@@ -4,6 +4,9 @@
       <action date="2013-08-08" dev="mhm" type="fix">
         Promote also installs files to the local repository now.
       </action>
+      <action date="2013-08-08" dev="mhm" type="fix">
+        Fix missing artifact metadata when deploying a plugin.
+      </action>
       <action date="2013-08-07" dev="mhm" type="update">
         Renamed the prerelease.archive to prerelease.storage. And renamed "archiveRoot" to "storage" in the documentation.
       </action>
