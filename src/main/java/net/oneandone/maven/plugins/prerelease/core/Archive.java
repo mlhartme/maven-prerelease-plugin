@@ -59,22 +59,18 @@ import java.util.TreeSet;
  *
  */
 public class Archive implements AutoCloseable {
-    public static FileNode directory(FileNode storage, MavenProject project) {
-        return storage.join(project.getGroupId(), project.getArtifactId());
-    }
-
-    public static Archive tryOpen(FileNode directory) {
+    public static Archive tryOpen(Storages storages, String groupId, String artifactId) {
         try {
-            return open(directory, -1, null);
+            return open(storages, groupId, artifactId, -1, null);
         } catch (IOException e) {
             return null;
         }
     }
 
-    public static Archive open(FileNode directory, int timeout, Log log) throws IOException {
+    public static Archive open(Storages storages, String groupId, String artifactId, int timeout, Log log) throws IOException {
         Archive archive;
 
-        archive = new Archive(directory);
+        archive = new Archive(storages, groupId, artifactId);
         archive.open(timeout, log);
         return archive;
     }
@@ -100,22 +96,28 @@ public class Archive implements AutoCloseable {
         return result;
     }
 
-    public final FileNode directory;
+    private final Storages storages;
+    private final String groupId;
+    private final String artifactId;
     private boolean opened = false;
     private boolean closed = false;
 
-    private Archive(FileNode directory) {
-        this.directory = directory;
+    private Archive(Storages storages, String groupId, String artifactId) {
+        this.storages = storages;
+        this.groupId = groupId;
+        this.artifactId = artifactId;
     }
 
     public Target target(long revision) {
-        return new Target(directory.join(Long.toString(revision)), revision);
+        // TODO: always primary?
+        return new Target(storages.primary().join(groupId, artifactId, Long.toString(revision)), revision);
     }
 
     //--
 
+    // always in primary storage
     private FileNode lockFile() {
-        return directory.getParent().join(directory.getName() + ".LOCK");
+        return storages.primary().join(groupId, artifactId + ".LOCK");
     }
 
     /**
@@ -235,7 +237,8 @@ public class Archive implements AutoCloseable {
             throw new IllegalArgumentException("keep " + keep);
         }
         prereleases = new TreeMap<>();
-        for (FileNode prerelease : directory.list()) {
+        // TODO
+        for (FileNode prerelease : storages.primary().list()) {
             name = prerelease.getName();
             if (name.equals(Target.REMOVE)) {
                 Target.wipe(prerelease);

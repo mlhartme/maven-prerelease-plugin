@@ -46,10 +46,9 @@ public abstract class ProjectBase extends Base {
 
     @Override
     public void doExecute() throws Exception {
-        FileNode directory;
+        FileNode director;
 
-        directory = Archive.directory(world.file(storage), project);
-        try (Archive archive = Archive.open(directory, lockTimeout, getLog())) {
+        try (Archive archive = Archive.open(storages(), project.getGroupId(), project.getArtifactId(), lockTimeout, getLog())) {
             try {
                 doExecute(archive);
             } finally {

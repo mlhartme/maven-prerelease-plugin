@@ -15,6 +15,7 @@
  */
 package net.oneandone.maven.plugins.prerelease;
 
+import net.oneandone.maven.plugins.prerelease.core.Storages;
 import net.oneandone.maven.plugins.prerelease.util.Maven;
 import net.oneandone.sushi.fs.World;
 import net.oneandone.sushi.util.Separator;
@@ -35,8 +36,8 @@ public abstract class Base extends AbstractMojo {
     /**
      * Where to store prereleases.
      */
-    @Parameter(property = "prerelease.storage", defaultValue = "${settings.localRepository}/../prereleases", required = true)
-    protected String storage;
+    @Parameter(property = "prerelease.storages", defaultValue = "${settings.localRepository}/../prereleases", required = true)
+    private List<String> storages;
 
     /**
      * Timeout in seconds for locking a prerelease archive.
@@ -119,6 +120,9 @@ public abstract class Base extends AbstractMojo {
         return result;
     }
 
+    protected Storages storages() {
+        return Storages.create(storages);
+    }
     protected Maven maven() {
         return new Maven(world, session, localRepository,
                 session.getRequest().getExecutionListener(), projectHelper, projectBuilder, remoteRepositories);
