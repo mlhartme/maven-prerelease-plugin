@@ -18,6 +18,7 @@ package net.oneandone.maven.plugins.prerelease;
 import net.oneandone.maven.plugins.prerelease.core.Archive;
 import net.oneandone.maven.plugins.prerelease.core.Prerelease;
 import net.oneandone.maven.plugins.prerelease.core.WorkingCopy;
+import net.oneandone.maven.plugins.prerelease.util.Maven;
 import org.apache.maven.plugins.annotations.Mojo;
 
 /**
@@ -28,12 +29,17 @@ public class UpdatePromote extends Promote {
     public void doExecute(Archive archive) throws Exception {
         WorkingCopy workingCopy;
         Prerelease prerelease;
+        Maven maven;
 
         workingCopy = checkedWorkingCopy();
         setTarget(archive.target(workingCopy.revision()));
         prerelease = target.loadOpt();
         if (prerelease == null) {
-            prerelease = Prerelease.create(maven(), propertyArgs(), getLog(), checkedDescriptor(workingCopy), target);
+            maven = maven();
+            prerelease = Prerelease.create(maven, propertyArgs(), getLog(), checkedDescriptor(workingCopy), target);
+            if (snapshots) {
+                prerelease.deploySnapshot(maven, getLog(), propertyArgs(), project);
+            }
             archive.wipe(keep, target.join());
         }
         prerelease.promote(getLog(), propertyArgs(), createTagMessage, revertTagMessage, nextIterationMessage, maven());
