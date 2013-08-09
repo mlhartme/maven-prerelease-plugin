@@ -71,9 +71,8 @@ public class Swap extends Base {
                             continue;
                         }
                         dest = secondary.join(dir.getRelative(primary), src.getName());
-                        dest.mkdirs();
-                        src.copyDirectory(dest, new Filter().includeAll());
-                        src.deleteTree();
+                        dest.getParent().mkdirsOpt();
+                        src.move(dest);
                         getLog().info("swapped " + ((FileNode) src).getAbsolute() + " -> " + dest.getAbsolute());
                         dest.link(src);
                     }
