@@ -40,7 +40,7 @@ public class UpdatePromote extends Promote {
             if (snapshots) {
                 prerelease.deploySnapshot(maven, getLog(), propertyArgs(), project);
             }
-            archive.wipe(keep, target.join());
+            archive.wipe(keep);
         }
         prerelease.promote(getLog(), propertyArgs(), createTagMessage, revertTagMessage, nextIterationMessage, maven());
         workingCopy.update(getLog());

@@ -24,6 +24,7 @@ import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
 
 import java.io.IOException;
+import java.util.List;
 
 /**
  * Executes a build on an existing prerelease.
@@ -51,7 +52,7 @@ public class Build extends ProjectBase {
             workingCopy = checkedWorkingCopy();
             setTarget(archive.target(workingCopy.revision()));
         } else {
-            setTarget(archive.target(revisionForDescriptor(archive.directory)));
+            setTarget(archive.target(revisionForDescriptor(archive)));
         }
         prerelease = target.loadOpt();
         if (prerelease == null) {
@@ -60,11 +61,11 @@ public class Build extends ProjectBase {
         maven().build(prerelease.checkout, propertyArgs(), arguments);
     }
 
-    private long revisionForDescriptor(FileNode archiveDirectory) throws MojoExecutionException, IOException {
+    private long revisionForDescriptor(Archive archive) throws MojoExecutionException, IOException {
         long result;
 
         if (BareBase.LASTEST_PRERELEASE.equals(buildRevision)) {
-            result = Archive.latest(archiveDirectory);
+            result = archive.latest();
             if (result == -1) {
                 throw new MojoExecutionException("no existing prerelease");
             }

@@ -29,10 +29,13 @@ import org.xml.sax.SAXException;
 
 import java.io.IOException;
 import java.lang.management.ManagementFactory;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
 import java.util.SortedSet;
 import java.util.TreeMap;
 import java.util.TreeSet;
@@ -59,63 +62,78 @@ import java.util.TreeSet;
  *
  */
 public class Archive implements AutoCloseable {
-    public static FileNode directory(FileNode storage, MavenProject project) {
-        return storage.join(project.getGroupId(), project.getArtifactId());
+    public static List<FileNode> directories(List<FileNode> storages, MavenProject project) {
+        List<FileNode> directories;
+
+        directories = new ArrayList<>(storages.size());
+        for (FileNode storage : storages) {
+            directories.add(storage.join(project.getGroupId(), project.getArtifactId()));
+        }
+        return directories;
     }
 
-    public static Archive tryOpen(FileNode directory) {
+    public static Archive tryOpen(List<FileNode> directories) {
         try {
-            return open(directory, -1, null);
+            return open(directories, -1, null);
         } catch (IOException e) {
             return null;
         }
     }
 
-    public static Archive open(FileNode directory, int timeout, Log log) throws IOException {
+    public static Archive open(List<FileNode> directories, int timeout, Log log) throws IOException {
         Archive archive;
 
-        archive = new Archive(directory);
+        archive = new Archive(directories);
         archive.open(timeout, log);
         return archive;
     }
 
-    public static long latest(FileNode directory) throws ListException, DirectoryNotFoundException {
-        long revision;
-        long result;
+    private final List<FileNode> directories;
+    private boolean opened = false;
+    private boolean closed = false;
 
-        result = -1;
-        if (directory.exists()) {
-            for (FileNode prerelease : directory.list()) {
-                try {
-                    revision = Long.parseLong(prerelease.getName());
-                } catch (NumberFormatException e) {
-                    // not a prerelease
-                    continue;
-                }
-                if (revision > result) {
-                    result = revision;
+    private Archive(List<FileNode> directories) {
+        if (directories.size() == 0) {
+            throw new IllegalArgumentException();
+        }
+        this.directories = directories;
+    }
+
+    public Target target(long revision) {
+        // TODO
+        return new Target(directories.get(0).join(Long.toString(revision)), revision);
+    }
+
+    /** */
+    public TreeMap<Long, FileNode> list() throws ListException, DirectoryNotFoundException {
+        TreeMap<Long, FileNode> result;
+        long revision;
+
+        result = new TreeMap<>();
+        for (FileNode directory : directories) {
+            if (directory.exists()) {
+                for (FileNode prerelease : directory.list()) {
+                    if (!prerelease.getName().equals(Target.REMOVE)) {
+                        revision = Long.parseLong(prerelease.getName());
+                        result.put(revision, prerelease);
+                    }
                 }
             }
         }
         return result;
     }
 
-    public final FileNode directory;
-    private boolean opened = false;
-    private boolean closed = false;
-
-    private Archive(FileNode directory) {
-        this.directory = directory;
-    }
-
-    public Target target(long revision) {
-        return new Target(directory.join(Long.toString(revision)), revision);
+    public long latest() throws ListException, DirectoryNotFoundException {
+        return list().lastKey();
     }
 
     //--
 
     private FileNode lockFile() {
-        return directory.getParent().join(directory.getName() + ".LOCK");
+        FileNode primary;
+
+        primary = directories.get(0);
+        return primary.getParent().join(primary.getName() + ".LOCK");
     }
 
     /**
@@ -133,7 +151,7 @@ public class Archive implements AutoCloseable {
         try {
             seconds = 0;
             while (true) {
-                // every time - if someone wiped the whole prereleases directory
+                // every time - if someone wiped the primary storage directory
                 file.getParent().mkdirsOpt();
                 try {
                     file.mkfile();
@@ -221,35 +239,24 @@ public class Archive implements AutoCloseable {
     }
 
     /**
-     * Also wipes REMOVE directories, no matter what's specified to keep.
-     *
      * @param keep number of prereleases after this method
-     * @param current is always considered the latest; may be null
      */
-    public void wipe(int keep, FileNode current) throws IOException {
+    public void wipe(int keep) throws IOException {
         TreeMap<Long, FileNode> prereleases;
-        String name;
-        long revision;
+        FileNode d;
 
         if (keep < 1) {
             throw new IllegalArgumentException("keep " + keep);
         }
-        prereleases = new TreeMap<>();
-        for (FileNode prerelease : directory.list()) {
-            name = prerelease.getName();
-            if (name.equals(Target.REMOVE)) {
-                Target.wipe(prerelease);
-            } else {
-                revision = Long.parseLong(name);
-                if (prerelease.equals(current)) {
-                    keep--;
-                } else {
-                    prereleases.put(revision, prerelease);
-                }
+        for (FileNode directory : directories) {
+            d = directory.join(Target.REMOVE);
+            if (d.isDirectory()) {
+                d.deleteTree();
             }
         }
+        prereleases = list();
         while (prereleases.size() > keep) {
-            Target.wipe(prereleases.remove(prereleases.firstKey()));
+            prereleases.remove(prereleases.firstKey()).deleteTree();
         }
     }
 }

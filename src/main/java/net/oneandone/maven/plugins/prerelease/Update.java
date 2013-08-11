@@ -47,7 +47,7 @@ public class Update extends ProjectBase {
         } else {
             maven = maven();
             prerelease = Prerelease.create(maven, propertyArgs(), getLog(), descriptor, target);
-            archive.wipe(keep, target.join());
+            archive.wipe(keep);
             try {
                 descriptor.check(world, project);
             } catch (RuntimeException e) {

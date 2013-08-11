@@ -23,7 +23,10 @@ import net.oneandone.sushi.fs.filter.Filter;
 import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
 
+import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 /**
  * Wipes archives and moves prerelease directories from primary storage to secondary storage. Also wipes all archives.
@@ -39,46 +42,75 @@ public class Swap extends Base {
 
     @Override
     public void doExecute() throws Exception {
-        FileNode primary;
-        List<Node> directories;
+        Set done;
+        List<FileNode> storages;
+        List<Node> archives;
         Archive archive;
-        FileNode secondary;
+        String relative;
         FileNode dest;
 
-        primary = storages().get(0);
-        if (!primary.exists()) {
-            return;
-        }
-        secondary = world.file(swap);
-        directories = primary.find("*/*");
-        for (Node dir : directories) {
-            if (!dir.isDirectory()) {
-                continue;
-            }
-            archive = Archive.tryOpen((FileNode) dir);
-            if (archive == null) {
-                getLog().info("skipped: " + dir);
-            } else {
-                try {
-                    archive.wipe(keep, null);
-                    for (Node src : dir.list()) {
-                        if (src.isLink()) {
-                            continue;
+        done = new HashSet<>();
+        storages = storages();
+        for (Node storage : storages()) {
+            archives = storage.find("*/*");
+            for (Node candidate : archives) {
+                if (!candidate.isDirectory()) {
+                    continue;
+                }
+                relative = candidate.getRelative(storage);
+                if (!done.add(relative)) {
+                    // already processed
+                    continue;
+                }
+                archive = Archive.tryOpen(directories(storages, relative));
+                if (archive == null) {
+                    getLog().info("skipped because it is locked: " + relative);
+                } else {
+                    try {
+                        archive.wipe(keep);
+                        for (FileNode src : archive.list().values()) {
+                            dest = nextStorage(storages, src);
+                            if (dest == null) {
+                                getLog().info("already in final storage: " + src);
+                            } else {
+                                dest.getParent().mkdirsOpt();
+                                src.move(dest);
+                                getLog().info("swapped " + src.getAbsolute() + " -> " + dest.getAbsolute());
+                            }
                         }
-                        if (src.getName().equals(Target.REMOVE)) {
-                            continue;
-                        }
-                        dest = secondary.join(dir.getRelative(primary), src.getName());
-                        dest.getParent().mkdirsOpt();
-                        src.move(dest);
-                        getLog().info("swapped " + ((FileNode) src).getAbsolute() + " -> " + dest.getAbsolute());
-                        dest.link(src);
+                    } finally {
+                        archive.close();
                     }
-                } finally {
-                    archive.close();
+                }
+
+            }
+        }
+        getLog().info(done.size() + " archives processed.");
+    }
+
+    private static FileNode nextStorage(List<FileNode> storages, FileNode prerelease) {
+        FileNode storage;
+
+        for (int i = 0, max = storages.size(); i < max; i++) {
+            storage = storages.get(i);
+            if (prerelease.hasAnchestor(storage)) {
+                if (i + 1 < max) {
+                    return storages.get(i + 1);
+                } else {
+                    return null;
                 }
             }
         }
-        getLog().info(directories.size() + " archives processed.");
+        throw new IllegalStateException(prerelease.getAbsolute());
+    }
+
+    private static List<FileNode> directories(List<FileNode> storages, String relative) {
+        List<FileNode> result;
+
+        result = new ArrayList<>();
+        for (FileNode storage : storages) {
+            result.add(storage.join(relative));
+        }
+        return result;
     }
 }

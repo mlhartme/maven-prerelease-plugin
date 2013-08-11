@@ -30,17 +30,13 @@ public class Lst extends ProjectBase {
         String revision;
         String name;
 
-        if (archive.directory.exists()) {
-            revision = Long.toString(WorkingCopy.load(basedir()).revision());
-            for (FileNode prerelease : archive.directory.list()) {
-                name = prerelease.getName();
-                if (name.equals(revision)) {
-                    name = name + " <- CURRENT";
-                } else {
-                    name = name + " (out-dated)";
-                }
-                getLog().info(name);
+        revision = Long.toString(WorkingCopy.load(basedir()).revision());
+        for (FileNode prerelease : archive.list().values()) {
+            name = prerelease.getName();
+            if (name.equals(revision)) {
+                name = name + " <- CURRENT";
             }
+            getLog().info(name);
         }
     }
 

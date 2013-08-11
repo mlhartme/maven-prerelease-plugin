@@ -62,6 +62,6 @@ public class Create extends ProjectBase {
         if (snapshots) {
             prerelease.deploySnapshot(maven, getLog(), propertyArgs(), project);
         }
-        archive.wipe(keep, target.join());
+        archive.wipe(keep);
     }
 }

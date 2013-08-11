@@ -64,7 +64,7 @@ public class Target {
     }
 
     public void create() throws IOException {
-        wipe(removeDirectory());
+        removeDirectory().deleteTreeOpt();
         directory.mkdirs();
     }
 
@@ -116,16 +116,5 @@ public class Target {
 
     public String toString() {
         return directory.toString();
-    }
-
-    /** delete prerelease if it exists; also deletes directories references by symlinks */
-    public static void wipe(FileNode dest) throws IOException {
-        if (!dest.isDirectory()) {
-            return;
-        }
-        if (dest.isLink()) {
-            dest.resolveLink().deleteTree();
-        }
-        dest.deleteTree();
     }
 }

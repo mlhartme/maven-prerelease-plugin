@@ -21,6 +21,8 @@ import net.oneandone.sushi.fs.file.FileNode;
 import org.apache.maven.plugin.logging.Log;
 import org.junit.Test;
 
+import java.util.Collections;
+
 import static org.junit.Assert.fail;
 
 public class ArchiveIT extends IntegrationBase {
@@ -31,7 +33,7 @@ public class ArchiveIT extends IntegrationBase {
 
         tmp = WORLD.getTemp().createTempDirectory();
         try{
-            try (Archive archive = Archive.open(tmp, 1, nullLog())) {
+            try (Archive archive = Archive.open(Collections.singletonList(tmp), 1, nullLog())) {
                 toomuch = new long[Integer.MAX_VALUE];
                 toomuch[0] = 0;
             }
@@ -40,7 +42,7 @@ public class ArchiveIT extends IntegrationBase {
             // ok
         }
         // make sure the lock was removed
-        Archive.open(tmp, 1, nullLog()).close();
+        Archive.open(Collections.singletonList(tmp), 1, nullLog()).close();
     }
 
     @Test
@@ -50,7 +52,7 @@ public class ArchiveIT extends IntegrationBase {
         final Archive archive2;
 
         tmp = WORLD.getTemp().createTempDirectory();
-        archive = Archive.open(tmp, 5, nullLog());
+        archive = Archive.open(Collections.singletonList(tmp), 5, nullLog());
         new Thread() {
             public void run() {
                 try {
@@ -61,7 +63,7 @@ public class ArchiveIT extends IntegrationBase {
                 }
             }
         }.start();
-        archive2 = Archive.open(tmp, 10, systemOutLog());
+        archive2 = Archive.open(Collections.singletonList(tmp), 10, systemOutLog());
         archive2.close();
     }
 
@@ -71,9 +73,9 @@ public class ArchiveIT extends IntegrationBase {
         final Archive archive;
 
         tmp = WORLD.getTemp().createTempDirectory();
-        archive = Archive.open(tmp, 5, nullLog());
+        archive = Archive.open(Collections.singletonList(tmp), 5, nullLog());
         try {
-            try (Archive archive2 = Archive.open(tmp, 1, nullLog())) {
+            try (Archive archive2 = Archive.open(Collections.singletonList(tmp), 1, nullLog())) {
                 // empty - exception expected
             }
             fail();
