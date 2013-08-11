@@ -2,7 +2,8 @@
   <body>
     <release date="2013-07-xx" version="1.6.0">
       <action date="2013-08-07" dev="mhm" type="update">
-        Added prerelease property to prerelease.property to document the plugin version that created this prerelease.
+        prerelease.properties changes: Added "prerelease" to document the plugin version that created this prerelease.
+        Removed "project.url" and "project.name" because they were unused.
       </action>
       <action date="2013-08-07" dev="mhm" type="update">
         Added support for multiple storages and a swap command to move between them.

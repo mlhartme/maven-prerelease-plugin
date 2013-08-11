@@ -39,8 +39,6 @@ public class Descriptor {
     private static final String PRERELEASE = "prerelease";
     private static final String SVN_ORIG = "svn.orig";
     private static final String SVN_TAG = "svn.tag";
-    private static final String PROJECT_NAME = "project.name";
-    private static final String PROJECT_URL = "project.url";
     private static final String PROJECT_GROUP_ID = "project.groupId";
     private static final String PROJECT_ARTIFACT_ID = "project.artifactId";
     private static final String PROJECT_VERSION = "project.version"; // of the release
@@ -58,8 +56,7 @@ public class Descriptor {
         src = file(target).createInputStream();
         properties.load(src);
         return new Descriptor(get(properties, PRERELEASE), target.getRevision(), get(properties, SVN_ORIG), get(properties, SVN_TAG),
-                new Project(get(properties, PROJECT_NAME), get(properties, PROJECT_URL),
-                        get(properties, PROJECT_GROUP_ID), get(properties, PROJECT_ARTIFACT_ID), get(properties, PROJECT_VERSION)),
+                new Project(get(properties, PROJECT_GROUP_ID), get(properties, PROJECT_ARTIFACT_ID), get(properties, PROJECT_VERSION)),
                 get(properties, DEPLOY_REPOSITORY), "true".equals(get(properties, DEPLOY_PLUGIN_METADATA)),
                 get(properties, PREVIOUS), get(properties, NEXT),
                 getProperties(properties, DEPLOY_PROPERTIES));
@@ -174,8 +171,6 @@ public class Descriptor {
         properties.setProperty(DEPLOY_REPOSITORY, deployRepository);
         properties.setProperty(DEPLOY_PLUGIN_METADATA, Boolean.toString(deployPluginMetadata));
         properties.setProperty(PREVIOUS, previous);
-        properties.setProperty(PROJECT_NAME, orEmpty(project.name));
-        properties.setProperty(PROJECT_URL, orEmpty(project.url));
         properties.setProperty(PROJECT_GROUP_ID, project.groupId);
         properties.setProperty(PROJECT_ARTIFACT_ID, project.artifactId);
         properties.setProperty(PROJECT_VERSION, project.version);
@@ -186,10 +181,6 @@ public class Descriptor {
         dest = file(target).createOutputStream(false);
         properties.store(dest, "");
         dest.close();
-    }
-
-    private static String orEmpty(String str) {
-        return str == null ? "" : str;
     }
 
     //-- utility code

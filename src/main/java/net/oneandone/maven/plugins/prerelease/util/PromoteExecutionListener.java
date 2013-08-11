@@ -23,6 +23,7 @@ import org.apache.maven.artifact.repository.metadata.GroupRepositoryMetadata;
 import org.apache.maven.artifact.repository.metadata.Versioning;
 import org.apache.maven.execution.ExecutionEvent;
 import org.apache.maven.execution.ExecutionListener;
+import org.apache.maven.plugin.descriptor.PluginDescriptor;
 import org.apache.maven.project.MavenProject;
 import org.apache.maven.project.MavenProjectHelper;
 
@@ -64,7 +65,8 @@ public class PromoteExecutionListener extends BaseExecutionListener {
                 metadata = new ArtifactRepositoryMetadata( projectArtifact, versioning);
                 projectArtifact.addMetadata(metadata);
                 groupMetadata = new GroupRepositoryMetadata( project.getGroupId());
-                groupMetadata.addPluginMapping(prerelease.descriptor.project.name, project.getArtifactId(), project.getName());
+                groupMetadata.addPluginMapping(
+                        PluginDescriptor.getGoalPrefixFromArtifactId(project.getArtifactId()), project.getArtifactId(), project.getName());
 
                 projectArtifact.addMetadata(groupMetadata);
             }
