@@ -63,22 +63,19 @@ public class Maven {
     private final ArtifactRepository localRepository;
     private final ExecutionListener executionListener;
     private final MavenProjectHelper projectHelper;
-    private final List<ArtifactRepository> remoteLegacy; // needed to load poms :(
-
-    // TODO: use a project builder that works without legacy classes, esp. without ArtifactRepository ...
-    // As far as I know, there's no such project builder in mvn 3.0.2.
+    private final List<ArtifactRepository> remoteRepositories;
     private final ProjectBuilder builder;
 
     public Maven(World world, MavenSession parentSession, ArtifactRepository localRepository,
                  ExecutionListener executionListener, MavenProjectHelper projectHelper,
-                 ProjectBuilder builder, List<ArtifactRepository> remoteLegacy) {
+                 ProjectBuilder builder, List<ArtifactRepository> remoteRepositories) {
         this.world = world;
         this.parentSession = parentSession;
         this.localRepository = localRepository;
         this.executionListener = executionListener;
         this.projectHelper = projectHelper;
         this.builder = builder;
-        this.remoteLegacy = remoteLegacy;
+        this.remoteRepositories = remoteRepositories;
     }
 
     public FileNode getLocalRepositoryDir() {
@@ -263,7 +260,7 @@ public class Maven {
 
         // session initializes the repository session in the build request
         request = new DefaultProjectBuildingRequest(parentSession.getProjectBuildingRequest());
-        request.setRemoteRepositories(remoteLegacy);
+        request.setRemoteRepositories(remoteRepositories);
         request.setProcessPlugins(false);
         request.setValidationLevel(ModelBuildingRequest.VALIDATION_LEVEL_MINIMAL);
         request.setSystemProperties(System.getProperties());

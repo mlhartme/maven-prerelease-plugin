@@ -6,21 +6,17 @@
         Removed "project.url" and "project.name" because they were unused.
       </action>
       <action date="2013-08-07" dev="mhm" type="update">
-        Added support for multiple storages and a swap command to move between them.
-        Renamed the prerelease.archive to prerelease.storage. And renamed "archiveRoot" to "storage" in the documentation.
+        Archives support multiple storages for prereleases. Added a swap command to move prereleases between storages.
+        Renamed the prerelease.archive property to prerelease.storages. And renamed "archiveRoot" to "storages" in the documentation.
       </action>
       <action date="2013-08-11" dev="mhm" type="fix">
-        Fix logger configuration for embedded Maven 3.1 invokation (it prints a warning now).
+        Fixed logger configuration for embedded Maven 3.1 invokation (it prints a warning now).
       </action>
       <action date="2013-08-08" dev="mhm" type="fix">
         Promote also installs files to the local repository now.
       </action>
       <action date="2013-08-08" dev="mhm" type="fix">
-        Fix missing artifact metadata when deploying a plugin.
-      </action>
-      <action date="2013-08-06" dev="mhm" type="add">
-        Added swap goal to move prereleases to secondary archive; archives now support symlinks to prerelease
-        directories.
+        Fixed missing artifact metadata when deploying a plugin.
       </action>
       <action date="2013-08-06" dev="mhm" type="add">
         Configurable number of prerelease to be kept in archives.
@@ -29,7 +25,7 @@
         Added -Dprerelease.args to pass property arguments to maven invocations.
       </action>
       <action date="2013-08-06" dev="mhm" type="fix">
-        Fix locksmith on Mac OS.
+        Fixed locksmith on Mac OS.
       </action>
       <action date="2013-08-03" dev="mhm" type="fix">
         Support Maven 3.1.
@@ -40,7 +36,7 @@
       <action date="2013-08-03" dev="mhm" type="fix">
         Proper error message when running in none-svn workspace.
       </action>
-      <action date="2013-07-09" dev="mhm" type="fix">
+      <action date="2013-08-03" dev="mhm" type="fix">
         Accept projects without url or name in their pom.
       </action>
     </release>
@@ -59,7 +55,7 @@
     </release>
     <release date="2013-05-21" version="1.5.0">
       <action date="2013-04-30" dev="mhm" type="update">
-        Moved code to github, adjust groupId and package names.
+        Moved code to github, adjusted groupId and package names.
       </action>
       <action date="2013-04-30" dev="mhm" type="update">
         Dumped devreg dependency, prerelease.user is mandatory now.

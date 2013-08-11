@@ -16,6 +16,7 @@
 package net.oneandone.maven.plugins.prerelease;
 
 import net.oneandone.maven.plugins.prerelease.core.Archive;
+import net.oneandone.maven.plugins.prerelease.core.Descriptor;
 import net.oneandone.maven.plugins.prerelease.core.Target;
 import net.oneandone.sushi.fs.Node;
 import net.oneandone.sushi.fs.file.FileNode;
@@ -63,6 +64,11 @@ public class Swap extends Base {
                     try {
                         archive.wipe(keep);
                         for (FileNode src : archive.list().values()) {
+                            if (!src.join("prerelease.properties").readString().contains("prerelease=")) {
+                                // This property was introduced in 1.6, together with multiple storage support
+                                getLog().info("skipped -- prerelease version too old");
+                                continue;
+                            }
                             dest = nextStorage(storages, src);
                             if (dest == null) {
                                 getLog().info("already in final storage: " + src);
