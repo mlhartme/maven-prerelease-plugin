@@ -183,12 +183,14 @@ public class Maven {
     }
 
     private static void setOutput(Logger logger, PrintStream dest) {
-        /*
         try {
             logger.getClass().getDeclaredMethod("setStream", PrintStream.class).invoke(logger, dest);
+        } catch (NoSuchMethodException e) {
+            logger.warn("cannot adjust logger: " + e.getMessage());
+            logger.debug("this is a know problem with maven 3.1", e);
         } catch (Exception e) {
             throw new IllegalStateException(e);
-        }*/
+        }
     }
 
     //--

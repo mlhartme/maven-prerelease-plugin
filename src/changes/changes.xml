@@ -5,6 +5,9 @@
         Added support for multiple storages and a swap command to move between them.
         Renamed the prerelease.archive to prerelease.storage. And renamed "archiveRoot" to "storage" in the documentation.
       </action>
+      <action date="2013-08-11" dev="mhm" type="fix">
+        Fix logger configuration for embedded Maven 3.1 invokation (it prints a warning now).
+      </action>
       <action date="2013-08-08" dev="mhm" type="fix">
         Promote also installs files to the local repository now.
       </action>
