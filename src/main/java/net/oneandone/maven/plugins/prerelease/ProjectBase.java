@@ -19,6 +19,7 @@ import net.oneandone.maven.plugins.prerelease.core.Archive;
 import net.oneandone.maven.plugins.prerelease.core.Descriptor;
 import net.oneandone.maven.plugins.prerelease.core.Target;
 import net.oneandone.maven.plugins.prerelease.core.WorkingCopy;
+import net.oneandone.sushi.fs.World;
 import net.oneandone.sushi.fs.file.FileNode;
 import org.apache.maven.plugin.logging.Log;
 import org.apache.maven.plugins.annotations.Parameter;
@@ -99,7 +100,7 @@ public abstract class ProjectBase extends Base {
 
         getLog().info("checking project ...");
         revision = workingCopy.revision();
-        descriptor = Descriptor.checkedCreate(world, project, revision);
+        descriptor = Descriptor.checkedCreate(world, version(), project, revision);
         workingCopy.checkCompatibility(descriptor);
         return descriptor;
     }

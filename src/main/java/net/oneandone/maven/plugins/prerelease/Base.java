@@ -140,4 +140,11 @@ public abstract class Base extends AbstractMojo {
         }
         return result;
     }
+
+    protected String version() {
+        String result;
+
+        result = getClass().getPackage().getSpecificationVersion();
+        return result == null ? "unknown" : result;
+    }
 }
