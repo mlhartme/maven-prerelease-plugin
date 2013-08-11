@@ -29,17 +29,11 @@ import java.util.List;
 import java.util.Set;
 
 /**
- * Wipes archives and moves prerelease directories from primary storage to secondary storage. Also wipes all archives.
+ * Wipes archives and moves prereleases to the next storage. You usually have two storages, primary and secondary.
  * Useful when you use ram disks: use the ramdisk as primary storage, and a hardisk as secondary storage.
  */
 @Mojo(name = "swap", requiresProject = false)
 public class Swap extends Base {
-    /**
-     * Location of the secondary storage.
-     */
-    @Parameter(property = "prerelease.swap", required = true)
-    private String swap;
-
     @Override
     public void doExecute() throws Exception {
         Set done;

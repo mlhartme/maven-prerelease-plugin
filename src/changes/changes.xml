@@ -1,14 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?><document xmlns="http://maven.apache.org/changes/1.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/changes/1.0.0 http://maven.apache.org/xsd/changes-1.0.0.xsd">
   <body>
-    <release date="2013-07-xx" version="1.5.3">
+    <release date="2013-07-xx" version="1.6.0">
+      <action date="2013-08-07" dev="mhm" type="update">
+        Added support for multiple storages and a swap command to move between them.
+        Renamed the prerelease.archive to prerelease.storage. And renamed "archiveRoot" to "storage" in the documentation.
+      </action>
       <action date="2013-08-08" dev="mhm" type="fix">
         Promote also installs files to the local repository now.
       </action>
       <action date="2013-08-08" dev="mhm" type="fix">
         Fix missing artifact metadata when deploying a plugin.
-      </action>
-      <action date="2013-08-07" dev="mhm" type="update">
-        Renamed the prerelease.archive to prerelease.storage. And renamed "archiveRoot" to "storage" in the documentation.
       </action>
       <action date="2013-08-06" dev="mhm" type="add">
         Added swap goal to move prereleases to secondary archive; archives now support symlinks to prerelease

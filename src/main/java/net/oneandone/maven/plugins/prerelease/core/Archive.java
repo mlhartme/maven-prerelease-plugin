@@ -100,8 +100,17 @@ public class Archive implements AutoCloseable {
     }
 
     public Target target(long revision) {
-        // TODO
-        return new Target(directories.get(0).join(Long.toString(revision)), revision);
+        String name;
+        FileNode prerelease;
+
+        name = Long.toString(revision);
+        for (int i = directories.size() - 1; i >= 0; i++) {
+            prerelease = directories.get(i).join(name);
+            if (i == 0 || prerelease.exists()) {
+                return new Target(prerelease, revision);
+            }
+        }
+        throw new IllegalStateException();
     }
 
     /** */
