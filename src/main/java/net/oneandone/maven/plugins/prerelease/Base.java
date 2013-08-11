@@ -17,6 +17,7 @@ package net.oneandone.maven.plugins.prerelease;
 
 import net.oneandone.maven.plugins.prerelease.util.Maven;
 import net.oneandone.sushi.fs.World;
+import net.oneandone.sushi.fs.file.FileNode;
 import net.oneandone.sushi.util.Separator;
 import org.apache.maven.artifact.repository.ArtifactRepository;
 import org.apache.maven.execution.MavenSession;
@@ -27,6 +28,9 @@ import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.project.MavenProjectHelper;
 import org.apache.maven.project.ProjectBuilder;
 
+import java.io.File;
+import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -35,8 +39,8 @@ public abstract class Base extends AbstractMojo {
     /**
      * Where to store prereleases.
      */
-    @Parameter(property = "prerelease.storage", defaultValue = "${settings.localRepository}/../prereleases", required = true)
-    protected String storage;
+    @Parameter(property = "prerelease.storages", defaultValue = "${settings.localRepository}/../prereleases", required = true)
+    private List<String> storages;
 
     /**
      * Timeout in seconds for locking a prerelease archive.
@@ -122,5 +126,18 @@ public abstract class Base extends AbstractMojo {
     protected Maven maven() {
         return new Maven(world, session, localRepository,
                 session.getRequest().getExecutionListener(), projectHelper, projectBuilder, remoteRepositories);
+    }
+
+    protected List<FileNode> storages() throws IOException {
+        List<FileNode> result;
+
+        if (storages.size() == 0) {
+            throw new IOException("expected at least 1 storage");
+        }
+        result = new ArrayList<>(storages.size());
+        for (String s : storages) {
+            result.add(world.file(new File(s).getCanonicalFile()));
+        }
+        return result;
     }
 }

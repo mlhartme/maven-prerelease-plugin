@@ -45,9 +45,7 @@ public class Swap extends Base {
         FileNode secondary;
         FileNode dest;
 
-        primary = world.file(storage);
-        // TODO: sushi bug?
-        primary = world.file(primary.toPath().toFile().getCanonicalFile());
+        primary = storages().get(0);
         if (!primary.exists()) {
             return;
         }
