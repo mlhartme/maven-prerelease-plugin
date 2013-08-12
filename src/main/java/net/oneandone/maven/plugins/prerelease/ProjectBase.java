@@ -30,7 +30,7 @@ public abstract class ProjectBase extends Base {
     protected MavenProject project;
 
     /** Set to true to deploy snapshots for every successfully built prerelease */
-    @Parameter(property = "prerelease.snapshot", defaultValue = "false")
+    @Parameter(property = "prerelease.snapshots", defaultValue = "false")
     protected boolean snapshots;
 
     /**

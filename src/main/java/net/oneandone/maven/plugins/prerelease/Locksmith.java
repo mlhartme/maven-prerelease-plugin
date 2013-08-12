@@ -105,7 +105,7 @@ public class Locksmith extends Base {
 
     private static final SimpleDateFormat TODAY = new SimpleDateFormat("HH:mm:ss");
     private static final SimpleDateFormat OTHER = new SimpleDateFormat("MMM dd", Locale.US);
-    private static final SimpleDateFormat MAC = new SimpleDateFormat("EEE MMM d HH:mm:ss yyyy", Locale.US);
+    private static final SimpleDateFormat MAC = new SimpleDateFormat("EEE MMM d HH:mm:ss yyyy");
 
     private Map<String, Long> startedMap() throws IOException {
         String[] cmd;
