@@ -73,6 +73,7 @@ public class Swap extends Base {
                             if (dest == null) {
                                 getLog().info("already in final storage: " + src);
                             } else {
+                                dest = dest.join(relative, src.getName());
                                 dest.getParent().mkdirsOpt();
                                 src.move(dest);
                                 getLog().info("swapped " + src.getAbsolute() + " -> " + dest.getAbsolute());
