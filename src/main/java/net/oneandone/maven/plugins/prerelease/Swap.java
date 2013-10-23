@@ -16,16 +16,11 @@
 package net.oneandone.maven.plugins.prerelease;
 
 import net.oneandone.maven.plugins.prerelease.core.Archive;
-import net.oneandone.maven.plugins.prerelease.core.Descriptor;
-import net.oneandone.maven.plugins.prerelease.core.Target;
 import net.oneandone.sushi.fs.Node;
 import net.oneandone.sushi.fs.file.FileNode;
-import net.oneandone.sushi.fs.filter.Filter;
 import org.apache.maven.plugins.annotations.Mojo;
-import org.apache.maven.plugins.annotations.Parameter;
 
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -43,20 +38,21 @@ public class Swap extends Base {
         Archive archive;
         String relative;
         FileNode dest;
+        FileNode storage;
+        int count;
 
-        done = new HashSet<>();
+        count = 0;
         storages = storages();
-        for (Node storage : storages()) {
+        // don't start at "-2" because we also want to wipe ...
+        for (int level = storages.size() - 1; level >= 0; level--) {
+            storage = storages.get(level);
+            getLog().info("checking storage: " + storage.getAbsolute());
             archives = storage.find("*/*");
             for (Node candidate : archives) {
                 if (!candidate.isDirectory()) {
                     continue;
                 }
                 relative = candidate.getRelative(storage);
-                if (!done.add(relative)) {
-                    // already processed
-                    continue;
-                }
                 archive = Archive.tryOpen(directories(storages, relative));
                 if (archive == null) {
                     getLog().info("skipped because it is locked: " + relative);
@@ -69,14 +65,14 @@ public class Swap extends Base {
                                 getLog().info("skipped -- prerelease version too old: " + relative);
                                 continue;
                             }
-                            dest = nextStorage(storages, src);
-                            if (dest == null) {
+                            if (level == storages.size() - 1) {
                                 getLog().info("already in final storage: " + src);
                             } else {
-                                dest = dest.join(relative, src.getName());
+                                dest = storages.get(level + 1).join(relative, src.getName());
                                 dest.getParent().mkdirsOpt();
                                 src.move(dest);
                                 getLog().info("swapped " + src.getAbsolute() + " -> " + dest.getAbsolute());
+                                count++;
                             }
                         }
                     } finally {
@@ -86,23 +82,7 @@ public class Swap extends Base {
 
             }
         }
-        getLog().info(done.size() + " archives processed.");
-    }
-
-    private static FileNode nextStorage(List<FileNode> storages, FileNode prerelease) {
-        FileNode storage;
-
-        for (int i = 0, max = storages.size(); i < max; i++) {
-            storage = storages.get(i);
-            if (prerelease.hasAnchestor(storage)) {
-                if (i + 1 < max) {
-                    return storages.get(i + 1);
-                } else {
-                    return null;
-                }
-            }
-        }
-        throw new IllegalStateException(prerelease.getAbsolute());
+        getLog().info(count + " archives swapped.");
     }
 
     private static List<FileNode> directories(List<FileNode> storages, String relative) {
