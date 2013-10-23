@@ -31,7 +31,7 @@ import java.util.Set;
 
 /**
  * Wipes archives and moves prereleases to the next storage. You usually have two storages, primary and secondary.
- * Useful when you use ram disks: use the ramdisk as primary storage, and a hardisk as secondary storage.
+ * Useful when you use ram disks: use the ramdisk as primary storage, and a harddisk as secondary storage.
  */
 @Mojo(name = "swap", requiresProject = false)
 public class Swap extends Base {
@@ -66,7 +66,7 @@ public class Swap extends Base {
                         for (FileNode src : archive.list().values()) {
                             if (!src.join("prerelease.properties").readString().contains("prerelease=")) {
                                 // This property was introduced in 1.6, together with multiple storage support
-                                getLog().info("skipped -- prerelease version too old");
+                                getLog().info("skipped -- prerelease version too old: " + relative);
                                 continue;
                             }
                             dest = nextStorage(storages, src);

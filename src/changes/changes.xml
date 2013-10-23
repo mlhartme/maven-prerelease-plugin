@@ -10,7 +10,7 @@
       </action>
       <action date="2013-08-07" dev="mhm" type="update">
         prerelease.properties changes: 
-        Added "prerelease" to document the plugin version that created this prerelease.
+        Added "prerelease" property to document the plugin version that created this prerelease.
         Removed "project.url" and "project.name" because they were unused.
       </action>
       <action date="2013-08-11" dev="mhm" type="fix">
