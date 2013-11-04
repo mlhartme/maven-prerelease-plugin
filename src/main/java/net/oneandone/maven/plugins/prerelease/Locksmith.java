@@ -15,6 +15,7 @@
  */
 package net.oneandone.maven.plugins.prerelease;
 
+import net.oneandone.sushi.fs.FileNotFoundException;
 import net.oneandone.sushi.fs.Node;
 import net.oneandone.sushi.fs.file.FileNode;
 import net.oneandone.sushi.io.OS;
@@ -73,7 +74,16 @@ public class Locksmith extends Base {
         }
         locks = primary.find("*/*.LOCK");
         for (Node file : locks) {
-            pid = file.readString();
+            try {
+                pid = file.readString();
+            } catch (IOException e) {
+                if (file.isFile()) {
+                    throw e;
+                } else {
+                    // lock has already been removed, probably by a concurrent build that finished
+                    continue;
+                }
+            }
             if (pid.trim().isEmpty()) {
                 throw new IOException(file + ": old lock file format");
             }
