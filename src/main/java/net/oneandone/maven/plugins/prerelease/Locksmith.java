@@ -75,21 +75,16 @@ public class Locksmith extends Base {
         for (Node file : locks) {
             pid = file.readString();
             if (pid.trim().isEmpty()) {
-                getLog().info(file + ": old lock file format");
-                if (System.currentTimeMillis() - file.getLastModified() < HOUR * COUNT) {
-                    getLog().info("> younger than " + COUNT + " hours - considered ok");
-                    continue;
-                }
+                throw new IOException(file + ": old lock file format");
+            }
+            time = started.get(pid);
+            if (time == null) {
+                getLog().info(file + ": stale lock - no process with id " + pid);
+            } else if (file.getLastModified() < time) {
+                getLog().info(file + ": stale lock - process with id " + pid + " younger than lock file");
             } else {
-                time = started.get(pid);
-                if (time == null) {
-                    getLog().info(file + ": stale lock - no process with id " + pid);
-                } else if (file.getLastModified() < time) {
-                    getLog().info(file + ": stale lock - process with id " + pid + " younger than lock file");
-                } else {
-                    getLog().debug(file + " ok");
-                    continue;
-                }
+                getLog().debug(file + " ok");
+                continue;
             }
             errors++;
             if (delete) {
