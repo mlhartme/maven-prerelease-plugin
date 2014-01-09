@@ -42,6 +42,9 @@
         <groupId>net.oneandone.maven.plugins</groupId>
         <artifactId>prerelease</artifactId>
         <version>@@VERSION@@</version>
+        <configuration>
+          <allowPrereleaseSnapshots>true</allowPrereleaseSnapshots>
+        </configuration>
       </plugin>
     </plugins>
   </build>

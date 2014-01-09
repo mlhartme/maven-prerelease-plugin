@@ -38,6 +38,9 @@
         <groupId>de.schlund.maven.poms</groupId>
         <artifactId>schlund</artifactId>
         <version>1.1-SNAPSHOT</version>
+        <configuration>
+          <allowPrereleaseSnapshots>true</allowPrereleaseSnapshots>
+        </configuration>
       </plugin>
     </plugins>
   </build>

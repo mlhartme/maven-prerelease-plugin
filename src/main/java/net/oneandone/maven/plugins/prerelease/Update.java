@@ -49,7 +49,7 @@ public class Update extends ProjectBase {
             prerelease = Prerelease.create(maven, propertyArgs(), getLog(), descriptor, target);
             archive.wipe(keep);
             try {
-                descriptor.check(world, project, allowSnapshots);
+                descriptor.check(world, project, allowSnapshots, allowPrereleaseSnapshots);
             } catch (RuntimeException e) {
                 throw e;
             } catch (Exception e) {

@@ -78,10 +78,10 @@ public class Descriptor {
                 new HashMap<String, String>());
     }
 
-    public static Descriptor checkedCreate(World world, String prerelease, MavenProject mavenProject, long revision, boolean allowSnapshots)
+    public static Descriptor checkedCreate(World world, String prerelease, MavenProject mavenProject, long revision, boolean allowSnapshots, boolean allowPrereleaseSnapshots)
             throws CannotDeterminTagBase,
             MissingScmTag, CannotBumpVersion, MissingDeveloperConnection, TagAlreadyExists, VersioningProblem {
-        return create(prerelease, mavenProject, revision).check(world, mavenProject, allowSnapshots);
+        return create(prerelease, mavenProject, revision).check(world, mavenProject, allowSnapshots, allowPrereleaseSnapshots);
     }
 
     //--
@@ -119,7 +119,7 @@ public class Descriptor {
     }
 
     /** @return this */
-    public Descriptor check(World world, MavenProject mavenProject, boolean allowSnapshots)
+    public Descriptor check(World world, MavenProject mavenProject, boolean allowSnapshots, boolean allowPrereleaseSnapshots)
            throws TagAlreadyExists, VersioningProblem, CannotDeterminTagBase, MissingScmTag, CannotBumpVersion, MissingDeveloperConnection {
         List<String> problems;
         MavenProject parent;
@@ -134,7 +134,11 @@ public class Descriptor {
             checkRelease(dependency.getGroupId() + ":" + dependency.getArtifactId(), dependency.getVersion(), problems);
         }
         for (Artifact artifact : mavenProject.getPluginArtifacts()) {
-            checkRelease(artifact.getGroupId() + ":" + artifact.getArtifactId(), artifact.getVersion(), problems);
+            if (allowPrereleaseSnapshots && "net.oneandone.maven.plugins".equals(artifact.getGroupId()) && "prerelease".equals(artifact.getArtifactId())) {
+                // skip for integration tests
+            } else {
+                checkRelease(artifact.getGroupId() + ":" + artifact.getArtifactId(), artifact.getVersion(), problems);
+            }
         }
         if (problems.size() > 0 && !allowSnapshots) {
             throw new VersioningProblem(problems);

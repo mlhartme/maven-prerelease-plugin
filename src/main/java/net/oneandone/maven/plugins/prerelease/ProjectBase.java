@@ -37,6 +37,10 @@ public abstract class ProjectBase extends Base {
     @Parameter(property = "prerelease.allowSnapshots", defaultValue = "false")
     protected boolean allowSnapshots;
 
+    /** Report errors for snapshot dependencies to the prerelease plugin. True is used in integration tests. */
+    @Parameter(property = "prerelease.allowPrereleaseSnapshots", defaultValue = "false")
+    protected boolean allowPrereleaseSnapshots;
+
     /**
      * Specifies where to create a symlink to the prerelease checkout. No symlink is created if the prerelease has no checkout yet
      * (and thus is broken). No symlink is created if not specified.
@@ -104,7 +108,7 @@ public abstract class ProjectBase extends Base {
 
         getLog().info("checking project ...");
         revision = workingCopy.revision();
-        descriptor = Descriptor.checkedCreate(world, version(), project, revision, allowSnapshots);
+        descriptor = Descriptor.checkedCreate(world, version(), project, revision, allowSnapshots, allowPrereleaseSnapshots);
         workingCopy.checkCompatibility(descriptor);
         return descriptor;
     }
