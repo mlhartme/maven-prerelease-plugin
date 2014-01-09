@@ -78,10 +78,10 @@ public class Descriptor {
                 new HashMap<String, String>());
     }
 
-    public static Descriptor checkedCreate(World world, String prerelease, MavenProject mavenProject, long revision)
+    public static Descriptor checkedCreate(World world, String prerelease, MavenProject mavenProject, long revision, boolean allowSnapshots)
             throws CannotDeterminTagBase,
             MissingScmTag, CannotBumpVersion, MissingDeveloperConnection, TagAlreadyExists, VersioningProblem {
-        return create(prerelease, mavenProject, revision).check(world, mavenProject);
+        return create(prerelease, mavenProject, revision).check(world, mavenProject, allowSnapshots);
     }
 
     //--
@@ -119,7 +119,7 @@ public class Descriptor {
     }
 
     /** @return this */
-    public Descriptor check(World world, MavenProject mavenProject)
+    public Descriptor check(World world, MavenProject mavenProject, boolean allowSnapshots)
            throws TagAlreadyExists, VersioningProblem, CannotDeterminTagBase, MissingScmTag, CannotBumpVersion, MissingDeveloperConnection {
         List<String> problems;
         MavenProject parent;
@@ -134,13 +134,9 @@ public class Descriptor {
             checkRelease(dependency.getGroupId() + ":" + dependency.getArtifactId(), dependency.getVersion(), problems);
         }
         for (Artifact artifact : mavenProject.getPluginArtifacts()) {
-            if ("net.oneandone.maven.plugins".equals(artifact.getGroupId()) && "prerelease".equals(artifact.getArtifactId())) {
-                // ignores -- that what we use in integration tests */
-            } else {
-                checkRelease(artifact.getGroupId() + ":" + artifact.getArtifactId(), artifact.getVersion(), problems);
-            }
+            checkRelease(artifact.getGroupId() + ":" + artifact.getArtifactId(), artifact.getVersion(), problems);
         }
-        if (problems.size() > 0) {
+        if (problems.size() > 0 && !allowSnapshots) {
             throw new VersioningProblem(problems);
         }
         if (Subversion.exists(world.getTemp(), svnTag)) {
