@@ -103,6 +103,10 @@ public final class Transform {
     public static String adjustScm(String origStr, String svnurl, String tag) throws MojoExecutionException {
         String str;
 
+        if ("scm:svn:${project.svn.url}".equals(origStr)) {
+            // do not touch - implied by scm url.
+            return origStr;
+        }
         str = origStr;
         if (str.endsWith("/")) {
             str = str.substring(0, str.length() - 1);
