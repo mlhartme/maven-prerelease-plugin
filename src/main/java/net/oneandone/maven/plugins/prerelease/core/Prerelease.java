@@ -28,7 +28,6 @@ import net.oneandone.sushi.util.Strings;
 import net.oneandone.sushi.util.Substitution;
 import net.oneandone.sushi.util.SubstitutionException;
 import net.oneandone.sushi.xml.XmlException;
-import org.apache.maven.model.DeploymentRepository;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.logging.Log;
 import org.apache.maven.project.MavenProject;
@@ -182,7 +181,7 @@ public class Prerelease {
 
         // no "clean" because we have a vanilla directory from svn
         try {
-            maven.build(checkout, maven.releaseProps(propertyArgs), new PrepareExecutionListener(this, maven.getExecutionListener()), false, "install");
+            maven.build(checkout, descriptor.releaseProps(propertyArgs), new PrepareExecutionListener(this, maven.getExecutionListener()), false, "install");
         } finally {
             installed = descriptor.project.localRepo(maven);
             if (installed.exists()) {

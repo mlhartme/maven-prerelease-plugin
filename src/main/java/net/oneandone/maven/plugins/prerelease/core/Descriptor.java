@@ -276,4 +276,17 @@ public class Descriptor {
     public static FileNode file(Target target) {
         return target.join("prerelease.properties");
     }
+
+    //--
+
+    public Map<String, String> releaseProps(Map<String, String> initial) {
+        Map<String, String> props;
+
+        props = new HashMap<>();
+        props.putAll(initial);
+        props.put("performRelease", "true");
+        props.put("prerelease.svn.orig", svnOrig);
+        props.put("prerelease.svn.revision", Long.toString(revision));
+        return props;
+    }
 }

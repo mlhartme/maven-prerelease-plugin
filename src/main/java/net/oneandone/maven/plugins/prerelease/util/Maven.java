@@ -36,28 +36,17 @@ import org.apache.maven.project.ProjectBuildingException;
 import org.apache.maven.project.ProjectBuildingRequest;
 import org.apache.maven.project.ProjectBuildingResult;
 import org.codehaus.plexus.DefaultPlexusContainer;
-import org.codehaus.plexus.PlexusContainer;
 import org.codehaus.plexus.component.repository.exception.ComponentLookupException;
 import org.codehaus.plexus.logging.Logger;
 
 import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 
 public class Maven {
-    public static Map<String, String> releaseProps(Map<String, String> initial) {
-        Map<String, String> props;
-
-        props = new HashMap<>();
-        props.putAll(initial);
-        props.put("performRelease", "true");
-        return props;
-    }
-
     private final World world;
     private final MavenSession parentSession;
     private final ArtifactRepository localRepository;
@@ -206,7 +195,7 @@ public class Maven {
 
         listener = new PromoteExecutionListener(prerelease, projectHelper, executionListener);
         try {
-            build(prerelease.checkout, releaseProps(propertyArgs), listener, true, "deploy");
+            build(prerelease.checkout, prerelease.descriptor.releaseProps(propertyArgs), listener, true, "deploy");
         } catch (BuildException e) {
             if (listener.isFirstSuccess()) {
                 log.warn("Promote succeeded: your artifacts have been deployed, and your svn tag was created. ");
