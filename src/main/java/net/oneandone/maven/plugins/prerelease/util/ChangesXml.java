@@ -15,6 +15,7 @@
  */
 package net.oneandone.maven.plugins.prerelease.util;
 
+import net.oneandone.sushi.fs.FileNotFoundException;
 import net.oneandone.sushi.fs.file.FileNode;
 import net.oneandone.sushi.xml.Selector;
 import net.oneandone.sushi.xml.XmlException;
@@ -36,11 +37,17 @@ public class ChangesXml {
 
     private static final SimpleDateFormat FORMAT = new SimpleDateFormat("yyyy-MM-dd");
 
-    public static ChangesXml load(FileNode basedir) throws IOException, SAXException {
-        FileNode dest;
+    public static ChangesXml load(FileNode basedir) throws IOException {
+        FileNode file;
 
-        dest = basedir.join(PATH);
-        return new ChangesXml(dest, dest.readXml());
+        file = basedir.join(PATH);
+        try {
+            return new ChangesXml(file, file.readXml());
+        } catch (FileNotFoundException e) {
+            throw e;
+        } catch (IOException | SAXException e) {
+            throw new IOException(file.getPath() + ": cannot load changes.xml: " + e.getMessage(), e);
+        }
     }
 
     private final FileNode dest;
