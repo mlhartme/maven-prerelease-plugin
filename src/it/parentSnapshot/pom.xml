@@ -4,7 +4,7 @@
   <parent>
     <groupId>org.apache</groupId>
     <artifactId>apache</artifactId>
-    <version>14-SNAPSHOT</version>
+    <version>15-SNAPSHOT</version>
   </parent>
 
   <groupId>net.oneandone.maven.plugins.prerelease</groupId>
@@ -26,15 +26,6 @@
       <url>file://@@TARGET@@/it/maven-snapshot-repository</url>
     </snapshotRepository>
   </distributionManagement>
-
-  <!-- TODO: this repo is in it/settings.xml !? -->
-  <repositories>
-    <repository>
-      <id>apachesnapshots</id>
-      <url>http://repository.apache.org/snapshots/</url>
-      <releases><enabled>false</enabled></releases>
-    </repository>
-  </repositories>
 
   <build>
     <plugins>
