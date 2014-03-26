@@ -29,7 +29,7 @@ import org.apache.maven.execution.DefaultMavenExecutionRequest;
 import org.apache.maven.execution.DefaultMavenExecutionResult;
 import org.apache.maven.execution.MavenSession;
 import org.apache.maven.project.ProjectBuilder;
-import org.apache.maven.repository.internal.MavenRepositorySystemSession;
+import org.apache.maven.repository.internal.MavenRepositorySystemUtils;
 import org.codehaus.plexus.DefaultContainerConfiguration;
 import org.codehaus.plexus.DefaultPlexusContainer;
 import org.codehaus.plexus.PlexusContainerException;
@@ -37,8 +37,10 @@ import org.codehaus.plexus.classworlds.ClassWorld;
 import org.codehaus.plexus.classworlds.realm.ClassRealm;
 import org.codehaus.plexus.component.repository.exception.ComponentLookupException;
 import org.codehaus.plexus.logging.Logger;
+import org.eclipse.aether.DefaultRepositorySystemSession;
+import org.eclipse.aether.RepositorySystem;
+import org.eclipse.aether.repository.LocalRepository;
 import org.junit.BeforeClass;
-import org.sonatype.aether.impl.internal.SimpleLocalRepositoryManager;
 
 import java.io.File;
 import java.io.IOException;
@@ -222,7 +224,8 @@ public class IntegrationBase {
         FileNode localDir;
         ArtifactRepository local;
         MavenSession session;
-        MavenRepositorySystemSession repoSession;
+        RepositorySystem repoSystem;
+        DefaultRepositorySystemSession repoSession;
 
         container = container(null, null, Logger.LEVEL_DISABLED);
         try {
@@ -246,8 +249,9 @@ public class IntegrationBase {
 
 
         try {
-            repoSession = new MavenRepositorySystemSession();
-            repoSession.setLocalRepositoryManager(new SimpleLocalRepositoryManager(localDir.toPath().toFile()));
+            repoSystem = container.lookup(RepositorySystem.class);
+            repoSession = MavenRepositorySystemUtils.newSession();
+            repoSession.setLocalRepositoryManager(repoSystem.newLocalRepositoryManager(repoSession, new LocalRepository(localDir.getAbsolute())));
             session = new MavenSession(container, repoSession, new DefaultMavenExecutionRequest(), new DefaultMavenExecutionResult());
             return new Maven(world, session, local, null, null, container.lookup(ProjectBuilder.class), Arrays.asList(central, snapshots));
         } catch (ComponentLookupException e) {
@@ -272,6 +276,7 @@ public class IntegrationBase {
         if (realm != null) {
             config.setRealm(realm);
         }
+        config.setAutoWiring(true);
         try {
             container = new DefaultPlexusContainer(config);
         } catch (PlexusContainerException e) {
