@@ -1,5 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?><document xmlns="http://maven.apache.org/changes/1.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/changes/1.0.0 http://maven.apache.org/xsd/changes-1.0.0.xsd">
   <body>
+    <release date="2014-03-26" version="1.6.3">
+      <action date="2014-03-26" dev="mhm" type="update">
+        Update dependencies, in particular Maven 3.0.4 to 3.1.1, which includes the switch to eclipse aether.
+      </action>
+    </release>
     <release date="2014-03-13" version="1.6.2">
       <action date="2014-03-13" dev="mhm" type="update">
         Added prerelease.svn.orig and prerelease.svn.revision properties to make the scm origin of the prerelease available to builds.

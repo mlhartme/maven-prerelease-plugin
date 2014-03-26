@@ -93,9 +93,9 @@ public class PatchedBuilderCommon extends BuilderCommon {
         return filter? filtered(result) : result;
     }
 
-    public void handleBuildError(ReactorContext buildContext, MavenSession rootSession,
+    public void handleBuildError(ReactorContext buildContext, MavenSession rootSession, MavenSession currentSession,
                                  MavenProject mavenProject, Exception e, long buildStartTime) {
-        bc.handleBuildError(buildContext, rootSession, mavenProject, e, buildStartTime);
+        bc.handleBuildError(buildContext, rootSession, currentSession, mavenProject, e, buildStartTime);
     }
 
     private MavenExecutionPlan filtered(MavenExecutionPlan base) {

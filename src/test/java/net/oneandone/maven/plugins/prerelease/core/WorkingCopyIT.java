@@ -32,6 +32,7 @@ public class WorkingCopyIT extends IntegrationBase {
         workingCopy.check();
     }
 
+    @Test
     public void otherChanges() throws Exception {
         long initialRevision;
         FileNode mine;
