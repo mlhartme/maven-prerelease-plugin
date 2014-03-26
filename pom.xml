@@ -17,7 +17,6 @@
     for continuous delivery</description>
   <url>https://github.com/mlhartme/maven-application-plugin</url>
   <properties>
-    <aetherVersion>1.13.1</aetherVersion>
     <mavenVersion>3.0.5</mavenVersion>
     <enforcer.skip>true</enforcer.skip><!-- TODO ... dependency convergence -->
     <wsd.ypid>20236</wsd.ypid>
