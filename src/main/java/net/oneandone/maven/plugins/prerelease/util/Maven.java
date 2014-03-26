@@ -38,8 +38,9 @@ import org.apache.maven.project.ProjectBuildingResult;
 import org.codehaus.plexus.DefaultPlexusContainer;
 import org.codehaus.plexus.component.repository.exception.ComponentLookupException;
 import org.codehaus.plexus.logging.Logger;
+import org.slf4j.spi.LocationAwareLogger;
 
-import java.io.PrintStream;
+import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -107,13 +108,15 @@ public class Maven {
 
         bc = PatchedBuilderCommon.install(container, filter);
         Logger logger = getLogger(container);
-        setOutput(logger, indentPrintStream("  "));
+        org.slf4j.Logger previous = setTarget(logger, new PrefixLogger("prerelease", "  ", LocationAwareLogger.INFO_INT, System.out));
         logger.info("[" + basedir + "] mvn " + props(request.getUserProperties()) + Separator.SPACE.join(goals));
         try {
             result = maven.execute(request);
         } finally {
             bc.uninstall();
-            setOutput(logger, System.out);
+            if (previous != null) {
+                setTarget(logger, previous);
+            }
         }
         exception = null;
         for (Throwable e : result.getExceptions()) {
@@ -145,38 +148,24 @@ public class Maven {
 
     //--
 
-    private static PrintStream indentPrintStream(final String prefix) {
-        return new PrintStream(System.out) {
-            private boolean start = true;
-            public void print(String str) {
-                if (start) {
-                    super.print(prefix);
-                    start = false;
-                }
-                super.print(str);
-            }
-
-            public void println(String str) {
-                print(str);
-                super.println();
-                start = true;
-            }
-        };
-    }
-
     private static Logger getLogger(DefaultPlexusContainer container) {
         return container.getLoggerManager().getLoggerForComponent("notused");
     }
 
-    private static void setOutput(Logger logger, PrintStream dest) {
+    private static org.slf4j.Logger setTarget(Logger plexusLogger, org.slf4j.Logger target) {
+        Field field;
+        org.slf4j.Logger previous;
+
         try {
-            logger.getClass().getDeclaredMethod("setStream", PrintStream.class).invoke(logger, dest);
-        } catch (NoSuchMethodException e) {
-            logger.warn("cannot adjust logger: " + e.getMessage());
-            logger.debug("this is a know problem with maven 3.1", e);
+            field = plexusLogger.getClass().getDeclaredField("logger");
+            field.setAccessible(true);
+            previous = (org.slf4j.Logger) field.get(plexusLogger);
+            field.set(plexusLogger, target);
         } catch (Exception e) {
-            throw new IllegalStateException(e);
+            plexusLogger.warn("cannot adjust logger: " + e.getMessage());
+            previous = null;
         }
+        return previous;
     }
 
     //--
