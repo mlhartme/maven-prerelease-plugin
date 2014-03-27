@@ -107,7 +107,7 @@ public class Maven {
 
         bc = PatchedBuilderCommon.install(container, filter);
         log.info("[" + basedir + "] mvn " + props(request.getUserProperties()) + Separator.SPACE.join(goals));
-        log.info("\033[33m\033[1m");
+        log.info("\033[2m");
         try {
             result = maven.execute(request);
         } finally {
