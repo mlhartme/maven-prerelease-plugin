@@ -124,7 +124,7 @@ public abstract class Base extends AbstractMojo {
     }
 
     protected Maven maven() {
-        return new Maven(world, session, localRepository,
+        return new Maven(world, getLog(), session, localRepository,
                 session.getRequest().getExecutionListener(), projectHelper, projectBuilder, remoteRepositories);
     }
 

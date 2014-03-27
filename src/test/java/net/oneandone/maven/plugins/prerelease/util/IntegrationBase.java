@@ -28,6 +28,7 @@ import org.apache.maven.artifact.repository.layout.DefaultRepositoryLayout;
 import org.apache.maven.execution.DefaultMavenExecutionRequest;
 import org.apache.maven.execution.DefaultMavenExecutionResult;
 import org.apache.maven.execution.MavenSession;
+import org.apache.maven.monitor.logging.DefaultLog;
 import org.apache.maven.project.ProjectBuilder;
 import org.apache.maven.repository.internal.MavenRepositorySystemUtils;
 import org.codehaus.plexus.DefaultContainerConfiguration;
@@ -253,7 +254,7 @@ public class IntegrationBase {
             repoSession = MavenRepositorySystemUtils.newSession();
             repoSession.setLocalRepositoryManager(repoSystem.newLocalRepositoryManager(repoSession, new LocalRepository(localDir.getAbsolute())));
             session = new MavenSession(container, repoSession, new DefaultMavenExecutionRequest(), new DefaultMavenExecutionResult());
-            return new Maven(world, session, local, null, null, container.lookup(ProjectBuilder.class), Arrays.asList(central, snapshots));
+            return new Maven(world, new DefaultLog(null), session, local, null, null, container.lookup(ProjectBuilder.class), Arrays.asList(central, snapshots));
         } catch (ComponentLookupException e) {
             throw new IllegalStateException(e);
         }

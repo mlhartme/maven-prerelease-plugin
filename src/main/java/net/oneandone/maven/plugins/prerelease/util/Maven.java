@@ -37,10 +37,7 @@ import org.apache.maven.project.ProjectBuildingRequest;
 import org.apache.maven.project.ProjectBuildingResult;
 import org.codehaus.plexus.DefaultPlexusContainer;
 import org.codehaus.plexus.component.repository.exception.ComponentLookupException;
-import org.codehaus.plexus.logging.Logger;
-import org.slf4j.spi.LocationAwareLogger;
 
-import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -49,6 +46,7 @@ import java.util.Properties;
 
 public class Maven {
     private final World world;
+    private final Log log;
     private final MavenSession parentSession;
     private final ArtifactRepository localRepository;
     private final ExecutionListener executionListener;
@@ -56,10 +54,11 @@ public class Maven {
     private final List<ArtifactRepository> remoteRepositories;
     private final ProjectBuilder builder;
 
-    public Maven(World world, MavenSession parentSession, ArtifactRepository localRepository,
+    public Maven(World world, Log log, MavenSession parentSession, ArtifactRepository localRepository,
                  ExecutionListener executionListener, MavenProjectHelper projectHelper,
                  ProjectBuilder builder, List<ArtifactRepository> remoteRepositories) {
         this.world = world;
+        this.log = log;
         this.parentSession = parentSession;
         this.localRepository = localRepository;
         this.executionListener = executionListener;
@@ -107,16 +106,13 @@ public class Maven {
         request.setExecutionListener(theExecutionListener);
 
         bc = PatchedBuilderCommon.install(container, filter);
-        Logger logger = getLogger(container);
-        org.slf4j.Logger previous = setTarget(logger, new PrefixLogger("prerelease", "  ", LocationAwareLogger.INFO_INT, System.out));
-        logger.info("[" + basedir + "] mvn " + props(request.getUserProperties()) + Separator.SPACE.join(goals));
+        log.info("[" + basedir + "] mvn " + props(request.getUserProperties()) + Separator.SPACE.join(goals));
+        log.info("\033[33m\033[1m");
         try {
             result = maven.execute(request);
         } finally {
+            log.info("\033[0m");
             bc.uninstall();
-            if (previous != null) {
-                setTarget(logger, previous);
-            }
         }
         exception = null;
         for (Throwable e : result.getExceptions()) {
@@ -144,28 +140,6 @@ public class Maven {
             builder.append(' ');
         }
         return builder.toString();
-    }
-
-    //--
-
-    private static Logger getLogger(DefaultPlexusContainer container) {
-        return container.getLoggerManager().getLoggerForComponent("notused");
-    }
-
-    private static org.slf4j.Logger setTarget(Logger plexusLogger, org.slf4j.Logger target) {
-        Field field;
-        org.slf4j.Logger previous;
-
-        try {
-            field = plexusLogger.getClass().getDeclaredField("logger");
-            field.setAccessible(true);
-            previous = (org.slf4j.Logger) field.get(plexusLogger);
-            field.set(plexusLogger, target);
-        } catch (Exception e) {
-            plexusLogger.warn("cannot adjust logger: " + e.getMessage());
-            previous = null;
-        }
-        return previous;
     }
 
     //--
