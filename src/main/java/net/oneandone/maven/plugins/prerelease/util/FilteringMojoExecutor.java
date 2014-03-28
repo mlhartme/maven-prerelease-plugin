@@ -33,7 +33,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class FilteringMojoExecutor extends MojoExecutor {
-    public static FilteringMojoExecutor install(PlexusContainer container, boolean filter) {
+    public static FilteringMojoExecutor install(PlexusContainer container, String phase) {
         LifecycleModuleBuilder builder;
         Field field;
         FilteringMojoExecutor result;
@@ -42,7 +42,7 @@ public class FilteringMojoExecutor extends MojoExecutor {
             builder = container.lookup(LifecycleModuleBuilder.class);
             field = builder.getClass().getDeclaredField("mojoExecutor");
             field.setAccessible(true);
-            result = new FilteringMojoExecutor(builder, field, (MojoExecutor) field.get(builder), filter, container.lookup(DefaultLifecycles.class));
+            result = new FilteringMojoExecutor(builder, field, (MojoExecutor) field.get(builder), phase, container.lookup(DefaultLifecycles.class));
             field.set(builder, result);
         } catch (Exception e) {
             throw new IllegalStateException(e);
@@ -53,14 +53,16 @@ public class FilteringMojoExecutor extends MojoExecutor {
     private final LifecycleModuleBuilder builder;
     private final Field field;
     private final MojoExecutor baseExecutor;
-    private final boolean filter;
+
+    /** what to filter for; null: nothing */
+    private final String phase;
     private final DefaultLifecycles defaultLifecycles;
 
-    public FilteringMojoExecutor(LifecycleModuleBuilder builder, Field field, MojoExecutor baseExecutor, boolean filter, DefaultLifecycles defaultLifecyles) {
+    public FilteringMojoExecutor(LifecycleModuleBuilder builder, Field field, MojoExecutor baseExecutor, String phase, DefaultLifecycles defaultLifecyles) {
         this.builder = builder;
         this.field = field;
         this.baseExecutor = baseExecutor;
-        this.filter = filter;
+        this.phase = phase;
         this.defaultLifecycles = defaultLifecyles;
     }
 
@@ -113,7 +115,7 @@ public class FilteringMojoExecutor extends MojoExecutor {
 
         lst = new ArrayList<>();
         for (MojoExecution item : orig) {
-            if ("deploy".equals(item.getLifecyclePhase())) {
+            if (phase == null || phase.equals(item.getLifecyclePhase())) {
                 lst.add(item);
             }
         }

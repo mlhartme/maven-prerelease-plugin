@@ -83,13 +83,14 @@ public class Maven {
      * Creates an DefaultMaven instance, initializes it form parentRequest (in Maven, this is done by MavenCli - also by
      * loading settings).
      */
-    public void build(FileNode basedir, Map<String, String> userProperties, ExecutionListener theExecutionListener, boolean filter, String ... goals) throws BuildException {
+    public void build(FileNode basedir, Map<String, String> userProperties, ExecutionListener theExecutionListener, boolean deployOnly,
+                      String ... goals) throws BuildException {
         DefaultPlexusContainer container;
         org.apache.maven.Maven maven;
         MavenExecutionRequest request;
         MavenExecutionResult result;
         BuildException exception;
-        PatchedBuilderCommon bc;
+        FilteringMojoExecutor mojoExecutor;
 
         request = DefaultMavenExecutionRequest.copy(parentSession.getRequest());
         container = (DefaultPlexusContainer) parentSession.getContainer();
@@ -105,14 +106,14 @@ public class Maven {
         request.setUserProperties(merged(request.getUserProperties(), userProperties));
         request.setExecutionListener(theExecutionListener);
 
-        bc = PatchedBuilderCommon.install(container, filter);
+        mojoExecutor = FilteringMojoExecutor.install(container, deployOnly ? "deploy" : null);
         log.info("[" + basedir + "] mvn " + props(request.getUserProperties()) + Separator.SPACE.join(goals));
         nestedOutputOn();
         try {
             result = maven.execute(request);
         } finally {
             nestedOutputOff();
-            bc.uninstall();
+            mojoExecutor.uninstall();
         }
         exception = null;
         for (Throwable e : result.getExceptions()) {
