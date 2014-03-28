@@ -107,11 +107,11 @@ public class Maven {
 
         bc = PatchedBuilderCommon.install(container, filter);
         log.info("[" + basedir + "] mvn " + props(request.getUserProperties()) + Separator.SPACE.join(goals));
-        log.info("\033[2m");
+        nestedOutputOn();
         try {
             result = maven.execute(request);
         } finally {
-            log.info("\033[0m");
+            nestedOutputOff();
             bc.uninstall();
         }
         exception = null;
@@ -126,6 +126,8 @@ public class Maven {
             throw exception;
         }
     }
+
+    //--
 
     /** @return with tailing space */
     private static String props(Properties props) {
@@ -224,4 +226,22 @@ public class Maven {
         result = builder.build(file.toPath().toFile(), request);
         return result.getProject();
     }
+
+    //--
+
+    // Marks nested output. I'd love to just indent it by 4 spaces, but there's no single place to do this.
+    // * it's too late to configure a LoggerFactory because Maven has already setup most of the components,
+    //   and they'll be re-used by the build command
+    // * every component has it's own Logger instance, that holds the target output stream; there's no
+    //   way to get hold of all these loggers
+    // * System.setOut does not affect the output streams already stored in the component loggers
+
+    private void nestedOutputOn() {
+        log.info("\033[2m");
+    }
+
+    private void nestedOutputOff() {
+        log.info("\033[0m");
+    }
+
 }
