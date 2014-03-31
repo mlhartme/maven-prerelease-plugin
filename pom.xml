@@ -22,6 +22,9 @@
     <oneandone.java.source>1.7</oneandone.java.source>
     <oneandone.java.target>1.7</oneandone.java.target>
 
+    <!-- for site-deploy, see https://github.com/1and1/foss-parent -->
+    <scmpublish.content>target/staging/prerelease</scmpublish.content>
+
     <!-- TODO ... dependency convergence -->
     <enforcer.skip>true</enforcer.skip>
 
