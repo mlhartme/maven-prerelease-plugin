@@ -42,25 +42,24 @@ import java.util.TreeSet;
 
 /**
  * The archive stores prereleases for one given groupId/artifactId.
- *
- * ~/.m2/prereleases          <- default storage for all archives. This is the primary storage, swap also uses a secondary storage.
- *   groupId/artifactId.LOCK  <- optional, indicates that a process operates on this archive
- *   groupId/artifactId/      <- archive directory
- *     |- revision1           <- prerelease directory, ready to promote; promoting the prerelease removes this directory
- *     |     |- tags
- *     |     |    - <tagname>
- *     |     |- artifacts
- *     |      - prerelease.properties
- *     |- revision2
- *     :
- *     |- REMOVE              <- a renamed prerelease directory
- *     :     :                   optional - only when the last create call failed (because the mvn call failed) or promote succeeded
- *     :     |- CAUSE         <- why this directory is to be removed
- *     :     :
- *
  *  Prerelease directories have the svn revision number as their directory name; it may be a symlink to an arbitrary location
- *
  */
+//
+// ~/.m2/prereleases          <- default storage for all archives. This is the primary storage, swap also uses a secondary storage.
+//   groupId/artifactId.LOCK  <- optional, indicates that a process operates on this archive
+//   groupId/artifactId/      <- archive directory
+//    |- revision1           <- prerelease directory, ready to promote; promoting the prerelease removes this directory
+//    |     |- tags
+//    |     |    - <tagname>
+//    |     |- artifacts
+//    |      - prerelease.properties
+//    |- revision2
+//    :
+//    |- REMOVE              <- a renamed prerelease directory
+//    :     :                   optional - only when the last create call failed (because the mvn call failed) or promote succeeded
+//    :     |- CAUSE         <- why this directory is to be removed
+//    :     :
+
 public class Archive implements AutoCloseable {
     public static List<FileNode> directories(List<FileNode> storages, MavenProject project) {
         List<FileNode> directories;
