@@ -31,7 +31,6 @@
     <pmd.skip>true</pmd.skip>
     <cpd.skip>true</cpd.skip>
     <findbugs.skip>true</findbugs.skip>
-
   </properties>
   <developers>
     <developer>
@@ -206,6 +205,13 @@
           <argLine>-Dprerelease.version=${project.version}</argLine>
         </configuration>
       </plugin>
+      <plugin>
+        <groupId>org.jacoco</groupId>
+        <artifactId>jacoco-maven-plugin</artifactId>
+        <configuration><!-- TODO: beceause it has problems with Java 8 -->
+          <skip>true</skip>
+        </configuration>
+      </plugin>
     </plugins>
   </build>
 
@@ -217,13 +223,6 @@
       </activation>
       <build>
         <plugins>
-          <plugin>
-            <groupId>org.jacoco</groupId>
-            <artifactId>jacoco-maven-plugin</artifactId>
-            <configuration><!-- TODO: beceause it has problems with Java 8 -->
-              <skip>true</skip>
-            </configuration>
-          </plugin>
           <plugin>
             <groupId>org.apache.maven.plugins</groupId>
             <artifactId>maven-javadoc-plugin</artifactId>
