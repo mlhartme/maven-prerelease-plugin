@@ -10,7 +10,7 @@
     <meta name="Date-Revision-yyyymmdd" content="20140331" />
     <meta http-equiv="Content-Language" content="en" />
     <title>Maven Prerelease Plugin - 
-    Maven Prerelease Plugin</title>
+    prerelease:swap</title>
     <link rel="stylesheet" href="./css/apache-maven-fluido-1.3.0.min.css" />
     <link rel="stylesheet" href="./css/site.css" />
     <link rel="stylesheet" href="./css/print.css" media="print" />
@@ -76,7 +76,7 @@
         </li>
       <li class="divider ">/</li>
         <li class="">
-    Maven Prerelease Plugin</li>
+    prerelease:swap</li>
                 
                 
                     
@@ -94,10 +94,12 @@
                 <ul class="nav nav-list">
                     <li class="nav-header">Documentation</li>
                                 
-      <li class="active">
+      <li>
     
-            <a href="#"><i class="none"></i>Home</a>
-          </li>
+                          <a href="index.html" title="Home">
+          <i class="none"></i>
+        Home</a>
+            </li>
                   
       <li>
     
@@ -106,111 +108,13 @@
         Goals</a>
             </li>
                                         <li class="nav-header">Project Documentation</li>
-                                                                                                                                                                                                                                                                                                                                      
+                                                                                                                                                                                                                                                                                                                            
       <li>
     
                           <a href="project-info.html" title="Project Information">
-          <i class="icon-chevron-down"></i>
+          <i class="icon-chevron-right"></i>
         Project Information</a>
-                    <ul class="nav nav-list">
-                      
-      <li class="active">
-    
-            <a href="#"><i class="none"></i>About</a>
-          </li>
-                      
-      <li>
-    
-                          <a href="plugin-management.html" title="Plugin Management">
-          <i class="none"></i>
-        Plugin Management</a>
-            </li>
-                      
-      <li>
-    
-                          <a href="distribution-management.html" title="Distribution Management">
-          <i class="none"></i>
-        Distribution Management</a>
-            </li>
-                      
-      <li>
-    
-                          <a href="dependency-info.html" title="Dependency Information">
-          <i class="none"></i>
-        Dependency Information</a>
-            </li>
-                      
-      <li>
-    
-                          <a href="source-repository.html" title="Source Repository">
-          <i class="none"></i>
-        Source Repository</a>
-            </li>
-                      
-      <li>
-    
-                          <a href="mail-lists.html" title="Mailing Lists">
-          <i class="none"></i>
-        Mailing Lists</a>
-            </li>
-                      
-      <li>
-    
-                          <a href="issue-tracking.html" title="Issue Tracking">
-          <i class="none"></i>
-        Issue Tracking</a>
-            </li>
-                      
-      <li>
-    
-                          <a href="integration.html" title="Continuous Integration">
-          <i class="none"></i>
-        Continuous Integration</a>
-            </li>
-                      
-      <li>
-    
-                          <a href="plugins.html" title="Project Plugins">
-          <i class="none"></i>
-        Project Plugins</a>
-            </li>
-                      
-      <li>
-    
-                          <a href="license.html" title="Project License">
-          <i class="none"></i>
-        Project License</a>
-            </li>
-                      
-      <li>
-    
-                          <a href="dependency-management.html" title="Dependency Management">
-          <i class="none"></i>
-        Dependency Management</a>
-            </li>
-                      
-      <li>
-    
-                          <a href="team-list.html" title="Project Team">
-          <i class="none"></i>
-        Project Team</a>
-            </li>
-                      
-      <li>
-    
-                          <a href="project-summary.html" title="Project Summary">
-          <i class="none"></i>
-        Project Summary</a>
-            </li>
-                      
-      <li>
-    
-                          <a href="dependencies.html" title="Dependencies">
-          <i class="none"></i>
-        Dependencies</a>
-            </li>
-              </ul>
-        </li>
+                  </li>
                                                                                                                                                                                                                                                                                                               
       <li>
     
@@ -250,9 +154,167 @@
             
   
     <div class="section">
-<h2>Maven Prerelease Plugin<a name="Maven_Prerelease_Plugin"></a></h2>
+<h2>prerelease:swap<a name="prerelease:swap"></a></h2>
       
-<p><a class="externalLink" href="https://github.com/mlhartme/maven-prerelease-plugin">GitHub</a></p>
+<p><b>Full name</b>:</p>
+      
+<p>net.oneandone.maven.plugins:prerelease:1.6.3-SNAPSHOT:swap</p>
+      
+<p><b>Description</b>:</p>
+      
+<div>Wipes archives and moves prereleases to the next storage. You
+usually have two storages, primary and secondary. Useful when you
+use ram disks: use the ramdisk as primary storage, and a harddisk
+as secondary storage.</div>
+      
+<p><b>Attributes</b>:</p>
+      
+<div class="section">
+<h3>Required Parameters<a name="Required_Parameters"></a></h3>
+        
+<table class="table table-striped" border="0">
+          
+<tr class="a">
+            
+<th>Name</th>
+            
+<th>Type</th>
+            
+<th>Since</th>
+            
+<th>Description</th>
+          </tr>
+          
+<tr class="b">
+            
+<td><b><a href="#keep">keep</a></b></td>
+            
+<td><tt>int</tt></td>
+            
+<td><tt>-</tt></td>
+            
+<td>Number of prereleases to keep in archive. 0 to keep all, which
+should only be used together with swap and keep.<br /><b>Default value is</b>: <tt>1</tt>.<br /><b>User property is</b>: <tt>prerelease.keep</tt>.</td>
+          </tr>
+          
+<tr class="a">
+            
+<td><b><a href="#lockTimeout">lockTimeout</a></b></td>
+            
+<td><tt>int</tt></td>
+            
+<td><tt>-</tt></td>
+            
+<td>Timeout in seconds for locking a prerelease archive.<br /><b>Default value is</b>: <tt>3600</tt>.<br /><b>User property is</b>: <tt>prerelease.lockTimeout</tt>.</td>
+          </tr>
+          
+<tr class="b">
+            
+<td><b><a href="#storages">storages</a></b></td>
+            
+<td><tt>List</tt></td>
+            
+<td><tt>-</tt></td>
+            
+<td>Where to store prereleases.<br /><b>Default value is</b>: <tt>${settings.localRepository}/../prereleases</tt>.<br /><b>User property is</b>: <tt>prerelease.storages</tt>.</td>
+          </tr>
+        </table>
+      </div>
+      
+<div class="section">
+<h3>Optional Parameters<a name="Optional_Parameters"></a></h3>
+        
+<table class="table table-striped" border="0">
+          
+<tr class="a">
+            
+<th>Name</th>
+            
+<th>Type</th>
+            
+<th>Since</th>
+            
+<th>Description</th>
+          </tr>
+          
+<tr class="b">
+            
+<td><b><a href="#propertyArgs">propertyArgs</a></b></td>
+            
+<td><tt>String</tt></td>
+            
+<td><tt>-</tt></td>
+            
+<td>Extra arguments to pass to the sub-maven build. A space-separated
+list with entries of the form -Dkey=value. Similar to &quot;arguments&quot;
+parameter of the Maven Release Plugin, but restricted to -D
+properties.<br /><b>User property is</b>: <tt>prerelease.args</tt>.</td>
+          </tr>
+        </table>
+      </div>
+      
+<div class="section">
+<h3>Parameter Details<a name="Parameter_Details"></a></h3>
+        
+<p><b><a name="keep">keep</a>:</b></p>
+        
+<div>Number of prereleases to keep in archive. 0 to keep all, which
+should only be used together with swap and keep.</div>
+        
+<ul>
+          
+<li><b>Type</b>: <tt>int</tt></li>
+          
+<li><b>Required</b>: <tt>Yes</tt></li>
+          
+<li><b>User Property</b>: <tt>prerelease.keep</tt></li>
+          
+<li><b>Default</b>: <tt>1</tt></li>
+        </ul><hr />
+<p><b><a name="lockTimeout">lockTimeout</a>:</b></p>
+        
+<div>Timeout in seconds for locking a prerelease archive.</div>
+        
+<ul>
+          
+<li><b>Type</b>: <tt>int</tt></li>
+          
+<li><b>Required</b>: <tt>Yes</tt></li>
+          
+<li><b>User Property</b>: <tt>prerelease.lockTimeout</tt></li>
+          
+<li><b>Default</b>: <tt>3600</tt></li>
+        </ul><hr />
+<p><b><a name="propertyArgs">propertyArgs</a>:</b></p>
+        
+<div>Extra arguments to pass to the sub-maven build. A space-separated
+list with entries of the form -Dkey=value. Similar to &quot;arguments&quot;
+parameter of the Maven Release Plugin, but restricted to -D
+properties.</div>
+        
+<ul>
+          
+<li><b>Type</b>: <tt>java.lang.String</tt></li>
+          
+<li><b>Required</b>: <tt>No</tt></li>
+          
+<li><b>User Property</b>: <tt>prerelease.args</tt></li>
+        </ul><hr />
+<p><b><a name="storages">storages</a>:</b></p>
+        
+<div>Where to store prereleases.</div>
+        
+<ul>
+          
+<li><b>Type</b>: <tt>java.util.List</tt></li>
+          
+<li><b>Required</b>: <tt>Yes</tt></li>
+          
+<li><b>User Property</b>: <tt>prerelease.storages</tt></li>
+          
+<li><b>Default</b>: <tt>${settings.localRepository}/../prereleases</tt></li>
+        </ul>
+      </div>
     </div>
   
 
