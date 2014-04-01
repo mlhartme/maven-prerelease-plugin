@@ -23,7 +23,7 @@ import net.oneandone.maven.plugins.prerelease.util.Maven;
 import org.apache.maven.plugins.annotations.Mojo;
 
 /**
- * Checks if there is a prerelease for the last change in your svn working directory, creates one if not.
+ * Checks if there is a prerelease for the last change in your svn working directory; creates one if not.
  */
 @Mojo(name = "update")
 public class Update extends ProjectBase {

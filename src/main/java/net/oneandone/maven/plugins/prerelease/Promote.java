@@ -27,7 +27,7 @@ import org.apache.maven.plugins.annotations.Parameter;
 import java.util.Map;
 
 /**
- * Promotes a prerelease by commuting the tag and deploying its artifact(s).
+ * Promotes a prerelease by commiting the tag and deploying its artifact(s).
  *
  * Execute this goal in the svn working directory of the project you want to release and make sure you have created a prerelease.
  *
@@ -39,9 +39,9 @@ import java.util.Map;
  * the packaging. If it fails, promotion fails. All other goals (e.g. email notifications) are optional: they may fail (yielding the
  * respective warning), but they don't cause the promote goal to fail.
  *
- * Error handling. In contrast to Maven's Release Plugin there's no rollback goal: when promote fails, artifacts and tags will be properly
- * removed. (If Tag creation fails, this goal fails with an error. If artifact deployment fails, the svn tag will be deleted from
- * the repository and the goal fails with an error. If optional promote goal fail, the plugins succeeds, but it issues a warning.)
+ * Error handling. In contrast to Maven's Release Plugin there's no need for a rollback goal: when promote fails, artifacts and tags will
+ * be properly removed. (If Tag creation fails, this goal fails with an error. If artifact deployment fails, the svn tag will be deleted
+ * from the repository and the goal fails with an error. If optional promote goal fail, the plugins succeeds, but it issues a warning.)
  *
  * Note that the deployment date of artifacts in the repository may be later that the release date in the changes.xml.
  */
