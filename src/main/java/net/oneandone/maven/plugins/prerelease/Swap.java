@@ -60,11 +60,6 @@ public class Swap extends Base {
                     try {
                         archive.wipe(keep);
                         for (FileNode src : archive.list().values()) {
-                            if (!src.join("prerelease.properties").readString().contains("prerelease=")) {
-                                // This property was introduced in 1.6, together with multiple storage support
-                                getLog().info("skipped -- prerelease version too old: " + relative);
-                                continue;
-                            }
                             if (level == storages.size() - 1) {
                                 getLog().debug("already in final storage: " + src);
                             } else {
