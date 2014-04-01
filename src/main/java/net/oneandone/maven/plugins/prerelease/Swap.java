@@ -66,7 +66,7 @@ public class Swap extends Base {
                                 continue;
                             }
                             if (level == storages.size() - 1) {
-                                getLog().info("already in final storage: " + src);
+                                getLog().debug("already in final storage: " + src);
                             } else {
                                 dest = storages.get(level + 1).join(relative, src.getName());
                                 dest.getParent().mkdirsOpt();
