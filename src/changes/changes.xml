@@ -3,7 +3,7 @@
     <release date="2014-04-02" version="1.6.3">
       <action date="2014-04-02" dev="mhm" type="add">
         Prerelease Checks: prerelease checks are executed before promoting a prerelease, or explicitly by the "check" goal.
-        You define prerelease checks a mojo executions who's id start with "prerelease-check". These executions are skipped during normal
+        You define prerelease via mojo executions who's id starts with "prerelease-check". These executions are skipped during normal
         build, but they are execute before promoting.
       </action>
       <action date="2014-03-28" dev="mhm" type="update">
