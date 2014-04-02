@@ -122,6 +122,38 @@ public class FilteringMojoExecutor extends MojoExecutor {
         return lst;
     }
 
+    //--
+
+    private static final String PRERELEASE_CHECK_PREFIX = "prerelease-check";
+
+    public static final Filter TRUE = new FilteringMojoExecutor.Filter() {
+        @Override
+        public boolean include(MojoExecution execution) {
+            return true;
+        }
+    };
+
+    public static final Filter CHECK = new FilteringMojoExecutor.Filter() {
+        @Override
+        public boolean include(MojoExecution execution) {
+            return execution.getExecutionId().startsWith(PRERELEASE_CHECK_PREFIX);
+        }
+    };
+
+    public static final Filter NONE_CHECK = new FilteringMojoExecutor.Filter() {
+        @Override
+        public boolean include(MojoExecution execution) {
+            return !execution.getExecutionId().startsWith(PRERELEASE_CHECK_PREFIX);
+        }
+    };
+
+    public static final Filter DEPLOY = new FilteringMojoExecutor.Filter() {
+        @Override
+        public boolean include(MojoExecution execution) {
+            return "deploy".equals(execution.getLifecyclePhase());
+        }
+    };
+
     public static abstract class Filter {
         public abstract boolean include(MojoExecution execution);
     }

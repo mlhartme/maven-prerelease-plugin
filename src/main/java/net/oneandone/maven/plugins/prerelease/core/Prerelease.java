@@ -16,6 +16,7 @@
 package net.oneandone.maven.plugins.prerelease.core;
 
 import net.oneandone.maven.plugins.prerelease.util.ChangesXml;
+import net.oneandone.maven.plugins.prerelease.util.FilteringMojoExecutor;
 import net.oneandone.maven.plugins.prerelease.util.Maven;
 import net.oneandone.maven.plugins.prerelease.util.PrepareExecutionListener;
 import net.oneandone.maven.plugins.prerelease.util.Subversion;
@@ -181,7 +182,8 @@ public class Prerelease {
 
         // no "clean" because we have a vanilla directory from svn
         try {
-            maven.build(checkout, descriptor.releaseProps(propertyArgs), new PrepareExecutionListener(this, maven.getExecutionListener()), false, "install");
+            maven.build(checkout, descriptor.releaseProps(propertyArgs), new PrepareExecutionListener(this, maven.getExecutionListener()),
+                    FilteringMojoExecutor.NONE_CHECK, "install");
         } finally {
             installed = descriptor.project.localRepo(maven);
             if (installed.exists()) {
@@ -191,8 +193,9 @@ public class Prerelease {
         // TODO: check that the workspace is without modifications
     }
 
-    public void verify(Maven maven, String profile, Map<String, String> propertyArgs) throws Exception {
-        maven.build(checkout, propertyArgs, "verify", /* to save disk space: */ "clean", "-P" + profile);
+    public void check(Log log, Map<String, String> propertyArgs, Maven maven) throws Exception {
+        log.info("prerelease checks for " + descriptor.project);
+        maven.build(checkout, descriptor.releaseProps(propertyArgs), FilteringMojoExecutor.CHECK, "install");
     }
 
     //-- promote
@@ -200,6 +203,7 @@ public class Prerelease {
     public void promote(Log log, Map<String, String> propertyArgs, String createTagMessage, String revertTagMessage, String nextIterationMessage, Maven maven) throws Exception {
         FileNode origCommit;
 
+        check(log, propertyArgs, maven);
         log.info("promoting revision " + descriptor.revision + " to " + descriptor.project);
         origCommit = prepareOrigCommit(log);
         try {

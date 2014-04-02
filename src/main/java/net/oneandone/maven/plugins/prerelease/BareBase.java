@@ -15,6 +15,7 @@
  */
 package net.oneandone.maven.plugins.prerelease;
 
+import net.oneandone.maven.plugins.prerelease.util.FilteringMojoExecutor;
 import net.oneandone.maven.plugins.prerelease.util.Maven;
 import net.oneandone.maven.plugins.prerelease.util.Subversion;
 import net.oneandone.sushi.fs.file.FileNode;
@@ -65,7 +66,7 @@ public abstract class BareBase extends Base {
         tempCheckout = tempCheckout();
         try {
             // CAUTION: the version of the prerelease plugin is determined by the plugin version configured in the projects pom.xml
-            maven.build(tempCheckout, userProperties(), "net.oneandone.maven.plugins:prerelease:" + goal);
+            maven.build(tempCheckout, userProperties(), FilteringMojoExecutor.TRUE, "net.oneandone.maven.plugins:prerelease:" + goal);
         } finally {
             tempCheckout.deleteTree();
         }
