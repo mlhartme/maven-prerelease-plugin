@@ -181,7 +181,7 @@ public class Maven {
         try {
             build(prerelease.checkout, prerelease.descriptor.releaseProps(propertyArgs), listener, true, "deploy");
         } catch (BuildException e) {
-            if (listener.isFirstSuccess()) {
+            if (listener.isDeploySuccess()) {
                 log.warn("Promote succeeded: your artifacts have been deployed, and your svn tag was created. ");
                 log.warn("However, some optional deploy goals failed with this exception:");
                 log.warn(e);
@@ -200,7 +200,7 @@ public class Maven {
         try {
             build(directory, propertyArgs, listener, true, "deploy");
         } catch (BuildException e) {
-            if (listener.isFirstSuccess()) {
+            if (listener.isDeploySuccess()) {
                 log.warn("Snapshot deployment succeeded.");
                 log.warn("However, some optional deploy goals failed with this exception:");
                 log.warn(e);

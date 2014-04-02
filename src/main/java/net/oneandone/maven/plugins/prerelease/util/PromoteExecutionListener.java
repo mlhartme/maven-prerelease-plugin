@@ -32,15 +32,13 @@ import java.io.IOException;
 public class PromoteExecutionListener extends BaseExecutionListener {
     private final Prerelease prerelease;
     private final MavenProjectHelper projectHelper;
-    private int mojosStarted;
-    private boolean firstSuccess;
+    private boolean deploySuccess;
 
     public PromoteExecutionListener(Prerelease prerelease, MavenProjectHelper projectHelper, ExecutionListener base) {
         super(base);
         this.prerelease = prerelease;
         this.projectHelper = projectHelper;
-        this.mojosStarted = 0;
-        this.firstSuccess = false;
+        this.deploySuccess = false;
     }
 
     @Override
@@ -77,15 +75,9 @@ public class PromoteExecutionListener extends BaseExecutionListener {
     }
 
     @Override
-    public void mojoStarted(ExecutionEvent event) {
-        mojosStarted++;
-        super.mojoStarted(event);
-    }
-
-    @Override
     public void mojoSucceeded(ExecutionEvent event) {
-        if (mojosStarted == 1) {
-            firstSuccess = true;
+        if ("deploy".equals(event.getMojoExecution().getLifecyclePhase())) {
+            deploySuccess = true;
         }
         super.mojoSucceeded(event);
     }
@@ -95,7 +87,7 @@ public class PromoteExecutionListener extends BaseExecutionListener {
         super.mojoFailed(event);
     }
 
-    public boolean isFirstSuccess() {
-        return firstSuccess;
+    public boolean isDeploySuccess() {
+        return deploySuccess;
     }
 }
