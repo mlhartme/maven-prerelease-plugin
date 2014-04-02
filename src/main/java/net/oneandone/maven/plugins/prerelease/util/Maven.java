@@ -81,7 +81,7 @@ public class Maven {
     }
 
 
-    private static final String PRERELEASE_PREFIX = "prerelease-";
+    private static final String PROMOTE_CHECK_PREFIX = "promote-check";
 
     /**
      * Creates an DefaultMaven instance, initializes it form parentRequest (in Maven, this is done by MavenCli - also by
@@ -115,13 +115,13 @@ public class Maven {
                 new FilteringMojoExecutor.Filter() {
                     @Override
                     public boolean include(MojoExecution execution) {
-                        return "deploy".equals(execution.getLifecyclePhase()) || execution.getExecutionId().startsWith(PRERELEASE_PREFIX);
+                        return "deploy".equals(execution.getLifecyclePhase()) || execution.getExecutionId().startsWith(PROMOTE_CHECK_PREFIX);
                     }
                 } :
                 new FilteringMojoExecutor.Filter() {
                     @Override
                     public boolean include(MojoExecution execution) {
-                        return !execution.getExecutionId().startsWith(PRERELEASE_PREFIX);
+                        return !execution.getExecutionId().startsWith(PROMOTE_CHECK_PREFIX);
                     }
                 };
         mojoExecutor = FilteringMojoExecutor.install(container, filter);

@@ -2,8 +2,9 @@
   <body>
     <release date="2014-03-28" version="1.6.3">
       <action date="2014-03-28" dev="mhm" type="update">
-        Prerelease Executions: Mojo executions who's id is prefixed with "prerelease-" are excluded during create and executed during
-        promote. This is useful for checks to ignore during normal continuous integration builds, but enforce before actually promoting.
+        Promote Checks: Mojo executions who's id is prefixed with "promote-check" are executed before promoting, they are not executed
+        during normal builds. This is useful for checks to ignore during normal continuous integration builds, but enforce before actually
+        promoting.
       </action>
       <action date="2014-03-28" dev="mhm" type="update">
         Swap requires prereleases built by version 1.6 or newer, it no longer skips older prereleases.
