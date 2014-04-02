@@ -27,6 +27,7 @@ import org.apache.maven.execution.MavenExecutionRequest;
 import org.apache.maven.execution.MavenExecutionResult;
 import org.apache.maven.execution.MavenSession;
 import org.apache.maven.model.building.ModelBuildingRequest;
+import org.apache.maven.plugin.MojoExecution;
 import org.apache.maven.plugin.logging.Log;
 import org.apache.maven.project.DefaultProjectBuildingRequest;
 import org.apache.maven.project.MavenProject;
@@ -79,6 +80,9 @@ public class Maven {
         build(basedir, userProperties, executionListener, false, goals);
     }
 
+
+    private static final String PRERELEASE_PREFIX = "prerelease-";
+
     /**
      * Creates an DefaultMaven instance, initializes it form parentRequest (in Maven, this is done by MavenCli - also by
      * loading settings).
@@ -91,6 +95,7 @@ public class Maven {
         MavenExecutionResult result;
         BuildException exception;
         FilteringMojoExecutor mojoExecutor;
+        FilteringMojoExecutor.Filter filter;
 
         request = DefaultMavenExecutionRequest.copy(parentSession.getRequest());
         container = (DefaultPlexusContainer) parentSession.getContainer();
@@ -106,7 +111,20 @@ public class Maven {
         request.setUserProperties(merged(request.getUserProperties(), userProperties));
         request.setExecutionListener(theExecutionListener);
 
-        mojoExecutor = FilteringMojoExecutor.install(container, deployOnly ? "deploy" : null);
+        filter = deployOnly ?
+                new FilteringMojoExecutor.Filter() {
+                    @Override
+                    public boolean include(MojoExecution execution) {
+                        return "deploy".equals(execution.getLifecyclePhase()) || execution.getExecutionId().startsWith(PRERELEASE_PREFIX);
+                    }
+                } :
+                new FilteringMojoExecutor.Filter() {
+                    @Override
+                    public boolean include(MojoExecution execution) {
+                        return !execution.getExecutionId().startsWith(PRERELEASE_PREFIX);
+                    }
+                };
+        mojoExecutor = FilteringMojoExecutor.install(container, filter);
         log.info("[" + basedir + "] mvn " + props(request.getUserProperties()) + Separator.SPACE.join(goals));
         nestedOutputOn();
         try {

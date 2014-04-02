@@ -45,7 +45,7 @@ import java.util.TreeSet;
  *  Prerelease directories have the svn revision number as their directory name; it may be a symlink to an arbitrary location
  */
 //
-// ~/.m2/prereleases          <- default storage for all archives. This is the primary storage, swap also uses a secondary storage.
+// primaryStorage             <- defaults to ~/.m2/prereleases
 //   groupId/artifactId.LOCK  <- optional, indicates that a process operates on this archive
 //   groupId/artifactId/      <- archive directory
 //    |- revision1           <- prerelease directory, ready to promote; promoting the prerelease removes this directory
@@ -59,7 +59,10 @@ import java.util.TreeSet;
 //    :     :                   optional - only when the last create call failed (because the mvn call failed) or promote succeeded
 //    :     |- CAUSE         <- why this directory is to be removed
 //    :     :
-
+// secondaryStorage
+//    :
+// tertiaryStorage
+//    :
 public class Archive implements AutoCloseable {
     public static List<FileNode> directories(List<FileNode> storages, MavenProject project) {
         List<FileNode> directories;

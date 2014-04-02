@@ -23,7 +23,7 @@ import org.apache.maven.plugin.logging.Log;
 import java.io.IOException;
 
 /**
- * Directory for a prerelease. The prerelease is not neccessarily promotable (it might not exist (yet), or it may be broken, or it
+ * Directory for a prerelease. The prerelease is not necessarily promotable (it might not exist (yet), or it may be broken, or it
  * might already be promoted).
  */
 public class Target {

@@ -33,7 +33,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class FilteringMojoExecutor extends MojoExecutor {
-    public static FilteringMojoExecutor install(PlexusContainer container, String phase) {
+    public static FilteringMojoExecutor install(PlexusContainer container, Filter filter) {
         LifecycleModuleBuilder builder;
         Field field;
         FilteringMojoExecutor result;
@@ -42,7 +42,7 @@ public class FilteringMojoExecutor extends MojoExecutor {
             builder = container.lookup(LifecycleModuleBuilder.class);
             field = builder.getClass().getDeclaredField("mojoExecutor");
             field.setAccessible(true);
-            result = new FilteringMojoExecutor(builder, field, (MojoExecutor) field.get(builder), phase, container.lookup(DefaultLifecycles.class));
+            result = new FilteringMojoExecutor(builder, field, (MojoExecutor) field.get(builder), filter, container.lookup(DefaultLifecycles.class));
             field.set(builder, result);
         } catch (Exception e) {
             throw new IllegalStateException(e);
@@ -55,14 +55,14 @@ public class FilteringMojoExecutor extends MojoExecutor {
     private final MojoExecutor baseExecutor;
 
     /** what to filter for; null: nothing */
-    private final String phase;
+    private final Filter filter;
     private final DefaultLifecycles defaultLifecycles;
 
-    public FilteringMojoExecutor(LifecycleModuleBuilder builder, Field field, MojoExecutor baseExecutor, String phase, DefaultLifecycles defaultLifecyles) {
+    public FilteringMojoExecutor(LifecycleModuleBuilder builder, Field field, MojoExecutor baseExecutor, Filter filter, DefaultLifecycles defaultLifecyles) {
         this.builder = builder;
         this.field = field;
         this.baseExecutor = baseExecutor;
-        this.phase = phase;
+        this.filter = filter;
         this.defaultLifecycles = defaultLifecyles;
     }
 
@@ -114,11 +114,15 @@ public class FilteringMojoExecutor extends MojoExecutor {
         List<MojoExecution> lst;
 
         lst = new ArrayList<>();
-        for (MojoExecution item : orig) {
-            if (phase == null || phase.equals(item.getLifecyclePhase())) {
-                lst.add(item);
+        for (MojoExecution execution : orig) {
+            if (filter.include(execution)) {
+                lst.add(execution);
             }
         }
         return lst;
+    }
+
+    public static abstract class Filter {
+        public abstract boolean include(MojoExecution execution);
     }
 }
