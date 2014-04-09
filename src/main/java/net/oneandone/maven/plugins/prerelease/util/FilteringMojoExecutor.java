@@ -113,21 +113,19 @@ public class FilteringMojoExecutor extends MojoExecutor {
 
     //--
 
-    private void filter(List<MojoExecution> executions) {
-        Iterator<MojoExecution> iter;
-        MojoExecution execution;
+    private List<MojoExecution> filter(List<MojoExecution> orig) {
+        List<MojoExecution> result;
 
-        iter = executions.iterator();
-        while (iter.hasNext()) {
-            execution = iter.next();
+        result = new ArrayList<>();
+        for (MojoExecution execution : orig) {
             if (filter.include(execution)) {
-                for (List<MojoExecution> forked : execution.getForkedExecutions().values()) {
-                    filter(forked);
+                result.add(execution);
+                for (Map.Entry<String, List<MojoExecution>> entry : execution.getForkedExecutions().entrySet()) {
+                    execution.setForkedExecutions(entry.getKey(), filter(entry.getValue()));
                 }
-            } else {
-                iter.remove();
             }
         }
+        return result;
     }
 
     //--
