@@ -86,8 +86,7 @@ public class FilteringMojoExecutor extends MojoExecutor {
     @Override
     public void execute(MavenSession session, List<MojoExecution> mojoExecutions, ProjectIndex projectIndex )
             throws LifecycleExecutionException {
-        filter(mojoExecutions);
-        baseExecutor.execute(session, mojoExecutions, projectIndex);
+        baseExecutor.execute(session, filter(mojoExecutions), projectIndex);
     }
 
     @Override
