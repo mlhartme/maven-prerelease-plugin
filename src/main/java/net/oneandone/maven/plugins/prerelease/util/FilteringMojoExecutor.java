@@ -134,12 +134,22 @@ public class FilteringMojoExecutor extends MojoExecutor {
 
     public static final Filter TRUE = new FilteringMojoExecutor.Filter() {
         @Override
+        public String toString() {
+            return "%true%";
+        }
+
+        @Override
         public boolean include(MojoExecution execution) {
             return true;
         }
     };
 
     public static final Filter CHECK = new FilteringMojoExecutor.Filter() {
+        @Override
+        public String toString() {
+            return "%check%";
+        }
+
         @Override
         public boolean include(MojoExecution execution) {
             return execution.getExecutionId().startsWith(PRERELEASE_CHECK_PREFIX);
@@ -148,6 +158,11 @@ public class FilteringMojoExecutor extends MojoExecutor {
 
     public static final Filter NONE_CHECK = new FilteringMojoExecutor.Filter() {
         @Override
+        public String toString() {
+            return "%none-check%";
+        }
+
+        @Override
         public boolean include(MojoExecution execution) {
             return !execution.getExecutionId().startsWith(PRERELEASE_CHECK_PREFIX);
         }
@@ -155,12 +170,18 @@ public class FilteringMojoExecutor extends MojoExecutor {
 
     public static final Filter DEPLOY = new FilteringMojoExecutor.Filter() {
         @Override
+        public String toString() {
+            return "%deploy%";
+        }
+
+        @Override
         public boolean include(MojoExecution execution) {
             return "deploy".equals(execution.getLifecyclePhase());
         }
     };
 
     public static abstract class Filter {
+        public abstract String toString();
         public abstract boolean include(MojoExecution execution);
     }
 }
