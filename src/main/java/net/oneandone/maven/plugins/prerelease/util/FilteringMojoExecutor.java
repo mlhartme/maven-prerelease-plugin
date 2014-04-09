@@ -30,7 +30,9 @@ import org.codehaus.plexus.PlexusContainer;
 
 import java.lang.reflect.Field;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
 public class FilteringMojoExecutor extends MojoExecutor {
     public static FilteringMojoExecutor install(PlexusContainer container, Filter filter) {
@@ -84,7 +86,8 @@ public class FilteringMojoExecutor extends MojoExecutor {
     @Override
     public void execute(MavenSession session, List<MojoExecution> mojoExecutions, ProjectIndex projectIndex )
             throws LifecycleExecutionException {
-        baseExecutor.execute(session, filter(mojoExecutions), projectIndex);
+        filter(mojoExecutions);
+        baseExecutor.execute(session, mojoExecutions, projectIndex);
     }
 
     @Override
@@ -110,16 +113,21 @@ public class FilteringMojoExecutor extends MojoExecutor {
 
     //--
 
-    private List<MojoExecution> filter(List<MojoExecution> orig) {
-        List<MojoExecution> lst;
+    private void filter(List<MojoExecution> executions) {
+        Iterator<MojoExecution> iter;
+        MojoExecution execution;
 
-        lst = new ArrayList<>();
-        for (MojoExecution execution : orig) {
+        iter = executions.iterator();
+        while (iter.hasNext()) {
+            execution = iter.next();
             if (filter.include(execution)) {
-                lst.add(execution);
+                for (List<MojoExecution> forked : execution.getForkedExecutions().values()) {
+                    filter(forked);
+                }
+            } else {
+                iter.remove();
             }
         }
-        return lst;
     }
 
     //--
