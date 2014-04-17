@@ -60,7 +60,7 @@ public class Build extends ProjectBase {
         if (prerelease == null) {
             throw new MojoExecutionException("no prerelease for revision " + target.getRevision());
         }
-        maven().build(prerelease.checkout, propertyArgs(), FilteringMojoExecutor.TRUE, arguments);
+        maven().build(prerelease.checkout, propertyArgs(), FilteringMojoExecutor.ALL, arguments);
     }
 
     private long revisionForDescriptor(Archive archive) throws MojoExecutionException, IOException {

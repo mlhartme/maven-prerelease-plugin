@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?><document xmlns="http://maven.apache.org/changes/1.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/changes/1.0.0 http://maven.apache.org/xsd/changes-1.0.0.xsd">
   <body>
-    <release date="2014-04-09" version="1.6.3">
+    <release date="2014-04-17" version="1.6.3">
       <action date="2014-04-02" dev="mhm" type="add">
         Prerelease Checks: prerelease checks are executed before promoting a prerelease, or explicitly by the "check" goal.
         You define checks via mojo executions who's id start with "prerelease-check". These executions are skipped during normal
-        build, but they are execute before promoting.
+        build.
       </action>
       <action date="2014-03-28" dev="mhm" type="update">
         Swap requires prereleases built by version 1.6 or newer now, it no longer skips older prereleases.

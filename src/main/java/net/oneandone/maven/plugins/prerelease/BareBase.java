@@ -66,7 +66,7 @@ public abstract class BareBase extends Base {
         tempCheckout = tempCheckout();
         try {
             // CAUTION: the version of the prerelease plugin is determined by the plugin version configured in the projects pom.xml
-            maven.build(tempCheckout, userProperties(), FilteringMojoExecutor.TRUE, "net.oneandone.maven.plugins:prerelease:" + goal);
+            maven.build(tempCheckout, userProperties(), FilteringMojoExecutor.ALL, "net.oneandone.maven.plugins:prerelease:" + goal);
         } finally {
             tempCheckout.deleteTree();
         }

@@ -109,7 +109,7 @@ public class Maven {
         request.setExecutionListener(theExecutionListener);
 
         mojoExecutor = FilteringMojoExecutor.install(container, filter);
-        log.info("[" + basedir + "] " + filter + " mvn " + props(request.getUserProperties()) + Separator.SPACE.join(goals));
+        log.info("[" + basedir + " " + filter + "] mvn " + props(request.getUserProperties()) + Separator.SPACE.join(goals));
         nestedOutputOn();
         try {
             result = maven.execute(request);

@@ -86,7 +86,7 @@ public class FilteringMojoExecutor extends MojoExecutor {
     @Override
     public void execute(MavenSession session, List<MojoExecution> mojoExecutions, ProjectIndex projectIndex )
             throws LifecycleExecutionException {
-        baseExecutor.execute(session, filter(mojoExecutions), projectIndex);
+        baseExecutor.execute(session, filter(false, mojoExecutions), projectIndex);
     }
 
     @Override
@@ -112,15 +112,15 @@ public class FilteringMojoExecutor extends MojoExecutor {
 
     //--
 
-    private List<MojoExecution> filter(List<MojoExecution> orig) {
+    private List<MojoExecution> filter(boolean nested, List<MojoExecution> orig) {
         List<MojoExecution> result;
 
         result = new ArrayList<>();
         for (MojoExecution execution : orig) {
-            if (filter.include(execution)) {
+            if (filter.include(nested, execution)) {
                 result.add(execution);
                 for (Map.Entry<String, List<MojoExecution>> entry : execution.getForkedExecutions().entrySet()) {
-                    execution.setForkedExecutions(entry.getKey(), filter(entry.getValue()));
+                    execution.setForkedExecutions(entry.getKey(), filter(true, entry.getValue()));
                 }
             }
         }
@@ -131,14 +131,14 @@ public class FilteringMojoExecutor extends MojoExecutor {
 
     private static final String PRERELEASE_CHECK_PREFIX = "prerelease-check";
 
-    public static final Filter TRUE = new FilteringMojoExecutor.Filter() {
+    public static final Filter ALL = new FilteringMojoExecutor.Filter() {
         @Override
         public String toString() {
-            return "%true%";
+            return "%all%";
         }
 
         @Override
-        public boolean include(MojoExecution execution) {
+        public boolean include(boolean nested, MojoExecution execution) {
             return true;
         }
     };
@@ -150,8 +150,8 @@ public class FilteringMojoExecutor extends MojoExecutor {
         }
 
         @Override
-        public boolean include(MojoExecution execution) {
-            return execution.getExecutionId().startsWith(PRERELEASE_CHECK_PREFIX);
+        public boolean include(boolean nested, MojoExecution execution) {
+            return nested ? true : execution.getExecutionId().startsWith(PRERELEASE_CHECK_PREFIX);
         }
     };
 
@@ -162,7 +162,7 @@ public class FilteringMojoExecutor extends MojoExecutor {
         }
 
         @Override
-        public boolean include(MojoExecution execution) {
+        public boolean include(boolean nested, MojoExecution execution) {
             return !execution.getExecutionId().startsWith(PRERELEASE_CHECK_PREFIX);
         }
     };
@@ -174,13 +174,13 @@ public class FilteringMojoExecutor extends MojoExecutor {
         }
 
         @Override
-        public boolean include(MojoExecution execution) {
-            return "deploy".equals(execution.getLifecyclePhase());
+        public boolean include(boolean nested, MojoExecution execution) {
+            return nested ? true : "deploy".equals(execution.getLifecyclePhase());
         }
     };
 
     public static abstract class Filter {
         public abstract String toString();
-        public abstract boolean include(MojoExecution execution);
+        public abstract boolean include(boolean nested, MojoExecution execution);
     }
 }
