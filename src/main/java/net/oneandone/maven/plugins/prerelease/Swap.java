@@ -21,6 +21,7 @@ import net.oneandone.sushi.fs.file.FileNode;
 import org.apache.maven.plugins.annotations.Mojo;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -32,19 +33,20 @@ import java.util.Set;
 public class Swap extends Base {
     @Override
     public void doExecute() throws Exception {
-        Set done;
+        Set<String> relatives;
         List<FileNode> storages;
         List<Node> archives;
         Archive archive;
-        String relative;
         FileNode dest;
         FileNode storage;
         int count;
+        int level;
 
         count = 0;
         storages = storages();
+        relatives = new HashSet<>();
         // don't start at "-2" because we also want to wipe ...
-        for (int level = storages.size() - 1; level >= 0; level--) {
+        for (level = 0; level < storages.size(); level++) {
             storage = storages.get(level);
             getLog().info("checking storage: " + storage.getAbsolute());
             archives = storage.find("*/*");
@@ -52,32 +54,44 @@ public class Swap extends Base {
                 if (!candidate.isDirectory()) {
                     continue;
                 }
-                relative = candidate.getRelative(storage);
-                archive = Archive.tryOpen(directories(storages, relative));
-                if (archive == null) {
-                    getLog().info("skipped because it is locked: " + relative);
-                } else {
-                    try {
-                        archive.wipe(keep);
-                        for (FileNode src : archive.list().values()) {
-                            if (level == storages.size() - 1) {
-                                getLog().debug("already in final storage: " + src);
-                            } else {
-                                dest = storages.get(level + 1).join(relative, src.getName());
-                                dest.getParent().mkdirsOpt();
-                                src.move(dest);
-                                getLog().info("swapped " + src.getAbsolute() + " -> " + dest.getAbsolute());
-                                count++;
-                            }
-                        }
-                    } finally {
-                        archive.close();
+                relatives.add(candidate.getRelative(storage));
+            }
+        }
+        getLog().info("archives found: " + relatives.size());
+        for (String relative : relatives) {
+            archive = Archive.tryOpen(directories(storages, relative));
+            if (archive == null) {
+                getLog().info("skipped because it is locked: " + relative);
+                continue;
+            }
+            try {
+                archive.wipe(keep);
+                for (FileNode src : archive.list().values()) {
+                    level = findLevel(storages, src);
+                    if (level == storages.size() - 1) {
+                        getLog().debug("already in final storage: " + src);
+                    } else {
+                        dest = storages.get(level + 1).join(relative, src.getName());
+                        dest.getParent().mkdirsOpt();
+                        src.move(dest);
+                        getLog().info("swapped " + src.getAbsolute() + " -> " + dest.getAbsolute());
+                        count++;
                     }
                 }
-
+            } finally {
+                archive.close();
             }
         }
         getLog().info(count + " archives swapped.");
+    }
+
+    private static int findLevel(List<FileNode> storages, Node prerelease) {
+        for (int level = 0; level < storages.size(); level++) {
+            if (prerelease.hasAnchestor(storages.get(level))) {
+                return level;
+            }
+        }
+        throw new IllegalStateException(prerelease.toString());
     }
 
     private static List<FileNode> directories(List<FileNode> storages, String relative) {
