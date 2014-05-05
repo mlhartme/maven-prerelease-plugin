@@ -1,5 +1,13 @@
 <settings>
   <localRepository>@@TARGET@@/it/maven-local-repository</localRepository>
+  <mirrors>
+    <mirror>
+      <id>apachesnapshots-mirror</id>
+      <name>Make sure the repository below is not matched by a mirror on all</name>
+      <url>http://repository.apache.org/snapshots/</url>
+      <mirrorOf>apachesnapshots</mirrorOf>
+    </mirror>
+  </mirrors>
   <profiles>
     <profile>
       <id>extrarepos</id>
