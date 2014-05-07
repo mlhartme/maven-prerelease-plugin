@@ -45,10 +45,9 @@ public class Swap extends Base {
         count = 0;
         storages = storages();
         relatives = new HashSet<>();
-        // don't start at "-2" because we also want to wipe ...
         for (level = 0; level < storages.size(); level++) {
             storage = storages.get(level);
-            getLog().info("checking storage: " + storage.getAbsolute());
+            getLog().info("storage " + (level + 1) + ": " + storage.getAbsolute());
             archives = storage.find("*/*");
             for (Node candidate : archives) {
                 if (!candidate.isDirectory()) {
@@ -68,6 +67,7 @@ public class Swap extends Base {
                 archive.wipe(keep);
                 for (FileNode src : archive.list().values()) {
                     level = findLevel(storages, src);
+                    getLog().debug(src + ": level " + level);
                     if (level == storages.size() - 1) {
                         getLog().debug("already in final storage: " + src);
                     } else {
