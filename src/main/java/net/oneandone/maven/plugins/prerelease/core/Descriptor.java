@@ -78,15 +78,10 @@ public class Descriptor {
                 new HashMap<String, String>());
     }
 
-    public static Descriptor checkedCreate(World world, String prerelease, MavenProject mavenProject, long revision, boolean allowSnapshots, boolean allowPrereleaseSnapshots)
-            throws CannotDeterminTagBase,
-            MissingScmTag, CannotBumpVersion, MissingDeveloperConnection, TagAlreadyExists, VersioningProblem {
-        return create(prerelease, mavenProject, revision).check(world, mavenProject, allowSnapshots, allowPrereleaseSnapshots);
-    }
-
     //--
 
-    public final String prerelease;
+    /** plugin version that created this prerelease */
+    public final String prereleaseVersion;
     /** not actually stored in properties, but convenient to have it here */
     public final long revision;
     public final String svnOrig;
@@ -98,7 +93,7 @@ public class Descriptor {
     public final String next;
     public final Map<String, String> deployProperties;
 
-    public Descriptor(String prerelease, long revision, String svnOrig, String svnTag, Project project, String deployRepository,
+    public Descriptor(String prereleaseVersion, long revision, String svnOrig, String svnTag, Project project, String deployRepository,
                       boolean deployPluginMetadata, String previous, String next, Map<String, String> deployProperties) {
         if (svnOrig.endsWith("/")) {
             throw new IllegalArgumentException(svnOrig);
@@ -106,7 +101,7 @@ public class Descriptor {
         if (svnTag.endsWith("/")) {
             throw new IllegalArgumentException(svnTag);
         }
-        this.prerelease = prerelease;
+        this.prereleaseVersion = prereleaseVersion;
         this.revision = revision;
         this.svnOrig = svnOrig;
         this.svnTag = svnTag;
@@ -165,7 +160,7 @@ public class Descriptor {
         OutputStream dest;
 
         properties = new Properties();
-        properties.setProperty(PRERELEASE, prerelease);
+        properties.setProperty(PRERELEASE, prereleaseVersion);
         properties.setProperty(SVN_ORIG, svnOrig);
         properties.setProperty(SVN_TAG, svnTag);
         properties.setProperty(DEPLOY_REPOSITORY, deployRepository);

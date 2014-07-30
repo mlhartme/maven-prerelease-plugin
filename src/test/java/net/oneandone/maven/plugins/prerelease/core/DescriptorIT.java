@@ -17,6 +17,7 @@ package net.oneandone.maven.plugins.prerelease.core;
 
 import net.oneandone.maven.plugins.prerelease.util.IntegrationBase;
 import net.oneandone.maven.plugins.prerelease.util.Maven;
+import net.oneandone.sushi.fs.World;
 import net.oneandone.sushi.fs.file.FileNode;
 import org.apache.maven.project.MavenProject;
 import org.junit.Ignore;
@@ -27,6 +28,12 @@ import java.net.URI;
 import static org.junit.Assert.assertEquals;
 
 public class DescriptorIT extends IntegrationBase {
+    public static Descriptor checkedCreate(World world, String prerelease, MavenProject mavenProject, long revision, boolean allowSnapshots, boolean allowPrereleaseSnapshots)
+            throws CannotDeterminTagBase,
+            MissingScmTag, CannotBumpVersion, MissingDeveloperConnection, TagAlreadyExists, VersioningProblem {
+        return Descriptor.create(prerelease, mavenProject, revision).check(world, mavenProject, allowSnapshots, allowPrereleaseSnapshots);
+    }
+
     @Test
     public void normal() throws Exception {
         FileNode dir;
@@ -39,7 +46,7 @@ public class DescriptorIT extends IntegrationBase {
         maven = maven(WORLD);
         project = maven.loadPom(dir.join("pom.xml"));
         revision = WorkingCopy.load(dir).revision();
-        descriptor = Descriptor.checkedCreate(WORLD, "foo", project, revision, false, true);
+        descriptor = checkedCreate(WORLD, "foo", project, revision, false, true);
         assertEquals(revision, descriptor.revision);
         assertEquals("1.0.0-SNAPSHOT", descriptor.previous);
         assertEquals("minimal", descriptor.project.artifactId);
@@ -62,11 +69,11 @@ public class DescriptorIT extends IntegrationBase {
         maven = maven(WORLD);
         project = maven.loadPom(dir.join("pom.xml"));
         revision = WorkingCopy.load(dir).revision();
-        Descriptor.checkedCreate(WORLD, "foo", project, revision, false, true);
+        checkedCreate(WORLD, "foo", project, revision, false, true);
         tag = new URI(REPOSITORY_URL + "/minimal/tags/minimal-1.0.0");
         svnMkdir(tag);
         try {
-            Descriptor.checkedCreate(WORLD, "foo", project, revision, false, true);
+            checkedCreate(WORLD, "foo", project, revision, false, true);
         } finally {
             svnRemove(tag);
         }
@@ -84,7 +91,7 @@ public class DescriptorIT extends IntegrationBase {
         maven = maven(WORLD);
         project = maven.loadPom(dir.join("pom.xml"));
         revision = WorkingCopy.load(dir).revision();
-        Descriptor.checkedCreate(WORLD, "foo", project, revision, false, true);
+        checkedCreate(WORLD, "foo", project, revision, false, true);
     }
 
     @Test(expected = VersioningProblem.class)
@@ -98,7 +105,7 @@ public class DescriptorIT extends IntegrationBase {
         maven = maven(WORLD);
         project = maven.loadPom(dir.join("pom.xml"));
         revision = WorkingCopy.load(dir).revision();
-        Descriptor.checkedCreate(WORLD, "foo", project, revision, false, true);
+        checkedCreate(WORLD, "foo", project, revision, false, true);
     }
 
     @Test(expected = VersioningProblem.class)
@@ -112,6 +119,6 @@ public class DescriptorIT extends IntegrationBase {
         maven = maven(WORLD);
         project = maven.loadPom(dir.join("pom.xml"));
         revision = WorkingCopy.load(dir).revision();
-        Descriptor.checkedCreate(WORLD, "foo", project, revision, false, true);
+        checkedCreate(WORLD, "foo", project, revision, false, true);
     }
 }
