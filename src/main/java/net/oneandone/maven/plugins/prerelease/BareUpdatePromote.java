@@ -18,7 +18,6 @@ package net.oneandone.maven.plugins.prerelease;
 import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
 
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 

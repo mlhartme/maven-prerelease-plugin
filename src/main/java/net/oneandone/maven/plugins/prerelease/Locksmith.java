@@ -15,7 +15,6 @@
  */
 package net.oneandone.maven.plugins.prerelease;
 
-import net.oneandone.sushi.fs.FileNotFoundException;
 import net.oneandone.sushi.fs.Node;
 import net.oneandone.sushi.fs.file.FileNode;
 import net.oneandone.sushi.io.OS;

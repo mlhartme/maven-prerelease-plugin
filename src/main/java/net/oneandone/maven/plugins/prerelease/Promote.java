@@ -18,13 +18,9 @@ package net.oneandone.maven.plugins.prerelease;
 import net.oneandone.maven.plugins.prerelease.core.Archive;
 import net.oneandone.maven.plugins.prerelease.core.Prerelease;
 import net.oneandone.maven.plugins.prerelease.core.WorkingCopy;
-import net.oneandone.maven.plugins.prerelease.util.Subversion;
-import net.oneandone.sushi.util.Substitution;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
-
-import java.util.Map;
 
 /**
  * Promotes a prerelease by commiting the tag and deploying its artifact(s).

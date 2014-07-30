@@ -19,14 +19,11 @@ import net.oneandone.maven.plugins.prerelease.core.Archive;
 import net.oneandone.maven.plugins.prerelease.core.Prerelease;
 import net.oneandone.maven.plugins.prerelease.core.WorkingCopy;
 import net.oneandone.maven.plugins.prerelease.util.FilteringMojoExecutor;
-import net.oneandone.sushi.fs.file.FileNode;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
-import org.eclipse.aether.util.graph.visitor.FilteringDependencyVisitor;
 
 import java.io.IOException;
-import java.util.List;
 
 /**
  * Executes a build on an existing prerelease.
