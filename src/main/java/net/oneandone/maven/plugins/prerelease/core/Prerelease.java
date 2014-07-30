@@ -126,7 +126,6 @@ public class Prerelease {
     }
 
     public void commit(Log log, String commitMessage) throws Failure {
-
         Launcher launcher;
 
         log.info("committing tag:");

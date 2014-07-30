@@ -38,6 +38,7 @@ import org.apache.maven.project.ProjectBuildingResult;
 import org.codehaus.plexus.DefaultPlexusContainer;
 import org.codehaus.plexus.component.repository.exception.ComponentLookupException;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -80,6 +81,17 @@ public class Maven {
         build(basedir, userProperties, executionListener, filter, goals);
     }
 
+    private static PrereleaseRepository prereleaseRepository() {
+        PrereleaseRepository result;
+
+        result = new PrereleaseRepository();
+        /* TODO
+        org.eclipse.aether.artifact.Artifact a;
+        a = new org.eclipse.aether.artifact.DefaultArtifact("foo:bar:1.0.0");
+        a = a.setFile(new File("pom.xml"));
+        result.add(a);*/
+        return result;
+    }
 
     /**
      * Creates an DefaultMaven instance, initializes it form parentRequest (in Maven, this is done by MavenCli - also by
@@ -107,6 +119,7 @@ public class Maven {
         request.setBaseDirectory(basedir.toPath().toFile());
         request.setUserProperties(merged(request.getUserProperties(), userProperties));
         request.setExecutionListener(theExecutionListener);
+        request.setWorkspaceReader(prereleaseRepository());
 
         mojoExecutor = FilteringMojoExecutor.install(container, filter);
         log.info("[" + basedir + " " + filter + "] mvn " + props(request.getUserProperties()) + Separator.SPACE.join(goals));
