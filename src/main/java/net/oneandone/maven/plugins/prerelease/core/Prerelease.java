@@ -296,7 +296,7 @@ public class Prerelease {
         }
     }
 
-    /** @return Mapping of Artifact File to [ classified, type ]. Classifier is null for the main artifact */
+    /** @return Mapping of Artifact File to [ classifier, type ]. Classifier is null for the main artifact */
     public Map<FileNode, String[]> artifactFiles() throws IOException {
         FileNode artifacts;
         String name;

@@ -60,11 +60,12 @@ public class Descriptor {
                 new Project(get(properties, PROJECT_GROUP_ID), get(properties, PROJECT_ARTIFACT_ID), get(properties, PROJECT_VERSION)),
                 get(properties, DEPLOY_REPOSITORY), "true".equals(get(properties, DEPLOY_PLUGIN_METADATA)),
                 get(properties, PREVIOUS), get(properties, NEXT),
-                getProperties(properties, DEPLOY_PROPERTIES));
+                getProperties(properties, DEPLOY_PROPERTIES),
+                new PrereleaseRepository() /* TODO */);
     }
 
-    public static Descriptor create(String prerelease, MavenProject mavenProject, long revision)
-            throws MissingScmTag, MissingDeveloperConnection, CannotBumpVersion, CannotDeterminTagBase {
+    public static Descriptor create(String prerelease, MavenProject mavenProject, long revision, List<FileNode> storages)
+            throws MissingScmTag, MissingDeveloperConnection, CannotBumpVersion, CannotDeterminTagBase, IOException {
         Project project;
         String svnOrig;
         String svnTag;
@@ -76,7 +77,8 @@ public class Descriptor {
         repo = mavenProject.getDistributionManagement().getRepository();
         return new Descriptor(prerelease, revision, svnOrig, svnTag, project, repo.getId() + "::" + repo.getUrl(),
                 "maven-plugin".equals(mavenProject.getPackaging()), mavenProject.getVersion(), next(project.version),
-                new HashMap<String, String>());
+                new HashMap<String, String>(),
+                PrereleaseRepository.forProject(mavenProject, storages));
     }
 
     //--
@@ -96,7 +98,8 @@ public class Descriptor {
     public final PrereleaseRepository prereleaseRepository;
 
     public Descriptor(String prereleaseVersion, long revision, String svnOrig, String svnTag, Project project, String deployRepository,
-                      boolean deployPluginMetadata, String previous, String next, Map<String, String> deployProperties) {
+                      boolean deployPluginMetadata, String previous, String next, Map<String, String> deployProperties,
+                      PrereleaseRepository prereleaseRepository) {
         if (svnOrig.endsWith("/")) {
             throw new IllegalArgumentException(svnOrig);
         }
@@ -113,7 +116,7 @@ public class Descriptor {
         this.previous = previous;
         this.next = next;
         this.deployProperties = deployProperties;
-        this.prereleaseRepository = new PrereleaseRepository();
+        this.prereleaseRepository = prereleaseRepository;
     }
 
     /** @return this */
@@ -183,14 +186,18 @@ public class Descriptor {
 
     //-- utility code
 
+    public static boolean isSnapshot(String version) {
+        return version.endsWith("-SNAPSHOT");
+    }
+
     private static void checkRelease(String where, String version, List<String> problems) {
-        if (version.endsWith("-SNAPSHOT")) {
+        if (isSnapshot(version)) {
             problems.add(where + ": expected release version, got " + version);
         }
     }
 
     private static void checkSnapshot(String where, String version, List<String> problems) {
-        if (!version.endsWith("-SNAPSHOT")) {
+        if (!isSnapshot(version)) {
             problems.add(where + ": expected snapshot version, got " + version);
         }
     }
@@ -211,7 +218,11 @@ public class Descriptor {
     }
 
     public static String releaseVersion(MavenProject project) {
-        return Strings.removeRight(project.getVersion(), "-SNAPSHOT");
+        return releaseVersion(project.getVersion());
+    }
+
+    public static String releaseVersion(String version) {
+        return Strings.removeRight(version, "-SNAPSHOT");
     }
 
     public static String tagurl(String svnurl, MavenProject project) throws CannotDeterminTagBase {

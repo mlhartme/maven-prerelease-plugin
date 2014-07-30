@@ -9,7 +9,7 @@
   </parent>
   <groupId>net.oneandone.maven.plugins</groupId>
   <artifactId>prerelease</artifactId>
-  <version>1.6.5-SNAPSHOT</version>
+  <version>1.7.0-SNAPSHOT</version>
   <packaging>maven-plugin</packaging>
 
   <name>Maven Prerelease Plugin</name>

@@ -39,7 +39,7 @@ public class Update extends ProjectBase {
         workingCopy = checkedWorkingCopy();
         getLog().info("checking project ...");
         revision = workingCopy.revision();
-        descriptor = Descriptor.create(version(), project, revision);
+        descriptor = Descriptor.create(version(), project, revision, storages());
         workingCopy.checkCompatibility(descriptor);
         setTarget(archive.target(revision));
         if (target.exists()) {

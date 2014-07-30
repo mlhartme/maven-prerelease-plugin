@@ -59,11 +59,16 @@ import java.util.TreeMap;
 //    :
 public class Archive implements AutoCloseable {
     public static List<FileNode> directories(List<FileNode> storages, MavenProject project) {
+        return directories(storages, project.getGroupId(), project.getArtifactId());
+
+    }
+
+    public static List<FileNode> directories(List<FileNode> storages, String groupId, String artifactId) {
         List<FileNode> directories;
 
         directories = new ArrayList<>(storages.size());
         for (FileNode storage : storages) {
-            directories.add(storage.join(project.getGroupId(), project.getArtifactId()));
+            directories.add(storage.join(groupId, artifactId));
         }
         return directories;
     }
@@ -109,7 +114,7 @@ public class Archive implements AutoCloseable {
         throw new IllegalStateException();
     }
 
-    /** */
+    /** @return maps revisions to prerelease directories */
     public TreeMap<Long, FileNode> list() throws ListException, DirectoryNotFoundException {
         TreeMap<Long, FileNode> result;
         long revision;
@@ -192,7 +197,7 @@ public class Archive implements AutoCloseable {
     }
 
     @Override
-    public void close() throws Exception {
+    public void close() throws IOException {
         FileNode file;
 
         if (!opened) {

@@ -23,15 +23,20 @@ import org.apache.maven.project.MavenProject;
 import org.junit.Ignore;
 import org.junit.Test;
 
+import java.io.IOException;
 import java.net.URI;
+import java.util.Collections;
 
 import static org.junit.Assert.assertEquals;
 
 public class DescriptorIT extends IntegrationBase {
     public static Descriptor checkedCreate(World world, String prerelease, MavenProject mavenProject, long revision, boolean allowSnapshots, boolean allowPrereleaseSnapshots)
             throws CannotDeterminTagBase,
-            MissingScmTag, CannotBumpVersion, MissingDeveloperConnection, TagAlreadyExists, VersioningProblem {
-        return Descriptor.create(prerelease, mavenProject, revision).check(world, mavenProject, allowSnapshots, allowPrereleaseSnapshots);
+            MissingScmTag, CannotBumpVersion, MissingDeveloperConnection, TagAlreadyExists, VersioningProblem, IOException {
+        FileNode tmp;
+
+        tmp = world.getTemp().createTempDirectory();
+        return Descriptor.create(prerelease, mavenProject, revision, Collections.singletonList(tmp)).check(world, mavenProject, allowSnapshots, allowPrereleaseSnapshots);
     }
 
     @Test

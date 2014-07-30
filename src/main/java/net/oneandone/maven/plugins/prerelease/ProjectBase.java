@@ -107,7 +107,7 @@ public abstract class ProjectBase extends Base {
 
         getLog().info("checking project ...");
         revision = workingCopy.revision();
-        descriptor = Descriptor.create(version(), project, revision).check(world, project, allowSnapshots, allowPrereleaseSnapshots);
+        descriptor = Descriptor.create(version(), project, revision, storages()).check(world, project, allowSnapshots, allowPrereleaseSnapshots);
         workingCopy.checkCompatibility(descriptor);
         return descriptor;
     }
