@@ -75,21 +75,10 @@ public class Maven {
         return executionListener;
     }
 
-    public void build(FileNode basedir, Map<String, String> userProperties, FilteringMojoExecutor.Filter filter, String ... goals)
+    public void build(FileNode basedir, Map<String, String> userProperties, FilteringMojoExecutor.Filter filter,
+                      PrereleaseRepository prereleaseRepository, String ... goals)
             throws Exception {
-        build(basedir, userProperties, executionListener, filter, goals);
-    }
-
-    private static PrereleaseRepository prereleaseRepository() {
-        PrereleaseRepository result;
-
-        result = new PrereleaseRepository();
-        /* TODO
-        org.eclipse.aether.artifact.Artifact a;
-        a = new org.eclipse.aether.artifact.DefaultArtifact("foo:bar:1.0.0");
-        a = a.setFile(new File("pom.xml"));
-        result.add(a);*/
-        return result;
+        build(basedir, userProperties, executionListener, filter, prereleaseRepository, goals);
     }
 
     /**
@@ -97,7 +86,7 @@ public class Maven {
      * loading settings).
      */
     public void build(FileNode basedir, Map<String, String> userProperties, ExecutionListener theExecutionListener,
-                      FilteringMojoExecutor.Filter filter, String ... goals) throws BuildException {
+                      FilteringMojoExecutor.Filter filter, PrereleaseRepository prereleaseRepository, String ... goals) throws BuildException {
         DefaultPlexusContainer container;
         org.apache.maven.Maven maven;
         MavenExecutionRequest request;
@@ -118,7 +107,7 @@ public class Maven {
         request.setBaseDirectory(basedir.toPath().toFile());
         request.setUserProperties(merged(request.getUserProperties(), userProperties));
         request.setExecutionListener(theExecutionListener);
-        request.setWorkspaceReader(prereleaseRepository());
+        request.setWorkspaceReader(prereleaseRepository);
 
         mojoExecutor = FilteringMojoExecutor.install(container, filter);
         log.info("[" + basedir + " " + filter + "] mvn " + props(request.getUserProperties()) + Separator.SPACE.join(goals));
@@ -175,7 +164,8 @@ public class Maven {
 
         listener = new PromoteExecutionListener(prerelease, projectHelper, executionListener);
         try {
-            build(prerelease.checkout, prerelease.descriptor.releaseProps(propertyArgs), listener, FilteringMojoExecutor.DEPLOY, "deploy");
+            build(prerelease.checkout, prerelease.descriptor.releaseProps(propertyArgs), listener, FilteringMojoExecutor.DEPLOY,
+                    prerelease.descriptor.prereleaseRepository, "deploy");
         } catch (BuildException e) {
             if (listener.isDeploySuccess()) {
                 log.warn("Promote succeeded: your artifacts have been deployed, and your svn tag was created. ");
@@ -194,7 +184,7 @@ public class Maven {
 
         listener = new PromoteExecutionListener(prerelease, projectHelper, executionListener);
         try {
-            build(directory, propertyArgs, listener, FilteringMojoExecutor.DEPLOY, "deploy");
+            build(directory, propertyArgs, listener, FilteringMojoExecutor.DEPLOY, prerelease.descriptor.prereleaseRepository, "deploy");
         } catch (BuildException e) {
             if (listener.isDeploySuccess()) {
                 log.warn("Snapshot deployment succeeded.");

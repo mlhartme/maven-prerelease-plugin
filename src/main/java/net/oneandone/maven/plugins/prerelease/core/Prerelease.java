@@ -182,7 +182,7 @@ public class Prerelease {
         // no "clean" because we have a vanilla directory from svn
         try {
             maven.build(checkout, descriptor.releaseProps(propertyArgs), new PrepareExecutionListener(this, maven.getExecutionListener()),
-                    FilteringMojoExecutor.NONE_CHECK, "install");
+                    FilteringMojoExecutor.NONE_CHECK, descriptor.prereleaseRepository, "install");
         } finally {
             installed = descriptor.project.localRepo(maven);
             if (installed.exists()) {
@@ -194,7 +194,7 @@ public class Prerelease {
 
     public void check(Log log, Map<String, String> propertyArgs, Maven maven) throws Exception {
         log.info("prerelease checks for " + descriptor.project);
-        maven.build(checkout, descriptor.releaseProps(propertyArgs), FilteringMojoExecutor.CHECK, "install");
+        maven.build(checkout, descriptor.releaseProps(propertyArgs), FilteringMojoExecutor.CHECK, descriptor.prereleaseRepository, "install");
     }
 
     //-- promote

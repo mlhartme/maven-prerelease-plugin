@@ -15,6 +15,7 @@
  */
 package net.oneandone.maven.plugins.prerelease.core;
 
+import net.oneandone.maven.plugins.prerelease.util.PrereleaseRepository;
 import net.oneandone.maven.plugins.prerelease.util.Subversion;
 import net.oneandone.sushi.fs.World;
 import net.oneandone.sushi.fs.file.FileNode;
@@ -92,6 +93,7 @@ public class Descriptor {
     public final String previous;
     public final String next;
     public final Map<String, String> deployProperties;
+    public final PrereleaseRepository prereleaseRepository;
 
     public Descriptor(String prereleaseVersion, long revision, String svnOrig, String svnTag, Project project, String deployRepository,
                       boolean deployPluginMetadata, String previous, String next, Map<String, String> deployProperties) {
@@ -111,6 +113,7 @@ public class Descriptor {
         this.previous = previous;
         this.next = next;
         this.deployProperties = deployProperties;
+        this.prereleaseRepository = new PrereleaseRepository();
     }
 
     /** @return this */
