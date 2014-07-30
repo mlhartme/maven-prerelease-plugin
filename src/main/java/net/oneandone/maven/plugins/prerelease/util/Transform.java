@@ -15,9 +15,13 @@
  */
 package net.oneandone.maven.plugins.prerelease.util;
 
+import net.oneandone.maven.plugins.prerelease.core.Prerelease;
 import net.oneandone.sushi.fs.file.FileNode;
 import net.oneandone.sushi.xml.Selector;
 import net.oneandone.sushi.xml.XmlException;
+import org.apache.maven.artifact.Artifact;
+import org.apache.maven.model.Dependency;
+import org.apache.maven.model.Model;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -34,7 +38,8 @@ import java.util.Iterator;
 /** Transforms via DOM - transforming the model would loose all formatting. Maven's Release Plugin follows the same approach. */
 public final class Transform {
     /** @param tag null to skip scm transformation */
-    public static void adjustPom(FileNode pom, String expectedVersion, String nextVersion, String svnurl, String tag)
+    public static void adjustPom(FileNode pom, String expectedVersion, String nextVersion, String svnurl, String tag,
+                                 PrereleaseRepository prereleaseRepository)
             throws IOException, MojoExecutionException, SAXException, XmlException {
         Document document;
         Element element;
@@ -70,6 +75,9 @@ public final class Transform {
             scm(selector.elementOpt(document, "/M:project/M:scm/M:connection"), svnurl, tag);
             scm(selector.elementOpt(document, "/M:project/M:scm/M:developerConnection"), svnurl, tag);
             scm(selector.elementOpt(document, "/M:project/M:scm/M:url"), svnurl, tag);
+        }
+        if (prereleaseRepository != null) {
+            prereleaseRepository.updateDependencies(selector, document);
         }
         writeRaw(document, pom);
     }

@@ -48,8 +48,9 @@ public class Descriptor {
     private static final String PREVIOUS = "previous"; // previous snapshot version
     private static final String NEXT = "next"; // next snapshot version
     private static final String DEPLOY_PROPERTIES = "deployProperties.";
+    private static final String PRERELEASE_REPOSITORY = "prereleaseRepository";
 
-    public static Descriptor load(Target target) throws IOException {
+    public static Descriptor load(Target target, List<FileNode> storages) throws IOException {
         Properties properties;
         InputStream src;
 
@@ -61,7 +62,7 @@ public class Descriptor {
                 get(properties, DEPLOY_REPOSITORY), "true".equals(get(properties, DEPLOY_PLUGIN_METADATA)),
                 get(properties, PREVIOUS), get(properties, NEXT),
                 getProperties(properties, DEPLOY_PROPERTIES),
-                new PrereleaseRepository() /* TODO */);
+                PrereleaseRepository.forDescriptor(get(properties, PRERELEASE_REPOSITORY), storages));
     }
 
     public static Descriptor create(String prerelease, MavenProject mavenProject, long revision, List<FileNode> storages)
@@ -176,6 +177,7 @@ public class Descriptor {
         properties.setProperty(PROJECT_ARTIFACT_ID, project.artifactId);
         properties.setProperty(PROJECT_VERSION, project.version);
         properties.setProperty(NEXT, next);
+        properties.setProperty(PRERELEASE_REPOSITORY, prereleaseRepository.toDescriptor());
         for (Map.Entry<String, String> entry : deployProperties.entrySet()) {
             properties.setProperty(DEPLOY_PROPERTIES + entry.getKey(), entry.getValue());
         }

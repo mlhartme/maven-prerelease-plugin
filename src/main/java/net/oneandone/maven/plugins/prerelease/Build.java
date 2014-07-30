@@ -53,7 +53,7 @@ public class Build extends ProjectBase {
         } else {
             setTarget(archive.target(revisionForDescriptor(archive)));
         }
-        prerelease = target.loadOpt();
+        prerelease = target.loadOpt(storages());
         if (prerelease == null) {
             throw new MojoExecutionException("no prerelease for revision " + target.getRevision());
         }

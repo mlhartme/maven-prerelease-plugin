@@ -38,14 +38,15 @@ import org.xml.sax.SAXException;
 import java.io.IOException;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public class Prerelease {
-    public static Prerelease load(Target target) throws IOException {
+    public static Prerelease load(Target target, List<FileNode> storages) throws IOException {
         Descriptor descriptor;
         FileNode workingCopy;
 
-        descriptor = Descriptor.load(target);
+        descriptor = Descriptor.load(target, storages);
         workingCopy = target.join("tags", descriptor.getTagName());
         workingCopy.checkDirectory();
         return new Prerelease(target, workingCopy, descriptor);
@@ -78,7 +79,7 @@ public class Prerelease {
             prerelease = new Prerelease(target, checkout, descriptor);
             prerelease.descriptor.save(target);
             Transform.adjustPom(prerelease.checkout.join("pom.xml"), descriptor.previous, descriptor.project.version,
-                    descriptor.svnOrig, descriptor.svnTag);
+                    descriptor.svnOrig, descriptor.svnTag, descriptor.prereleaseRepository);
             Archive.adjustChangesOpt(prerelease.checkout, prerelease.descriptor.project.version);
             prerelease.create(maven, propertyArgs);
             log.info("created prerelease in " + prerelease.target);
@@ -165,7 +166,7 @@ public class Prerelease {
         // (or in other words: make sure we see possible changes that were committed between checkout and lock)
         Subversion.launcher(result, "up");
 
-        Transform.adjustPom(result.join("pom.xml"), descriptor.previous, descriptor.next, null, null);
+        Transform.adjustPom(result.join("pom.xml"), descriptor.previous, descriptor.next, null, null, null);
         if (changes != null) {
             changes.releaseDate(descriptor.project.version, new Date());
             changes.save();

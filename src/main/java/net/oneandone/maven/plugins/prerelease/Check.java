@@ -34,7 +34,7 @@ public class Check extends ProjectBase {
         workingCopy = checkedWorkingCopy();
         revision = workingCopy.revision();
         setTarget(archive.target(revision));
-        prerelease = target.loadOpt();
+        prerelease = target.loadOpt(storages());
         if (prerelease == null) {
             throw new MojoExecutionException("no prerelease for revision " + revision);
         }

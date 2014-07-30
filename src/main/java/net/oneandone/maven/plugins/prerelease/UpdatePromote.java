@@ -33,7 +33,7 @@ public class UpdatePromote extends Promote {
 
         workingCopy = checkedWorkingCopy();
         setTarget(archive.target(workingCopy.revision()));
-        prerelease = target.loadOpt();
+        prerelease = target.loadOpt(storages());
         if (prerelease == null) {
             maven = maven();
             prerelease = Prerelease.create(maven, propertyArgs(), getLog(), checkedDescriptor(workingCopy), target);

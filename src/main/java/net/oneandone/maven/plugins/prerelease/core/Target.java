@@ -21,6 +21,7 @@ import net.oneandone.sushi.launcher.Launcher;
 import org.apache.maven.plugin.logging.Log;
 
 import java.io.IOException;
+import java.util.List;
 
 /**
  * Directory for a prerelease. The prerelease is not necessarily promotable (it might not exist (yet), or it may be broken, or it
@@ -41,8 +42,8 @@ public class Target {
         return directory.exists();
     }
 
-    public Prerelease loadOpt() throws IOException {
-        return exists() ? Prerelease.load(this) : null;
+    public Prerelease loadOpt(List<FileNode> storages) throws IOException {
+        return exists() ? Prerelease.load(this, storages) : null;
     }
 
     public FileNode join(String ... paths) {
