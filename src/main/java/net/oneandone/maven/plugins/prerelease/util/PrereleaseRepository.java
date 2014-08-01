@@ -165,4 +165,8 @@ public class PrereleaseRepository implements WorkspaceReader {
             }
         }
     }
+
+    public Prerelease[] nested() {
+        return new Prerelease[0]; // TODO
+    }
 }

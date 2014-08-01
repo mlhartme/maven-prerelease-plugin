@@ -19,6 +19,7 @@ import net.oneandone.maven.plugins.prerelease.util.ChangesXml;
 import net.oneandone.maven.plugins.prerelease.util.FilteringMojoExecutor;
 import net.oneandone.maven.plugins.prerelease.util.Maven;
 import net.oneandone.maven.plugins.prerelease.util.PrepareExecutionListener;
+import net.oneandone.maven.plugins.prerelease.util.PrereleaseRepository;
 import net.oneandone.maven.plugins.prerelease.util.Subversion;
 import net.oneandone.maven.plugins.prerelease.util.Transform;
 import net.oneandone.sushi.fs.FileNotFoundException;
@@ -203,6 +204,10 @@ public class Prerelease {
     public void promote(Log log, Map<String, String> propertyArgs, String createTagMessage, String revertTagMessage, String nextIterationMessage, Maven maven) throws Exception {
         FileNode origCommit;
 
+        for (Prerelease prerelease : descriptor.prereleaseRepository.nested()) {
+            // TODO: same message for all releases?
+            prerelease.promote(log, propertyArgs, createTagMessage, revertTagMessage, nextIterationMessage, maven);
+        }
         check(log, propertyArgs, maven);
         log.info("promoting revision " + descriptor.revision + " to " + descriptor.project);
         origCommit = prepareOrigCommit(log);
