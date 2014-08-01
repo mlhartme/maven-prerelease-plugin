@@ -16,11 +16,6 @@
 package net.oneandone.maven.plugins.prerelease;
 
 import net.oneandone.maven.plugins.prerelease.core.Archive;
-import net.oneandone.maven.plugins.prerelease.core.Descriptor;
-import net.oneandone.maven.plugins.prerelease.core.Prerelease;
-import net.oneandone.maven.plugins.prerelease.core.WorkingCopy;
-import net.oneandone.maven.plugins.prerelease.util.Maven;
-import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugins.annotations.Mojo;
 
 /**
@@ -44,22 +39,6 @@ import org.apache.maven.plugins.annotations.Mojo;
 public class Create extends ProjectBase {
     @Override
     public void doExecute(Archive archive) throws Exception {
-        WorkingCopy workingCopy;
-        Descriptor descriptor;
-        Prerelease prerelease;
-        Maven maven;
-
-        workingCopy = checkedWorkingCopy();
-        setTarget(archive.target(workingCopy.revision()));
-        if (target.exists()) {
-            throw new MojoExecutionException("prerelease already exists: " + workingCopy.revision());
-        }
-        descriptor = descriptorForWorkingcopy(workingCopy);
-        maven = maven();
-        prerelease = Prerelease.create(maven, propertyArgs(), getLog(), descriptor, target);
-        if (snapshots) {
-            prerelease.deploySnapshot(maven, getLog(), propertyArgs(), project);
-        }
-        archive.wipe(keep);
+        doCreate(archive, false);
     }
 }

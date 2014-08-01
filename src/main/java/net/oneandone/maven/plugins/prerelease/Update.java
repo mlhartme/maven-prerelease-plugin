@@ -16,10 +16,6 @@
 package net.oneandone.maven.plugins.prerelease;
 
 import net.oneandone.maven.plugins.prerelease.core.Archive;
-import net.oneandone.maven.plugins.prerelease.core.Descriptor;
-import net.oneandone.maven.plugins.prerelease.core.Prerelease;
-import net.oneandone.maven.plugins.prerelease.core.WorkingCopy;
-import net.oneandone.maven.plugins.prerelease.util.Maven;
 import org.apache.maven.plugins.annotations.Mojo;
 
 /**
@@ -29,28 +25,6 @@ import org.apache.maven.plugins.annotations.Mojo;
 public class Update extends ProjectBase {
     @Override
     public void doExecute(Archive archive) throws Exception {
-        WorkingCopy workingCopy;
-        Descriptor descriptor;
-        long revision;
-        Prerelease prerelease;
-        Maven maven;
-
-        // code differs from Create because the descriptor check is deferred until after Prerelease.create
-        workingCopy = checkedWorkingCopy();
-        getLog().info("checking project ...");
-        revision = workingCopy.revision();
-        descriptor = Descriptor.create(version(), project, revision, storages());
-        workingCopy.checkCompatibility(descriptor);
-        setTarget(archive.target(revision));
-        if (target.exists()) {
-            getLog().info("prerelease already exists: " + descriptor.getName());
-        } else {
-            maven = maven();
-            prerelease = Prerelease.create(maven, propertyArgs(), getLog(), descriptor, target);
-            archive.wipe(keep);
-            if (snapshots) {
-                prerelease.deploySnapshot(maven, getLog(), propertyArgs(), project);
-            }
-        }
+        doCreate(archive, true);
     }
 }

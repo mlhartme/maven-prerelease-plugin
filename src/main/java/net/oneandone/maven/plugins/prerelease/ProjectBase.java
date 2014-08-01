@@ -17,11 +17,14 @@ package net.oneandone.maven.plugins.prerelease;
 
 import net.oneandone.maven.plugins.prerelease.core.Archive;
 import net.oneandone.maven.plugins.prerelease.core.Descriptor;
+import net.oneandone.maven.plugins.prerelease.core.Prerelease;
 import net.oneandone.maven.plugins.prerelease.core.Project;
 import net.oneandone.maven.plugins.prerelease.core.Storages;
 import net.oneandone.maven.plugins.prerelease.core.Target;
 import net.oneandone.maven.plugins.prerelease.core.WorkingCopy;
+import net.oneandone.maven.plugins.prerelease.util.Maven;
 import net.oneandone.sushi.fs.file.FileNode;
+import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.logging.Log;
 import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.project.MavenProject;
@@ -128,5 +131,37 @@ public abstract class ProjectBase extends Base {
         descriptor = Descriptor.create(version(), project, revision, storages());
         workingCopy.checkCompatibility(descriptor);
         return descriptor;
+    }
+
+    //--
+
+    public void doCreate(Archive archive, boolean optional) throws Exception {
+        WorkingCopy workingCopy;
+        Descriptor descriptor;
+        long revision;
+        Prerelease prerelease;
+        Maven maven;
+
+        // code differs from Create because the descriptor check is deferred until after Prerelease.create
+        workingCopy = checkedWorkingCopy();
+        getLog().info("checking project ...");
+        revision = workingCopy.revision();
+        descriptor = Descriptor.create(version(), project, revision, storages());
+        workingCopy.checkCompatibility(descriptor);
+        setTarget(archive.target(revision));
+        if (target.exists()) {
+            if (optional) {
+                getLog().info("prerelease already exists: " + descriptor.getName());
+            } else {
+                throw new MojoExecutionException("prerelease already exists: " + workingCopy.revision());
+            }
+        } else {
+            maven = maven();
+            prerelease = Prerelease.create(maven, propertyArgs(), getLog(), descriptor, target);
+            archive.wipe(keep);
+            if (snapshots) {
+                prerelease.deploySnapshot(maven, getLog(), propertyArgs(), project);
+            }
+        }
     }
 }
