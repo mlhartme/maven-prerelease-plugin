@@ -42,6 +42,10 @@ public abstract class ProjectBase extends Base {
     @Parameter(property = "prerelease.allowPrereleaseSnapshots", defaultValue = "false")
     protected boolean allowPrereleaseSnapshots;
 
+    /** Report errors as warnings only. You can use this to preview "check" result without failing your build. */
+    @Parameter(property = "prerelease.ignoreFailure", defaultValue = "false")
+    private boolean ignoreFailure;
+
     /**
      * Specifies where to create a symlink to the prerelease checkout. No symlink is created if the prerelease has no checkout yet
      * (and thus is broken). No symlink is created if not specified.
@@ -72,6 +76,15 @@ public abstract class ProjectBase extends Base {
                 if (target == null) {
                     throw new IllegalStateException("missing target");
                 }
+            }
+        } catch (RuntimeException e) {
+            throw e;
+        } catch (Exception e) {
+            if (ignoreFailure) {
+                getLog().warn("ignoring plugin failure: " + e.getMessage());
+                getLog().debug(e);
+            } else {
+                throw e;
             }
         }
     }

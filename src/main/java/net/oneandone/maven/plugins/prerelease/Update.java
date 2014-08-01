@@ -48,14 +48,6 @@ public class Update extends ProjectBase {
             maven = maven();
             prerelease = Prerelease.create(maven, propertyArgs(), getLog(), descriptor, target);
             archive.wipe(keep);
-            try {
-                prerelease.check(getLog(), propertyArgs(), maven, allowSnapshots, allowPrereleaseSnapshots);
-            } catch (RuntimeException e) {
-                throw e;
-            } catch (Exception e) {
-                getLog().warn("build ok, but checks veto promotion: " + e.getMessage());
-                getLog().debug(e);
-            }
             if (snapshots) {
                 prerelease.deploySnapshot(maven, getLog(), propertyArgs(), project);
             }

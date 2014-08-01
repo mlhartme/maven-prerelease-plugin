@@ -8,7 +8,11 @@
         Archive directory contains the version now.
       </action>
       <action date="2014-08-01" dev="mlhartme" type="update">
+        Added ignoreFailures option to run checks without failing your build.
+      </action>
+      <action date="2014-08-01" dev="mlhartme" type="update">
         Check for release versions, existing tags etc (descriptor check) moved into check goal.
+        Update no longer warns about check failures at the end.
       </action>
     </release>
     <release date="2014-05-07" version="1.6.4">

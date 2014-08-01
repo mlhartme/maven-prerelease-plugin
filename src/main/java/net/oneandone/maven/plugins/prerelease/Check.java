@@ -22,7 +22,10 @@ import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugins.annotations.Mojo;
 
 /**
- * Runs the prerelease checks.
+ * Runs the prerelease checks and several built-in checks:
+ *
+ * 1) no snapshot dependencies or snapshot parent pom.
+ * 2) not tagged yet
  */
 @Mojo(name = "check")
 public class Check extends ProjectBase {

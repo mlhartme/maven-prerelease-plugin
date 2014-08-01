@@ -39,8 +39,6 @@ import org.apache.maven.plugins.annotations.Mojo;
  * 1) no uncommitted changes in your working directory.
  *
  * 2) no pending updates up to the last modified revision of your svn working directory
- *
- * 3) no snapshot dependencies or snapshot parent pom.
  */
 @Mojo(name = "create")
 public class Create extends ProjectBase {
