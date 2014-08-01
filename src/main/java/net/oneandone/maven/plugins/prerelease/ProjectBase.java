@@ -107,7 +107,7 @@ public abstract class ProjectBase extends Base {
         return world.file(project.getBasedir());
     }
 
-    protected WorkingCopy checkedWorkingCopy() throws Exception {
+    protected WorkingCopy workingCopy() throws Exception {
         Log log;
         WorkingCopy workingCopy;
 
@@ -118,6 +118,13 @@ public abstract class ProjectBase extends Base {
             log.debug("revisions: " + workingCopy.revisions);
             log.debug("changes: " + workingCopy.changes);
         }
+        return workingCopy;
+    }
+
+    protected WorkingCopy workingCopyChecked() throws Exception {
+        WorkingCopy workingCopy;
+
+        workingCopy = workingCopy();
         workingCopy.check();
         return workingCopy;
     }
@@ -135,18 +142,19 @@ public abstract class ProjectBase extends Base {
 
     //--
 
-    public void doCreate(Archive archive, boolean optional) throws Exception {
+    public Prerelease doCreate(Archive archive, boolean optional) throws Exception {
+        Storages storages;
         WorkingCopy workingCopy;
         Descriptor descriptor;
         long revision;
         Prerelease prerelease;
         Maven maven;
 
-        // code differs from Create because the descriptor check is deferred until after Prerelease.create
-        workingCopy = checkedWorkingCopy();
+        storages = storages();
+        workingCopy = workingCopyChecked();
         getLog().info("checking project ...");
         revision = workingCopy.revision();
-        descriptor = Descriptor.create(version(), project, revision, storages());
+        descriptor = Descriptor.create(version(), project, revision, storages);
         workingCopy.checkCompatibility(descriptor);
         setTarget(archive.target(revision));
         if (target.exists()) {
@@ -155,6 +163,7 @@ public abstract class ProjectBase extends Base {
             } else {
                 throw new MojoExecutionException("prerelease already exists: " + workingCopy.revision());
             }
+            prerelease = target.loadOpt(storages());
         } else {
             maven = maven();
             prerelease = Prerelease.create(maven, propertyArgs(), getLog(), descriptor, target);
@@ -163,5 +172,6 @@ public abstract class ProjectBase extends Base {
                 prerelease.deploySnapshot(maven, getLog(), propertyArgs(), project);
             }
         }
+        return prerelease;
     }
 }

@@ -27,23 +27,11 @@ import org.apache.maven.plugins.annotations.Mojo;
 @Mojo(name = "update-promote")
 public class UpdatePromote extends Promote {
     public void doExecute(Archive archive) throws Exception {
-        WorkingCopy workingCopy;
         Prerelease prerelease;
-        Maven maven;
 
-        workingCopy = checkedWorkingCopy();
-        setTarget(archive.target(workingCopy.revision()));
-        prerelease = target.loadOpt(storages());
-        if (prerelease == null) {
-            maven = maven();
-            prerelease = Prerelease.create(maven, propertyArgs(), getLog(), descriptorForWorkingcopy(workingCopy), target);
-            if (snapshots) {
-                prerelease.deploySnapshot(maven, getLog(), propertyArgs(), project);
-            }
-            archive.wipe(keep);
-        }
+        prerelease = doCreate(archive, true);
         prerelease.promote(getLog(), propertyArgs(), createTagMessage, revertTagMessage, nextIterationMessage, maven(),
                 allowSnapshots, allowPrereleaseSnapshots);
-        workingCopy.update(getLog());
+        workingCopy().update(getLog());
     }
 }

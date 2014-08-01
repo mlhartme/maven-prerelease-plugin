@@ -48,7 +48,7 @@ public class Build extends ProjectBase {
         Prerelease prerelease;
 
         if (buildRevision == null) {
-            workingCopy = checkedWorkingCopy();
+            workingCopy = workingCopyChecked();
             setTarget(archive.target(workingCopy.revision()));
         } else {
             setTarget(archive.target(revisionForDescriptor(archive)));
