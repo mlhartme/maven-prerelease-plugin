@@ -122,13 +122,14 @@ public class WorkingCopy {
         return changes.last();
     }
 
-    public void check() throws UncommitedChanges, PendingUpdates {
+    public WorkingCopy check() throws UncommitedChanges, PendingUpdates {
         if (!modifications.isEmpty()) {
             throw new UncommitedChanges(modifications);
         }
         if (!pendingUpdates.isEmpty()) {
             throw new PendingUpdates(revisions.last(), pendingUpdates);
         }
+        return this;
     }
 
     public Descriptor checkCompatibility(Descriptor descriptor) throws Exception {

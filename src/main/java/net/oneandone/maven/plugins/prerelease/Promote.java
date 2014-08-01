@@ -69,7 +69,7 @@ public class Promote extends ProjectBase {
         long revision;
         Prerelease prerelease;
 
-        workingCopy = workingCopyChecked();
+        workingCopy = workingCopy().check();
         revision = workingCopy.revision();
         setTarget(archive.target(revision));
         prerelease = target.loadOpt(storages());

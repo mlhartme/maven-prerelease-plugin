@@ -107,37 +107,21 @@ public abstract class ProjectBase extends Base {
         return world.file(project.getBasedir());
     }
 
+    private WorkingCopy lazyWorkingCopy;
+
     protected WorkingCopy workingCopy() throws Exception {
         Log log;
-        WorkingCopy workingCopy;
 
-        log = getLog();
-        log.info("checking working copy ...");
-        workingCopy = WorkingCopy.load(basedir());
-        if (log.isDebugEnabled()) {
-            log.debug("revisions: " + workingCopy.revisions);
-            log.debug("changes: " + workingCopy.changes);
+        if (lazyWorkingCopy == null) {
+            log = getLog();
+            log.info("checking working copy ...");
+            lazyWorkingCopy = WorkingCopy.load(basedir());
+            if (log.isDebugEnabled()) {
+                log.debug("revisions: " + lazyWorkingCopy.revisions);
+                log.debug("changes: " + lazyWorkingCopy.changes);
+            }
         }
-        return workingCopy;
-    }
-
-    protected WorkingCopy workingCopyChecked() throws Exception {
-        WorkingCopy workingCopy;
-
-        workingCopy = workingCopy();
-        workingCopy.check();
-        return workingCopy;
-    }
-
-    protected Descriptor descriptorForWorkingcopy(WorkingCopy workingCopy) throws Exception {
-        Descriptor descriptor;
-        long revision;
-
-        getLog().info("checking project ...");
-        revision = workingCopy.revision();
-        descriptor = Descriptor.create(version(), project, revision, storages());
-        workingCopy.checkCompatibility(descriptor);
-        return descriptor;
+        return lazyWorkingCopy;
     }
 
     //--
@@ -151,7 +135,7 @@ public abstract class ProjectBase extends Base {
         Maven maven;
 
         storages = storages();
-        workingCopy = workingCopyChecked();
+        workingCopy = workingCopy().check();
         getLog().info("checking project ...");
         revision = workingCopy.revision();
         descriptor = Descriptor.create(version(), project, revision, storages);
