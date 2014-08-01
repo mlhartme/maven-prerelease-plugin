@@ -36,13 +36,14 @@ public class UpdatePromote extends Promote {
         prerelease = target.loadOpt(storages());
         if (prerelease == null) {
             maven = maven();
-            prerelease = Prerelease.create(maven, propertyArgs(), getLog(), checkedDescriptor(workingCopy), target);
+            prerelease = Prerelease.create(maven, propertyArgs(), getLog(), descriptorForWorkingcopy(workingCopy), target);
             if (snapshots) {
                 prerelease.deploySnapshot(maven, getLog(), propertyArgs(), project);
             }
             archive.wipe(keep);
         }
-        prerelease.promote(getLog(), propertyArgs(), createTagMessage, revertTagMessage, nextIterationMessage, maven());
+        prerelease.promote(getLog(), propertyArgs(), createTagMessage, revertTagMessage, nextIterationMessage, maven(),
+                allowSnapshots, allowPrereleaseSnapshots);
         workingCopy.update(getLog());
     }
 }

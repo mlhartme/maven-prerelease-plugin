@@ -127,7 +127,6 @@ public class Descriptor {
         MavenProject parent;
 
         problems = new ArrayList<>();
-        checkSnapshot("project", mavenProject.getVersion(), problems);
         parent = mavenProject.getParent();
         if (parent != null) {
             checkRelease("project parent", parent.getVersion(), problems);
@@ -195,12 +194,6 @@ public class Descriptor {
     private static void checkRelease(String where, String version, List<String> problems) {
         if (isSnapshot(version)) {
             problems.add(where + ": expected release version, got " + version);
-        }
-    }
-
-    private static void checkSnapshot(String where, String version, List<String> problems) {
-        if (!isSnapshot(version)) {
-            problems.add(where + ": expected snapshot version, got " + version);
         }
     }
 

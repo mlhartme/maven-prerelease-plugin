@@ -38,6 +38,6 @@ public class Check extends ProjectBase {
         if (prerelease == null) {
             throw new MojoExecutionException("no prerelease for revision " + revision);
         }
-        prerelease.check(getLog(), propertyArgs(), maven());
+        prerelease.check(getLog(), propertyArgs(), maven(), allowSnapshots, allowPrereleaseSnapshots);
     }
 }

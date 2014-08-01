@@ -49,11 +49,11 @@ public class Update extends ProjectBase {
             prerelease = Prerelease.create(maven, propertyArgs(), getLog(), descriptor, target);
             archive.wipe(keep);
             try {
-                descriptor.check(world, project, allowSnapshots, allowPrereleaseSnapshots);
+                prerelease.check(getLog(), propertyArgs(), maven, allowSnapshots, allowPrereleaseSnapshots);
             } catch (RuntimeException e) {
                 throw e;
             } catch (Exception e) {
-                prerelease.target.scheduleRemove(getLog(), "build ok, but prerelease is not promotable: " + e.getMessage());
+                prerelease.target.scheduleRemove(getLog(), "build ok, but checks veto promotion: " + e.getMessage());
                 getLog().debug(e);
             }
             if (snapshots) {

@@ -7,6 +7,9 @@
       <action date="2014-08-01" dev="mlhartme" type="update">
         Archive directory contains the version now.
       </action>
+      <action date="2014-08-01" dev="mlhartme" type="update">
+        Check for release versions, existing tags etc (descriptor check) moved into check goal.
+      </action>
     </release>
     <release date="2014-05-07" version="1.6.4">
       <action date="2014-05-05" dev="mlhartme" type="fix">

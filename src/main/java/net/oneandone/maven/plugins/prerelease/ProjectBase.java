@@ -106,13 +106,13 @@ public abstract class ProjectBase extends Base {
         return workingCopy;
     }
 
-    protected Descriptor checkedDescriptor(WorkingCopy workingCopy) throws Exception {
+    protected Descriptor descriptorForWorkingcopy(WorkingCopy workingCopy) throws Exception {
         Descriptor descriptor;
         long revision;
 
         getLog().info("checking project ...");
         revision = workingCopy.revision();
-        descriptor = Descriptor.create(version(), project, revision, storages()).check(world, project, allowSnapshots, allowPrereleaseSnapshots);
+        descriptor = Descriptor.create(version(), project, revision, storages());
         workingCopy.checkCompatibility(descriptor);
         return descriptor;
     }

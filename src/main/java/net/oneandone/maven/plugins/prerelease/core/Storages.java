@@ -18,7 +18,6 @@ package net.oneandone.maven.plugins.prerelease.core;
 import net.oneandone.sushi.fs.Node;
 import net.oneandone.sushi.fs.file.FileNode;
 import org.apache.maven.plugin.logging.Log;
-import org.apache.maven.project.MavenProject;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -33,15 +32,25 @@ public class Storages {
         this.storages = storages;
     }
 
-    public List<Node> locks() throws IOException {
-        FileNode primary;
+    //-- main methods
 
-        primary = storages.get(0);
-        if (!primary.exists()) {
-            return new ArrayList<>();
+    public Archive tryOpen(Project project) {
+        try {
+            return open(project, -1, null);
+        } catch (IOException e) {
+            return null;
         }
-        return primary.find("*/*.LOCK");
     }
+
+    public Archive open(Project project, int timeout, Log log) throws IOException {
+        Archive archive;
+
+        archive = new Archive(directories(project));
+        archive.open(timeout, log);
+        return archive;
+    }
+
+    //--
 
     public Set<Project> list(Log log) throws IOException {
         int level;
@@ -69,6 +78,19 @@ public class Storages {
         return result;
     }
 
+    public List<Node> locks() throws IOException {
+        FileNode primary;
+
+        primary = storages.get(0);
+        if (!primary.exists()) {
+            return new ArrayList<>();
+        }
+        return primary.find("*/*.LOCK");
+    }
+
+    public int levels() {
+        return storages.size();
+    }
 
     public int findLevel(Node prerelease) {
         for (int level = 0; level < storages.size(); level++) {
@@ -79,27 +101,11 @@ public class Storages {
         throw new IllegalStateException(prerelease.toString());
     }
 
-    public Archive tryOpen(Project project) {
-        try {
-            return open(project, -1, null);
-        } catch (IOException e) {
-            return null;
-        }
+    public FileNode directory(Project project, int level) {
+        return storages.get(level).join(project.groupId, project.artifactId, Descriptor.releaseVersion(project.version));
     }
 
-    public Archive open(Project project, int timeout, Log log) throws IOException {
-        Archive archive;
-
-        archive = new Archive(directories(project));
-        archive.open(timeout, log);
-        return archive;
-    }
-
-    public int levels() {
-        return storages.size();
-    }
-
-    public List<FileNode> directories(Project project) {
+    private List<FileNode> directories(Project project) {
         List<FileNode> directories;
 
         directories = new ArrayList<>(storages.size());
@@ -107,9 +113,5 @@ public class Storages {
             directories.add(directory(project, i));
         }
         return directories;
-    }
-
-    public FileNode directory(Project project, int level) {
-        return storages.get(level).join(project.groupId, project.artifactId, Descriptor.releaseVersion(project.version));
     }
 }

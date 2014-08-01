@@ -56,7 +56,7 @@ public class Create extends ProjectBase {
         if (target.exists()) {
             throw new MojoExecutionException("prerelease already exists: " + workingCopy.revision());
         }
-        descriptor = checkedDescriptor(workingCopy);
+        descriptor = descriptorForWorkingcopy(workingCopy);
         maven = maven();
         prerelease = Prerelease.create(maven, propertyArgs(), getLog(), descriptor, target);
         if (snapshots) {

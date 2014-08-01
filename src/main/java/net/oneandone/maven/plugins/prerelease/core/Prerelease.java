@@ -194,21 +194,23 @@ public class Prerelease {
         // TODO: check that the workspace is without modifications
     }
 
-    public void check(Log log, Map<String, String> propertyArgs, Maven maven) throws Exception {
+    public void check(Log log, Map<String, String> propertyArgs, Maven maven, boolean allowSnapshots, boolean allowPrereleaseSnapshots) throws Exception {
         log.info("prerelease checks for " + descriptor.project);
+        descriptor.check(maven.getLocalRepositoryDir().getWorld(), maven.loadPom(checkout.join("pom.xml")), allowSnapshots, allowPrereleaseSnapshots);
         maven.build(checkout, descriptor.releaseProps(propertyArgs), FilteringMojoExecutor.CHECK, descriptor.prereleaseRepository, "install");
     }
 
     //-- promote
 
-    public void promote(Log log, Map<String, String> propertyArgs, String createTagMessage, String revertTagMessage, String nextIterationMessage, Maven maven) throws Exception {
+    public void promote(Log log, Map<String, String> propertyArgs, String createTagMessage, String revertTagMessage, String nextIterationMessage,
+                        Maven maven, boolean allowSnapshots, boolean allowPrereleaseSnapshots) throws Exception {
         FileNode origCommit;
 
         for (Prerelease prerelease : descriptor.prereleaseRepository.nested()) {
             // TODO: same message for all releases?
-            prerelease.promote(log, propertyArgs, createTagMessage, revertTagMessage, nextIterationMessage, maven);
+            prerelease.promote(log, propertyArgs, createTagMessage, revertTagMessage, nextIterationMessage, maven, allowSnapshots, allowPrereleaseSnapshots);
         }
-        check(log, propertyArgs, maven);
+        check(log, propertyArgs, maven, allowSnapshots, allowPrereleaseSnapshots);
         log.info("promoting revision " + descriptor.revision + " to " + descriptor.project);
         origCommit = prepareOrigCommit(log);
         try {
