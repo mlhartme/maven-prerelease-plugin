@@ -22,7 +22,6 @@ import org.w3c.dom.Element;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -35,7 +34,7 @@ public class PrereleaseRepository implements WorkspaceReader {
         String version;
         long revision;
 
-        result = new PrereleaseRepository(storages);
+        result = new PrereleaseRepository();
         for (String entry : Separator.COMMA.split(line)) {
             parts = entry.split(":");
             if (parts.length != 3) {
@@ -57,7 +56,7 @@ public class PrereleaseRepository implements WorkspaceReader {
 
         // TODO: expensive
         // TODO: handle multiple revisions
-        result = new PrereleaseRepository(storages);
+        result = new PrereleaseRepository();
         for (Dependency dependency : mavenProject.getDependencies()) {
             if (Descriptor.isSnapshot(dependency.getVersion())) {
                 try (Archive archive = storages.open(new Project(dependency.getGroupId(), dependency.getArtifactId(), dependency.getVersion()), 1 /* TODO */, null)) {
@@ -72,17 +71,15 @@ public class PrereleaseRepository implements WorkspaceReader {
 
     //--
 
-    // TODO: really hold this here?
-    private final Storages storages;
-
-    private final Map<Artifact, Long> files;
+    private final List<Prerelease> prereleases;
+    private final List<Artifact> artifacts;
 
     private final WorkspaceRepository repository;
 
-    public PrereleaseRepository(Storages storages) {
-        this.storages = storages;
+    public PrereleaseRepository() {
         this.repository = new WorkspaceRepository("prereleases");
-        this.files = new HashMap<>();
+        this.prereleases = new ArrayList<>();
+        this.artifacts = new ArrayList<>();
     }
 
     public void add(Prerelease prerelease) throws IOException {
@@ -90,13 +87,14 @@ public class PrereleaseRepository implements WorkspaceReader {
         String[] tmp;
         Artifact artifact;
 
+        prereleases.add(prerelease);
         for (Map.Entry<FileNode, String[]> entry : prerelease.artifactFiles().entrySet()) {
             file = entry.getKey();
             tmp = entry.getValue();
             artifact = new DefaultArtifact(prerelease.descriptor.project.groupId, prerelease.descriptor.project.artifactId,
                     tmp[0], tmp[1], prerelease.descriptor.project.version);
             artifact = artifact.setFile(file.toPath().toFile());
-            files.put(artifact, prerelease.descriptor.revision);
+            artifacts.add(artifact);
         }
     }
 
@@ -114,7 +112,7 @@ public class PrereleaseRepository implements WorkspaceReader {
     }
 
     public Artifact lookup(String groupId, String artifactId, String version) {
-        for (Artifact candidate : files.keySet()) {
+        for (Artifact candidate : artifacts) {
             // TODO
             if (candidate.getGroupId().equals(groupId) && candidate.getArtifactId().equals(artifactId) && (version == null || candidate.getVersion().equals(version))) {
                 return candidate;
@@ -128,7 +126,7 @@ public class PrereleaseRepository implements WorkspaceReader {
         List<String> result;
 
         result = new ArrayList<>();
-        for (Artifact candidate : files.keySet()) {
+        for (Artifact candidate : artifacts) {
             if (candidate.getGroupId().equals(artifact.getGroupId()) && candidate.getArtifactId().equals(artifact.getArtifactId())) {
                 result.add(candidate.getVersion());
             }
@@ -140,17 +138,17 @@ public class PrereleaseRepository implements WorkspaceReader {
         StringBuilder builder;
 
         builder = new StringBuilder();
-        for (Map.Entry<Artifact, Long> entry : files.entrySet()) {
+        for (Prerelease prerelease : prereleases) {
             if (builder.length() > 0) {
                 builder.append(',');
             }
-            builder.append(entry.getKey().getGroupId());
+            builder.append(prerelease.descriptor.project.groupId);
             builder.append(':');
-            builder.append(entry.getKey().getArtifactId());
+            builder.append(prerelease.descriptor.project.artifactId);
             builder.append(':');
-            builder.append(entry.getKey().getVersion());
+            builder.append(prerelease.descriptor.project.version);
             builder.append(':');
-            builder.append(entry.getValue());
+            builder.append(prerelease.descriptor.revision);
         }
         return builder.toString();
     }
@@ -177,19 +175,6 @@ public class PrereleaseRepository implements WorkspaceReader {
     }
 
     public List<Prerelease> nested() throws IOException {
-        List<Prerelease> result;
-        Artifact artifact;
-        Target target;
-
-        result = new ArrayList<>();
-        for (Map.Entry<Artifact, Long> entry : files.entrySet()) {
-            artifact = entry.getKey();
-            // TODO: projects vs artifacts
-            try (Archive archive = storages.open(new Project(artifact.getGroupId(), artifact.getArtifactId(), artifact.getVersion()), 1, null)) {
-                target = archive.target(entry.getValue());
-                result.add(target.loadOpt(storages));
-            }
-        }
-        return result;
+        return prereleases;
     }
 }
