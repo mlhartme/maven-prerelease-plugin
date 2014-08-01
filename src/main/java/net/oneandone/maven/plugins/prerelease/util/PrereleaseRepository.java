@@ -35,7 +35,7 @@ public class PrereleaseRepository implements WorkspaceReader {
         String version;
         long revision;
 
-        result = new PrereleaseRepository();
+        result = new PrereleaseRepository(storages);
         for (String entry : Separator.COMMA.split(line)) {
             parts = entry.split(":");
             if (parts.length != 3) {
@@ -57,7 +57,7 @@ public class PrereleaseRepository implements WorkspaceReader {
 
         // TODO: expensive
         // TODO: handle multiple revisions
-        result = new PrereleaseRepository();
+        result = new PrereleaseRepository(storages);
         for (Dependency dependency : mavenProject.getDependencies()) {
             if (Descriptor.isSnapshot(dependency.getVersion())) {
                 try (Archive archive = storages.open(new Project(dependency.getGroupId(), dependency.getArtifactId(), dependency.getVersion()), 1 /* TODO */, null)) {
@@ -72,13 +72,17 @@ public class PrereleaseRepository implements WorkspaceReader {
 
     //--
 
-    private Map<Artifact, Long> files;
+    // TODO: really hold this here?
+    private final Storages storages;
+
+    private final Map<Artifact, Long> files;
 
     private final WorkspaceRepository repository;
 
-    public PrereleaseRepository() {
-        repository = new WorkspaceRepository("prereleases");
-        files = new HashMap<>();
+    public PrereleaseRepository(Storages storages) {
+        this.storages = storages;
+        this.repository = new WorkspaceRepository("prereleases");
+        this.files = new HashMap<>();
     }
 
     public void add(Prerelease prerelease) throws IOException {
@@ -172,7 +176,20 @@ public class PrereleaseRepository implements WorkspaceReader {
         }
     }
 
-    public Prerelease[] nested() {
-        return new Prerelease[0]; // TODO
+    public List<Prerelease> nested() throws IOException {
+        List<Prerelease> result;
+        Artifact artifact;
+        Target target;
+
+        result = new ArrayList<>();
+        for (Map.Entry<Artifact, Long> entry : files.entrySet()) {
+            artifact = entry.getKey();
+            // TODO: projects vs artifacts
+            try (Archive archive = storages.open(new Project(artifact.getGroupId(), artifact.getArtifactId(), artifact.getVersion()), 1, null)) {
+                target = archive.target(entry.getValue());
+                result.add(target.loadOpt(storages));
+            }
+        }
+        return result;
     }
 }
