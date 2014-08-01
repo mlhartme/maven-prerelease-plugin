@@ -22,7 +22,7 @@ import net.oneandone.maven.plugins.prerelease.util.Maven;
 import org.apache.maven.plugins.annotations.Mojo;
 
 /**
- * Updates and promotes a prerelease. Convenience goal.
+ * Updates and promotes a prerelease. Convenience goal to build a release in one call.
  */
 @Mojo(name = "update-promote")
 public class UpdatePromote extends Promote {
