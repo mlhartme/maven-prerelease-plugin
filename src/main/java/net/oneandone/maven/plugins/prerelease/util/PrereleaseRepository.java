@@ -30,6 +30,7 @@ public class PrereleaseRepository implements WorkspaceReader {
         String[] parts;
         String groupId;
         String artifactId;
+        String version;
         long revision;
 
         result = new PrereleaseRepository();
@@ -40,8 +41,9 @@ public class PrereleaseRepository implements WorkspaceReader {
             }
             groupId = parts[0];
             artifactId = parts[1];
-            revision = Long.parseLong(parts[2]);
-            try (Archive archive = Archive.open(Archive.directories(storages, groupId, artifactId), 1 /* TODO */, null)) {
+            version = parts[2];
+            revision = Long.parseLong(parts[3]);
+            try (Archive archive = Archive.open(Archive.directories(storages, groupId, artifactId, version), 1 /* TODO */, null)) {
                 result.add(Prerelease.load(archive.target(revision), storages));
             }
         }
@@ -56,7 +58,7 @@ public class PrereleaseRepository implements WorkspaceReader {
         result = new PrereleaseRepository();
         for (Dependency dependency : mavenProject.getDependencies()) {
             if (Descriptor.isSnapshot(dependency.getVersion())) {
-                try (Archive archive = Archive.open(Archive.directories(storages, dependency.getGroupId(), dependency.getArtifactId()), 1 /* TODO */, null)) {
+                try (Archive archive = Archive.open(Archive.directories(storages, dependency.getGroupId(), dependency.getArtifactId(), dependency.getVersion()), 1 /* TODO */, null)) {
                     for (Map.Entry<Long, FileNode> foo : archive.list().entrySet()) {
                         result.add(Prerelease.load(new Target(foo.getValue(), foo.getKey()), storages));
                     }
@@ -139,6 +141,8 @@ public class PrereleaseRepository implements WorkspaceReader {
             builder.append(entry.getKey().getGroupId());
             builder.append(':');
             builder.append(entry.getKey().getArtifactId());
+            builder.append(':');
+            builder.append(entry.getKey().getVersion());
             builder.append(':');
             builder.append(entry.getValue());
         }

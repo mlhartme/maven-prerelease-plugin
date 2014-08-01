@@ -35,23 +35,23 @@ import java.util.List;
 import java.util.TreeMap;
 
 /**
- * The archive stores prereleases for one given groupId/artifactId.
+ * The archive holds all prereleases for one given groupId/artifactId/version.
  *  Prerelease directories have the svn revision number as their directory name; it may be a symlink to an arbitrary location
  */
 //
-// primaryStorage             <- defaults to ~/.m2/prereleases
-//   groupId/artifactId.LOCK  <- optional, indicates that a process operates on this archive
-//   groupId/artifactId/      <- archive directory
-//    |- revision1           <- prerelease directory, ready to promote; promoting the prerelease removes this directory
+// primaryStorage                     <- defaults to ~/.m2/prereleases
+//   groupId/artifactId/version.LOCK  <- optional, indicates that a process operates on this archive
+//   groupId/artifactId/version/      <- archive directory; version is always without '-SNAPSHOT' suffix
+//    |- revision1                    <- prerelease directory, ready to promote; promoting the prerelease removes this directory
 //    |     |- tags
 //    |     |    - <tagname>
 //    |     |- artifacts
 //    |      - prerelease.properties
 //    |- revision2
 //    :
-//    |- REMOVE              <- a renamed prerelease directory
-//    :     :                   optional - only when the last create call failed (because the mvn call failed) or promote succeeded
-//    :     |- CAUSE         <- why this directory is to be removed
+//    |- REMOVE                       <- a renamed prerelease directory
+//    :     :                            optional - only when the last create call failed (because the mvn call failed) or promote succeeded
+//    :     |- CAUSE                  <- why this directory is to be removed
 //    :     :
 // secondaryStorage
 //    :
@@ -59,16 +59,16 @@ import java.util.TreeMap;
 //    :
 public class Archive implements AutoCloseable {
     public static List<FileNode> directories(List<FileNode> storages, MavenProject project) {
-        return directories(storages, project.getGroupId(), project.getArtifactId());
+        return directories(storages, project.getGroupId(), project.getArtifactId(), project.getVersion());
 
     }
 
-    public static List<FileNode> directories(List<FileNode> storages, String groupId, String artifactId) {
+    public static List<FileNode> directories(List<FileNode> storages, String groupId, String artifactId, String version) {
         List<FileNode> directories;
 
         directories = new ArrayList<>(storages.size());
         for (FileNode storage : storages) {
-            directories.add(storage.join(groupId, artifactId));
+            directories.add(storage.join(groupId, artifactId, Descriptor.releaseVersion(version)));
         }
         return directories;
     }
