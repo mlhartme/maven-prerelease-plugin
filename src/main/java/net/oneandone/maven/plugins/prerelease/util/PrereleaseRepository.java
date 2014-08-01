@@ -61,8 +61,8 @@ public class PrereleaseRepository implements WorkspaceReader {
         for (Dependency dependency : mavenProject.getDependencies()) {
             if (Descriptor.isSnapshot(dependency.getVersion())) {
                 try (Archive archive = storages.open(new Project(dependency.getGroupId(), dependency.getArtifactId(), dependency.getVersion()), 1 /* TODO */, null)) {
-                    for (Map.Entry<Long, FileNode> foo : archive.list().entrySet()) {
-                        result.add(Prerelease.load(new Target(foo.getValue(), foo.getKey()), storages));
+                    for (Target target : archive.list()) {
+                        result.add(Prerelease.load(target, storages));
                     }
                 }
             }

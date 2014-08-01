@@ -16,6 +16,7 @@
 package net.oneandone.maven.plugins.prerelease;
 
 import net.oneandone.maven.plugins.prerelease.core.Archive;
+import net.oneandone.maven.plugins.prerelease.core.Target;
 import net.oneandone.maven.plugins.prerelease.core.WorkingCopy;
 import net.oneandone.sushi.fs.file.FileNode;
 import org.apache.maven.plugins.annotations.Mojo;
@@ -27,13 +28,13 @@ import org.apache.maven.plugins.annotations.Mojo;
 public class Lst extends ProjectBase {
     @Override
     public void doExecute(Archive archive) throws Exception {
-        String revision;
+        long revision;
         String name;
 
-        revision = Long.toString(WorkingCopy.load(basedir()).revision());
-        for (FileNode prerelease : archive.list().values()) {
-            name = prerelease.getName();
-            if (name.equals(revision)) {
+        revision = WorkingCopy.load(basedir()).revision();
+        for (Target target : archive.list()) {
+            name = Long.toString(target.getRevision());
+            if (target.getRevision() == revision) {
                 name = name + " <- CURRENT";
             }
             getLog().info(name);

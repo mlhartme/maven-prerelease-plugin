@@ -24,7 +24,6 @@ import net.oneandone.sushi.fs.OnShutdown;
 import net.oneandone.sushi.fs.file.FileNode;
 import net.oneandone.sushi.xml.XmlException;
 import org.apache.maven.plugin.logging.Log;
-import org.apache.maven.project.MavenProject;
 import org.xml.sax.SAXException;
 
 import java.io.IOException;
@@ -32,7 +31,6 @@ import java.lang.management.ManagementFactory;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import java.util.TreeMap;
 
 /**
  * The archive holds all prereleases for one given groupId/artifactId/version.
@@ -84,17 +82,17 @@ public class Archive implements AutoCloseable {
     }
 
     /** @return maps revisions to prerelease directories */
-    public TreeMap<Long, FileNode> list() throws ListException, DirectoryNotFoundException {
-        TreeMap<Long, FileNode> result;
+    public List<Target> list() throws ListException, DirectoryNotFoundException {
+        List<Target> result;
         long revision;
 
-        result = new TreeMap<>();
+        result = new ArrayList<>();
         for (FileNode directory : directories) {
             if (directory.exists()) {
                 for (FileNode prerelease : directory.list()) {
                     if (!prerelease.getName().equals(Target.REMOVE)) {
                         revision = Long.parseLong(prerelease.getName());
-                        result.put(revision, prerelease);
+                        result.add(new Target(prerelease, revision));
                     }
                 }
             }
@@ -103,7 +101,10 @@ public class Archive implements AutoCloseable {
     }
 
     public long latest() throws ListException, DirectoryNotFoundException {
-        return list().lastKey();
+        List<Target> targets;
+
+        targets = list();
+        return targets.get(targets.size() - 1).getRevision();
     }
 
     //--
@@ -221,7 +222,7 @@ public class Archive implements AutoCloseable {
      * @param keep number of prereleases after this method
      */
     public void wipe(int keep) throws IOException {
-        TreeMap<Long, FileNode> prereleases;
+        List<Target> prereleases;
         FileNode d;
 
         if (keep < 1) {
@@ -235,7 +236,7 @@ public class Archive implements AutoCloseable {
         }
         prereleases = list();
         while (prereleases.size() > keep) {
-            prereleases.remove(prereleases.firstKey()).deleteTree();
+            prereleases.remove(0).join().deleteTree();
         }
     }
 }

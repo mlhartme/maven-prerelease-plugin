@@ -18,6 +18,7 @@ package net.oneandone.maven.plugins.prerelease;
 import net.oneandone.maven.plugins.prerelease.core.Archive;
 import net.oneandone.maven.plugins.prerelease.core.Project;
 import net.oneandone.maven.plugins.prerelease.core.Storages;
+import net.oneandone.maven.plugins.prerelease.core.Target;
 import net.oneandone.sushi.fs.file.FileNode;
 import org.apache.maven.plugins.annotations.Mojo;
 
@@ -37,6 +38,7 @@ public class Swap extends Base {
         FileNode dest;
         int count;
         int level;
+        FileNode src;
 
         count = 0;
         storages = storages();
@@ -50,7 +52,8 @@ public class Swap extends Base {
             }
             try {
                 archive.wipe(keep);
-                for (FileNode src : archive.list().values()) {
+                for (Target target : archive.list()) {
+                    src = target.join();
                     level = storages.findLevel(src);
                     getLog().debug(src + ": level " + level);
                     level++;
