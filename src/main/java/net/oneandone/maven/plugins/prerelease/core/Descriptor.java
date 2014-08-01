@@ -37,7 +37,7 @@ import java.util.Properties;
 
 /** Basically the prerelease.properties. Metadata about a prerelease. */
 public class Descriptor {
-    private static final String PRERELEASE = "prerelease";
+    private static final String PRERELEASE_VERSION = "prereleaseVersion";
     private static final String SVN_ORIG = "svn.orig";
     private static final String SVN_TAG = "svn.tag";
     private static final String PROJECT_GROUP_ID = "project.groupId";
@@ -57,7 +57,7 @@ public class Descriptor {
         properties = new Properties();
         src = file(target).createInputStream();
         properties.load(src);
-        return new Descriptor(get(properties, PRERELEASE), target.getRevision(), get(properties, SVN_ORIG), get(properties, SVN_TAG),
+        return new Descriptor(get(properties, PRERELEASE_VERSION), target.getRevision(), get(properties, SVN_ORIG), get(properties, SVN_TAG),
                 new Project(get(properties, PROJECT_GROUP_ID), get(properties, PROJECT_ARTIFACT_ID), get(properties, PROJECT_VERSION)),
                 get(properties, DEPLOY_REPOSITORY), "true".equals(get(properties, DEPLOY_PLUGIN_METADATA)),
                 get(properties, PREVIOUS), get(properties, NEXT),
@@ -166,7 +166,7 @@ public class Descriptor {
         OutputStream dest;
 
         properties = new Properties();
-        properties.setProperty(PRERELEASE, prereleaseVersion);
+        properties.setProperty(PRERELEASE_VERSION, prereleaseVersion);
         properties.setProperty(SVN_ORIG, svnOrig);
         properties.setProperty(SVN_TAG, svnTag);
         properties.setProperty(DEPLOY_REPOSITORY, deployRepository);

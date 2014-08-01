@@ -14,6 +14,9 @@
         Check for release versions, existing tags etc (descriptor check) moved into check goal.
         Update no longer warns about check failures at the end.
       </action>
+      <action date="2014-08-01" dev="mlhartme" type="update">
+        Renamed prerelease to prereleaseVersion in prerelease.properties.
+      </action>
     </release>
     <release date="2014-05-07" version="1.6.4">
       <action date="2014-05-05" dev="mlhartme" type="fix">
