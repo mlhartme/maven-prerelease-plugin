@@ -36,7 +36,7 @@ public class DescriptorIT extends IntegrationBase {
         FileNode tmp;
 
         tmp = world.getTemp().createTempDirectory();
-        return Descriptor.create(prerelease, mavenProject, revision, Collections.singletonList(tmp)).check(world, mavenProject, allowSnapshots, allowPrereleaseSnapshots);
+        return Descriptor.create(prerelease, mavenProject, revision, new Storages(Collections.singletonList(tmp))).check(world, mavenProject, allowSnapshots, allowPrereleaseSnapshots);
     }
 
     @Test

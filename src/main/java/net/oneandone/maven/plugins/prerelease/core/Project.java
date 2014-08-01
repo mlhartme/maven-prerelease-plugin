@@ -24,6 +24,10 @@ public class Project {
     public final String artifactId;
     public final String version;
 
+    public static Project forMavenProject(MavenProject project) {
+        return forMavenProject(project, project.getVersion());
+    }
+
     public static Project forMavenProject(MavenProject project, String version) {
         return new Project(project.getGroupId(), project.getArtifactId(), version);
     }
@@ -40,5 +44,27 @@ public class Project {
 
     public String toString() {
         return groupId + ":" + artifactId + ":" + version;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        Project project;
+
+        if (obj instanceof Project) {
+            project = (Project) obj;
+            return (artifactId.equals(project.artifactId) && groupId.equals(project.groupId) && version.equals(project.version));
+        } else {
+            return false;
+        }
+    }
+
+    @Override
+    public int hashCode() {
+        int result;
+
+        result = groupId.hashCode();
+        result = 31 * result + artifactId.hashCode();
+        result = 31 * result + version.hashCode();
+        return result;
     }
 }

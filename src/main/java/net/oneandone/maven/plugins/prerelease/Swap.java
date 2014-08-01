@@ -16,13 +16,11 @@
 package net.oneandone.maven.plugins.prerelease;
 
 import net.oneandone.maven.plugins.prerelease.core.Archive;
-import net.oneandone.sushi.fs.Node;
+import net.oneandone.maven.plugins.prerelease.core.Project;
+import net.oneandone.maven.plugins.prerelease.core.Storages;
 import net.oneandone.sushi.fs.file.FileNode;
 import org.apache.maven.plugins.annotations.Mojo;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
 /**
@@ -33,45 +31,33 @@ import java.util.Set;
 public class Swap extends Base {
     @Override
     public void doExecute() throws Exception {
-        Set<String> relatives;
-        List<FileNode> storages;
-        List<Node> archives;
+        Set<Project> projects;
+        Storages storages;
         Archive archive;
         FileNode dest;
-        FileNode storage;
         int count;
         int level;
 
         count = 0;
         storages = storages();
-        relatives = new HashSet<>();
-        for (level = 0; level < storages.size(); level++) {
-            storage = storages.get(level);
-            getLog().info("storage " + (level + 1) + ": " + storage.getAbsolute());
-            archives = storage.find("*/*");
-            for (Node candidate : archives) {
-                if (!candidate.isDirectory()) {
-                    continue;
-                }
-                relatives.add(candidate.getRelative(storage));
-            }
-        }
-        getLog().info("archives found: " + relatives.size());
-        for (String relative : relatives) {
-            archive = Archive.tryOpen(directories(storages, relative));
+        projects = storages.list(getLog());
+        getLog().info("archives found: " + projects.size());
+        for (Project project : projects) {
+            archive = storages.tryOpen(project);
             if (archive == null) {
-                getLog().info("skipped because it is locked: " + relative);
+                getLog().info("skipped because it is locked: " + project);
                 continue;
             }
             try {
                 archive.wipe(keep);
                 for (FileNode src : archive.list().values()) {
-                    level = findLevel(storages, src);
+                    level = storages.findLevel(src);
                     getLog().debug(src + ": level " + level);
-                    if (level == storages.size() - 1) {
+                    level++;
+                    if (level >= storages.levels()) {
                         getLog().debug("already in final storage: " + src);
                     } else {
-                        dest = storages.get(level + 1).join(relative, src.getName());
+                        dest = storages.directory(project, level);
                         dest.getParent().mkdirsOpt();
                         src.move(dest);
                         getLog().info("swapped " + src.getAbsolute() + " -> " + dest.getAbsolute());
@@ -83,24 +69,5 @@ public class Swap extends Base {
             }
         }
         getLog().info(count + " archives swapped.");
-    }
-
-    private static int findLevel(List<FileNode> storages, Node prerelease) {
-        for (int level = 0; level < storages.size(); level++) {
-            if (prerelease.hasAnchestor(storages.get(level))) {
-                return level;
-            }
-        }
-        throw new IllegalStateException(prerelease.toString());
-    }
-
-    private static List<FileNode> directories(List<FileNode> storages, String relative) {
-        List<FileNode> result;
-
-        result = new ArrayList<>();
-        for (FileNode storage : storages) {
-            result.add(storage.join(relative));
-        }
-        return result;
     }
 }

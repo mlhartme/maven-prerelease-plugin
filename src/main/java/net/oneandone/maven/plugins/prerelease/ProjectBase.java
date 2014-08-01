@@ -17,6 +17,8 @@ package net.oneandone.maven.plugins.prerelease;
 
 import net.oneandone.maven.plugins.prerelease.core.Archive;
 import net.oneandone.maven.plugins.prerelease.core.Descriptor;
+import net.oneandone.maven.plugins.prerelease.core.Project;
+import net.oneandone.maven.plugins.prerelease.core.Storages;
 import net.oneandone.maven.plugins.prerelease.core.Target;
 import net.oneandone.maven.plugins.prerelease.core.WorkingCopy;
 import net.oneandone.sushi.fs.file.FileNode;
@@ -54,7 +56,10 @@ public abstract class ProjectBase extends Base {
 
     @Override
     public void doExecute() throws Exception {
-        try (Archive archive = Archive.open(Archive.directories(storages(), project), lockTimeout, getLog())) {
+        Storages storages;
+
+        storages = storages();
+        try (Archive archive = storages.open(Project.forMavenProject(project), lockTimeout, getLog())) {
             try {
                 doExecute(archive);
             } finally {

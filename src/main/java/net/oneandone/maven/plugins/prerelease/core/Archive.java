@@ -36,7 +36,7 @@ import java.util.TreeMap;
 
 /**
  * The archive holds all prereleases for one given groupId/artifactId/version.
- *  Prerelease directories have the svn revision number as their directory name; it may be a symlink to an arbitrary location
+ * Prerelease directories have the svn revision number as their directory name; it may be a symlink to an arbitrary location
  */
 //
 // primaryStorage                     <- defaults to ~/.m2/prereleases
@@ -58,42 +58,11 @@ import java.util.TreeMap;
 // tertiaryStorage
 //    :
 public class Archive implements AutoCloseable {
-    public static List<FileNode> directories(List<FileNode> storages, MavenProject project) {
-        return directories(storages, project.getGroupId(), project.getArtifactId(), project.getVersion());
-
-    }
-
-    public static List<FileNode> directories(List<FileNode> storages, String groupId, String artifactId, String version) {
-        List<FileNode> directories;
-
-        directories = new ArrayList<>(storages.size());
-        for (FileNode storage : storages) {
-            directories.add(storage.join(groupId, artifactId, Descriptor.releaseVersion(version)));
-        }
-        return directories;
-    }
-
-    public static Archive tryOpen(List<FileNode> directories) {
-        try {
-            return open(directories, -1, null);
-        } catch (IOException e) {
-            return null;
-        }
-    }
-
-    public static Archive open(List<FileNode> directories, int timeout, Log log) throws IOException {
-        Archive archive;
-
-        archive = new Archive(directories);
-        archive.open(timeout, log);
-        return archive;
-    }
-
     private final List<FileNode> directories;
     private boolean opened = false;
     private boolean closed = false;
 
-    private Archive(List<FileNode> directories) {
+    public Archive(List<FileNode> directories) {
         if (directories.size() == 0) {
             throw new IllegalArgumentException();
         }
@@ -150,7 +119,7 @@ public class Archive implements AutoCloseable {
      * @param timeout in seconds; -1 to try only once and never wait.
      * @param log may be null
      */
-    private void open(int timeout, Log log) throws IOException {
+    public void open(int timeout, Log log) throws IOException {
         FileNode file;
         int seconds;
 

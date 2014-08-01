@@ -59,7 +59,6 @@ public class Locksmith extends Base {
     @Override
     public void doExecute() throws Exception {
         Map<String, Long> started;
-        FileNode primary;
         String pid;
         Long time;
         int errors;
@@ -67,11 +66,7 @@ public class Locksmith extends Base {
 
         started = startedMap();
         errors = 0;
-        primary = storages().get(0);
-        if (!primary.exists()) {
-            return;
-        }
-        locks = primary.find("*/*.LOCK");
+        locks = storages().locks();
         for (Node file : locks) {
             try {
                 pid = file.readString();

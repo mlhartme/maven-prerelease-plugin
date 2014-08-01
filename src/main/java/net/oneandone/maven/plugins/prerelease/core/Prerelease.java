@@ -43,7 +43,7 @@ import java.util.List;
 import java.util.Map;
 
 public class Prerelease {
-    public static Prerelease load(Target target, List<FileNode> storages) throws IOException {
+    public static Prerelease load(Target target, Storages storages) throws IOException {
         Descriptor descriptor;
         FileNode workingCopy;
 

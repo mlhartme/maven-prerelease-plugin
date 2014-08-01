@@ -3,6 +3,8 @@ package net.oneandone.maven.plugins.prerelease.util;
 import net.oneandone.maven.plugins.prerelease.core.Archive;
 import net.oneandone.maven.plugins.prerelease.core.Descriptor;
 import net.oneandone.maven.plugins.prerelease.core.Prerelease;
+import net.oneandone.maven.plugins.prerelease.core.Project;
+import net.oneandone.maven.plugins.prerelease.core.Storages;
 import net.oneandone.maven.plugins.prerelease.core.Target;
 import net.oneandone.sushi.fs.file.FileNode;
 import net.oneandone.sushi.util.Separator;
@@ -25,7 +27,7 @@ import java.util.List;
 import java.util.Map;
 
 public class PrereleaseRepository implements WorkspaceReader {
-    public static PrereleaseRepository forDescriptor(String line, List<FileNode> storages) throws IOException {
+    public static PrereleaseRepository forDescriptor(String line, Storages storages) throws IOException {
         PrereleaseRepository result;
         String[] parts;
         String groupId;
@@ -43,14 +45,14 @@ public class PrereleaseRepository implements WorkspaceReader {
             artifactId = parts[1];
             version = parts[2];
             revision = Long.parseLong(parts[3]);
-            try (Archive archive = Archive.open(Archive.directories(storages, groupId, artifactId, version), 1 /* TODO */, null)) {
+            try (Archive archive = storages.open(new Project(groupId, artifactId, version), 1 /* TODO */, null)) {
                 result.add(Prerelease.load(archive.target(revision), storages));
             }
         }
         return result;
     }
 
-    public static PrereleaseRepository forProject(MavenProject mavenProject, List<FileNode> storages) throws IOException {
+    public static PrereleaseRepository forProject(MavenProject mavenProject, Storages storages) throws IOException {
         PrereleaseRepository result;
 
         // TODO: expensive
@@ -58,7 +60,7 @@ public class PrereleaseRepository implements WorkspaceReader {
         result = new PrereleaseRepository();
         for (Dependency dependency : mavenProject.getDependencies()) {
             if (Descriptor.isSnapshot(dependency.getVersion())) {
-                try (Archive archive = Archive.open(Archive.directories(storages, dependency.getGroupId(), dependency.getArtifactId(), dependency.getVersion()), 1 /* TODO */, null)) {
+                try (Archive archive = storages.open(new Project(dependency.getGroupId(), dependency.getArtifactId(), dependency.getVersion()), 1 /* TODO */, null)) {
                     for (Map.Entry<Long, FileNode> foo : archive.list().entrySet()) {
                         result.add(Prerelease.load(new Target(foo.getValue(), foo.getKey()), storages));
                     }

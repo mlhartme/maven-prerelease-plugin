@@ -42,7 +42,7 @@ public class Target {
         return directory.exists();
     }
 
-    public Prerelease loadOpt(List<FileNode> storages) throws IOException {
+    public Prerelease loadOpt(Storages storages) throws IOException {
         return exists() ? Prerelease.load(this, storages) : null;
     }
 

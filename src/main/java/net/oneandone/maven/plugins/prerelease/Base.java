@@ -15,6 +15,7 @@
  */
 package net.oneandone.maven.plugins.prerelease;
 
+import net.oneandone.maven.plugins.prerelease.core.Storages;
 import net.oneandone.maven.plugins.prerelease.util.Maven;
 import net.oneandone.sushi.fs.World;
 import net.oneandone.sushi.fs.file.FileNode;
@@ -128,7 +129,7 @@ public abstract class Base extends AbstractMojo {
                 session.getRequest().getExecutionListener(), projectHelper, projectBuilder, remoteRepositories);
     }
 
-    protected List<FileNode> storages() throws IOException {
+    protected Storages storages() throws IOException {
         List<FileNode> result;
 
         if (storages.size() == 0) {
@@ -138,7 +139,7 @@ public abstract class Base extends AbstractMojo {
         for (String s : storages) {
             result.add(world.file(new File(s).getCanonicalFile()));
         }
-        return result;
+        return new Storages(result);
     }
 
     protected String version() {

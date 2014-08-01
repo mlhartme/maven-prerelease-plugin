@@ -50,7 +50,7 @@ public class Descriptor {
     private static final String DEPLOY_PROPERTIES = "deployProperties.";
     private static final String PRERELEASE_REPOSITORY = "prereleaseRepository";
 
-    public static Descriptor load(Target target, List<FileNode> storages) throws IOException {
+    public static Descriptor load(Target target, Storages storages) throws IOException {
         Properties properties;
         InputStream src;
 
@@ -65,7 +65,7 @@ public class Descriptor {
                 PrereleaseRepository.forDescriptor(get(properties, PRERELEASE_REPOSITORY), storages));
     }
 
-    public static Descriptor create(String prerelease, MavenProject mavenProject, long revision, List<FileNode> storages)
+    public static Descriptor create(String prerelease, MavenProject mavenProject, long revision, Storages storages)
             throws MissingScmTag, MissingDeveloperConnection, CannotBumpVersion, CannotDeterminTagBase, IOException {
         Project project;
         String svnOrig;

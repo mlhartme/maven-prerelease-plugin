@@ -17,10 +17,10 @@ package net.oneandone.maven.plugins.prerelease.core;
 
 import net.oneandone.maven.plugins.prerelease.util.IntegrationBase;
 import net.oneandone.sushi.fs.MkfileException;
-import net.oneandone.sushi.fs.file.FileNode;
 import org.apache.maven.plugin.logging.Log;
 import org.junit.Test;
 
+import java.io.IOException;
 import java.util.Collections;
 
 import static org.junit.Assert.fail;
@@ -28,12 +28,14 @@ import static org.junit.Assert.fail;
 public class ArchiveIT extends IntegrationBase {
     @Test
     public void recoverFromOOM() throws Exception {
-        FileNode tmp;
+        Storages storages;
         long[] toomuch;
+        Project project;
 
-        tmp = WORLD.getTemp().createTempDirectory();
+        storages = testStorages();
+        project = testProject();
         try{
-            try (Archive archive = Archive.open(Collections.singletonList(tmp), 1, nullLog())) {
+            try (Archive archive = storages.open(project, 1, nullLog())) {
                 toomuch = new long[Integer.MAX_VALUE];
                 toomuch[0] = 0;
             }
@@ -42,17 +44,19 @@ public class ArchiveIT extends IntegrationBase {
             // ok
         }
         // make sure the lock was removed
-        Archive.open(Collections.singletonList(tmp), 1, nullLog()).close();
+        storages.open(project, 1, nullLog()).close();
     }
 
     @Test
     public void lock2Thread() throws Exception {
-        final FileNode tmp;
+        final Storages storages;
+        final Project project;
         final Archive archive;
         final Archive archive2;
 
-        tmp = WORLD.getTemp().createTempDirectory();
-        archive = Archive.open(Collections.singletonList(tmp), 5, nullLog());
+        storages = testStorages();
+        project = testProject();
+        archive = storages.open(project, 5, nullLog());
         new Thread() {
             public void run() {
                 try {
@@ -63,19 +67,21 @@ public class ArchiveIT extends IntegrationBase {
                 }
             }
         }.start();
-        archive2 = Archive.open(Collections.singletonList(tmp), 10, systemOutLog());
+        archive2 = storages.open(project, 10, systemOutLog());
         archive2.close();
     }
 
     @Test
     public void lockTimeout() throws Exception {
-        final FileNode tmp;
+        final Storages storages;
+        final Project project;
         final Archive archive;
 
-        tmp = WORLD.getTemp().createTempDirectory();
-        archive = Archive.open(Collections.singletonList(tmp), 5, nullLog());
+        storages = testStorages();
+        project = testProject();
+        archive = storages.open(project, 5, nullLog());
         try {
-            try (Archive archive2 = Archive.open(Collections.singletonList(tmp), 1, nullLog())) {
+            try (Archive archive2 = storages.open(project, 1, nullLog())) {
                 // empty - exception expected
             }
             fail();
@@ -229,5 +235,13 @@ public class ArchiveIT extends IntegrationBase {
             public void error(Throwable throwable) {
             }
         };
+    }
+
+    private Storages testStorages() throws IOException {
+        return new Storages(Collections.singletonList(WORLD.getTemp().createTempDirectory()));
+    }
+
+    private Project testProject() {
+        return new Project("foo", "bar", "1-SNAPSHOT");
     }
 }
