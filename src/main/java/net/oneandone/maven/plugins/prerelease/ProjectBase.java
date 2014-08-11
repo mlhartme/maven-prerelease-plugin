@@ -18,7 +18,6 @@ package net.oneandone.maven.plugins.prerelease;
 import net.oneandone.maven.plugins.prerelease.core.Archive;
 import net.oneandone.maven.plugins.prerelease.core.Descriptor;
 import net.oneandone.maven.plugins.prerelease.core.Prerelease;
-import net.oneandone.maven.plugins.prerelease.core.Project;
 import net.oneandone.maven.plugins.prerelease.core.Storages;
 import net.oneandone.maven.plugins.prerelease.core.Target;
 import net.oneandone.maven.plugins.prerelease.core.WorkingCopy;
@@ -64,9 +63,11 @@ public abstract class ProjectBase extends Base {
     @Override
     public void doExecute() throws Exception {
         Storages storages;
+        Archive archive;
 
         storages = storages();
-        try (Archive archive = storages.open(Project.forMavenProject(project), lockTimeout, getLog())) {
+        archive = storages.open(project, lockTimeout, getLog());
+        try {
             try {
                 doExecute(archive);
             } finally {
@@ -89,6 +90,8 @@ public abstract class ProjectBase extends Base {
             } else {
                 throw e;
             }
+        } finally {
+            storages.close();
         }
     }
 

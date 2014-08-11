@@ -20,6 +20,7 @@ import net.oneandone.maven.plugins.prerelease.core.Prerelease;
 import net.oneandone.maven.plugins.prerelease.core.WorkingCopy;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugins.annotations.Mojo;
+import org.apache.maven.plugins.annotations.ResolutionScope;
 
 /**
  * Runs the prerelease checks and several built-in checks:
@@ -27,7 +28,7 @@ import org.apache.maven.plugins.annotations.Mojo;
  * 1) no snapshot dependencies or snapshot parent pom.
  * 2) not tagged yet
  */
-@Mojo(name = "check")
+@Mojo(name = "check", requiresDependencyResolution = ResolutionScope.TEST, requiresDependencyCollection = ResolutionScope.TEST)
 public class Check extends ProjectBase {
     public void doExecute(Archive archive) throws Exception {
         WorkingCopy workingCopy;

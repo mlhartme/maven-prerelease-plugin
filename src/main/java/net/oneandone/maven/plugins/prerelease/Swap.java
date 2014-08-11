@@ -22,6 +22,7 @@ import net.oneandone.maven.plugins.prerelease.core.Target;
 import net.oneandone.sushi.fs.file.FileNode;
 import org.apache.maven.plugins.annotations.Mojo;
 
+import java.io.IOException;
 import java.util.Set;
 
 /**
@@ -45,8 +46,10 @@ public class Swap extends Base {
         projects = storages.list(getLog());
         getLog().info("archives found: " + projects.size());
         for (Project project : projects) {
-            archive = storages.tryOpen(project);
-            if (archive == null) {
+            archive = new Archive(project, storages.directories(project));
+            try {
+                archive.open(-1, null);
+            } catch (IOException e) {
                 getLog().info("skipped because it is locked: " + project);
                 continue;
             }

@@ -20,11 +20,12 @@ import net.oneandone.maven.plugins.prerelease.core.Target;
 import net.oneandone.maven.plugins.prerelease.core.WorkingCopy;
 import net.oneandone.sushi.fs.file.FileNode;
 import org.apache.maven.plugins.annotations.Mojo;
+import org.apache.maven.plugins.annotations.ResolutionScope;
 
 /**
  * Lists available prepreleases and display up-to-date information.
  */
-@Mojo(name = "list")
+@Mojo(name = "list", requiresDependencyResolution = ResolutionScope.TEST, requiresDependencyCollection = ResolutionScope.TEST)
 public class Lst extends ProjectBase {
     @Override
     public void doExecute(Archive archive) throws Exception {

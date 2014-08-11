@@ -35,7 +35,7 @@ public class ArchiveIT extends IntegrationBase {
         storages = testStorages();
         project = testProject();
         try{
-            try (Archive archive = storages.open(project, 1, nullLog())) {
+            try (Archive archive = storages.openOne(project, 1, nullLog())) {
                 toomuch = new long[Integer.MAX_VALUE];
                 toomuch[0] = 0;
             }
@@ -44,7 +44,7 @@ public class ArchiveIT extends IntegrationBase {
             // ok
         }
         // make sure the lock was removed
-        storages.open(project, 1, nullLog()).close();
+        storages.openOne(project, 1, nullLog()).close();
     }
 
     @Test
@@ -56,7 +56,7 @@ public class ArchiveIT extends IntegrationBase {
 
         storages = testStorages();
         project = testProject();
-        archive = storages.open(project, 5, nullLog());
+        archive = storages.openOne(project, 5, nullLog());
         new Thread() {
             public void run() {
                 try {
@@ -67,7 +67,7 @@ public class ArchiveIT extends IntegrationBase {
                 }
             }
         }.start();
-        archive2 = storages.open(project, 10, systemOutLog());
+        archive2 = storages.openOne(project, 10, systemOutLog());
         archive2.close();
     }
 
@@ -79,9 +79,9 @@ public class ArchiveIT extends IntegrationBase {
 
         storages = testStorages();
         project = testProject();
-        archive = storages.open(project, 5, nullLog());
+        archive = storages.openOne(project, 5, nullLog());
         try {
-            try (Archive archive2 = storages.open(project, 1, nullLog())) {
+            try (Archive archive2 = storages.openOne(project, 1, nullLog())) {
                 // empty - exception expected
             }
             fail();

@@ -17,11 +17,12 @@ package net.oneandone.maven.plugins.prerelease;
 
 import net.oneandone.maven.plugins.prerelease.core.Archive;
 import org.apache.maven.plugins.annotations.Mojo;
+import org.apache.maven.plugins.annotations.ResolutionScope;
 
 /**
  * Checks if there is a prerelease for the last change in your svn working directory; creates one if not.
  */
-@Mojo(name = "update")
+@Mojo(name = "update", requiresDependencyResolution = ResolutionScope.TEST, requiresDependencyCollection = ResolutionScope.TEST)
 public class Update extends ProjectBase {
     @Override
     public void doExecute(Archive archive) throws Exception {

@@ -19,6 +19,7 @@ import net.oneandone.sushi.fs.Node;
 import net.oneandone.sushi.fs.World;
 import net.oneandone.sushi.fs.file.FileNode;
 import org.apache.maven.plugin.logging.Log;
+import org.apache.maven.project.MavenProject;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -28,12 +29,14 @@ import java.util.Set;
 
 public class Storages {
     private final List<FileNode> storages;
+    private final List<Archive> opened;
 
     public Storages(List<FileNode> storages) {
         if (storages.isEmpty()) {
             throw new IllegalArgumentException();
         }
         this.storages = storages;
+        this.opened = new ArrayList<>();
     }
 
     public World getWorld() {
@@ -42,20 +45,77 @@ public class Storages {
 
     //-- main methods
 
-    public Archive tryOpen(Project project) {
-        try {
-            return open(project, -1, null);
-        } catch (IOException e) {
-            return null;
-        }
-    }
-
-    public Archive open(Project project, int timeout, Log log) throws IOException {
+    public Archive open(MavenProject project, int timeout, Log log) throws IOException {
+        Archive result;
+        Prerelease prerelease;
         Archive archive;
 
-        archive = new Archive(directories(project));
+        if (!opened.isEmpty()) {
+            throw new IllegalStateException();
+        }
+        result = openOne(Project.forMavenProject(project), timeout, log);
+        try {
+            for (org.apache.maven.artifact.Artifact artifact : project.getArtifacts()) {
+                if (Descriptor.isSnapshot(artifact.getVersion())) {
+                    if (artifact.getFile() == null) {
+                        throw new IllegalStateException(artifact.toString());
+                    }
+                    archive = openOne(new Project(artifact.getGroupId(), artifact.getArtifactId(), artifact.getVersion()), timeout, log);
+                    prerelease = archive.lookupArtifact(getWorld().file(artifact.getFile()), this);
+                    if (prerelease == null) {
+                        opened.remove(opened.size() - 1);
+                        archive.close();
+                    }
+                }
+            }
+        } catch (RuntimeException | IOException e) {
+            try {
+                close();
+            } catch (Exception nested) {
+                e.addSuppressed(nested);
+            }
+            throw e;
+        }
+        return result;
+    }
+
+    public Archive openOne(Project project, int timeout, Log log) throws IOException {
+        Archive archive;
+
+        archive = new Archive(project, directories(project));
         archive.open(timeout, log);
+        opened.add(archive);
         return archive;
+    }
+
+    public Archive get(Project project) {
+        for (Archive archive : opened) {
+            if (archive.project.equals(project)) {
+                return archive;
+            }
+        }
+        throw new IllegalStateException(project.toString());
+    }
+
+    public void close() throws IOException {
+        IOException failures;
+
+        failures = null;
+        for (Archive archive : opened) {
+            try {
+                archive.close();
+            } catch (IOException e) {
+                if (failures == null) {
+                    failures = e;
+                } else {
+                    failures.addSuppressed(e);
+                }
+            }
+        }
+        opened.clear();
+        if (failures != null) {
+            throw failures;
+        }
     }
 
     //--
@@ -113,7 +173,7 @@ public class Storages {
         return storages.get(level).join(project.groupId, project.artifactId, Descriptor.releaseVersion(project.version));
     }
 
-    private List<FileNode> directories(Project project) {
+    public List<FileNode> directories(Project project) {
         List<FileNode> directories;
 
         directories = new ArrayList<>(storages.size());

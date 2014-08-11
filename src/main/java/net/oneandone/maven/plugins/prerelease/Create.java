@@ -17,6 +17,7 @@ package net.oneandone.maven.plugins.prerelease;
 
 import net.oneandone.maven.plugins.prerelease.core.Archive;
 import org.apache.maven.plugins.annotations.Mojo;
+import org.apache.maven.plugins.annotations.ResolutionScope;
 
 /**
  * Creates a prerelease with an uncommitted tag and undeployed artifacts. Creating a prerelease is the first step to create a release;
@@ -35,7 +36,7 @@ import org.apache.maven.plugins.annotations.Mojo;
  *
  * 2) no pending updates up to the last modified revision of your svn working directory
  */
-@Mojo(name = "create")
+@Mojo(name = "create", requiresDependencyResolution = ResolutionScope.TEST, requiresDependencyCollection = ResolutionScope.TEST)
 public class Create extends ProjectBase {
     @Override
     public void doExecute(Archive archive) throws Exception {

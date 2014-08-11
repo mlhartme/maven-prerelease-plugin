@@ -43,9 +43,8 @@ public class PrereleaseRepository implements WorkspaceReader {
             artifactId = parts[1];
             version = parts[2];
             revision = Long.parseLong(parts[3]);
-            try (Archive archive = storages.open(new Project(groupId, artifactId, version), 1 /* TODO */, null)) {
-                result.add(Prerelease.load(archive.target(revision), storages));
-            }
+            Archive archive = storages.get(new Project(groupId, artifactId, version));
+            result.add(Prerelease.load(archive.target(revision), storages));
         }
         return result;
     }
@@ -53,20 +52,20 @@ public class PrereleaseRepository implements WorkspaceReader {
     public static PrereleaseRepository forProject(MavenProject mavenProject, Storages storages) throws IOException {
         PrereleaseRepository result;
         Prerelease prerelease;
+        Archive archive;
 
         // TODO: expensive
         // TODO: handle multiple revisions
         result = new PrereleaseRepository();
         for (org.apache.maven.artifact.Artifact artifact : mavenProject.getArtifacts()) {
             if (Descriptor.isSnapshot(artifact.getVersion())) {
-                try (Archive archive = storages.open(new Project(artifact.getGroupId(), artifact.getArtifactId(), artifact.getVersion()), 1 /* TODO */, null)) {
-                    if (artifact.getFile() == null) {
-                        throw new IllegalStateException(artifact.toString());
-                    }
-                    prerelease = archive.lookupArtifact(storages.getWorld().file(artifact.getFile()), storages);
-                    if (prerelease != null) {
-                        result.add(prerelease);
-                    }
+                if (artifact.getFile() == null) {
+                    throw new IllegalStateException(artifact.toString());
+                }
+                archive = storages.get(new Project(artifact.getGroupId(), artifact.getArtifactId(), artifact.getVersion()));
+                prerelease = archive.lookupArtifact(storages.getWorld().file(artifact.getFile()), storages);
+                if (prerelease != null) {
+                    result.add(prerelease);
                 }
             }
         }

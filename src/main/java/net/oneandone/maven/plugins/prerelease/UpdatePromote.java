@@ -20,11 +20,12 @@ import net.oneandone.maven.plugins.prerelease.core.Prerelease;
 import net.oneandone.maven.plugins.prerelease.core.WorkingCopy;
 import net.oneandone.maven.plugins.prerelease.util.Maven;
 import org.apache.maven.plugins.annotations.Mojo;
+import org.apache.maven.plugins.annotations.ResolutionScope;
 
 /**
  * Updates and promotes a prerelease. Convenience goal to build a release in one call.
  */
-@Mojo(name = "update-promote")
+@Mojo(name = "update-promote", requiresDependencyResolution = ResolutionScope.TEST, requiresDependencyCollection = ResolutionScope.TEST)
 public class UpdatePromote extends Promote {
     public void doExecute(Archive archive) throws Exception {
         Prerelease prerelease;

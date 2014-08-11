@@ -56,14 +56,16 @@ import java.util.List;
 // tertiaryStorage
 //    :
 public class Archive implements AutoCloseable {
+    public final Project project;
     private final List<FileNode> directories;
     private boolean opened = false;
     private boolean closed = false;
 
-    public Archive(List<FileNode> directories) {
+    public Archive(Project project, List<FileNode> directories) {
         if (directories.size() == 0) {
             throw new IllegalArgumentException();
         }
+        this.project = project;
         this.directories = directories;
     }
 
@@ -184,7 +186,6 @@ public class Archive implements AutoCloseable {
         }
     }
 
-    @Override
     public void close() throws IOException {
         FileNode file;
 

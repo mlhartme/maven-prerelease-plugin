@@ -21,6 +21,7 @@ import net.oneandone.maven.plugins.prerelease.core.WorkingCopy;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
+import org.apache.maven.plugins.annotations.ResolutionScope;
 
 /**
  * Promotes a prerelease by commiting the tag and deploying its artifact(s).
@@ -41,7 +42,7 @@ import org.apache.maven.plugins.annotations.Parameter;
  *
  * Note that the deployment date of artifacts in the repository may be later that the release date in the changes.xml.
  */
-@Mojo(name = "promote")
+@Mojo(name = "promote", requiresDependencyResolution = ResolutionScope.TEST, requiresDependencyCollection = ResolutionScope.TEST)
 public class Promote extends ProjectBase {
     /**
      * Message for svn commit of the new tag.
