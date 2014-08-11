@@ -81,6 +81,24 @@ public class Archive implements AutoCloseable {
         throw new IllegalStateException();
     }
 
+    public Prerelease lookupArtifact(FileNode artifact, Storages storages) throws IOException {
+        String sha;
+        Prerelease prerelease;
+
+        // TODO: expensive
+        // TODO: ambiguous search results
+        sha = artifact.sha();
+        for (Target target : list()) {
+            prerelease = target.loadOpt(storages);
+            for (FileNode file : prerelease.artifactFiles().keySet()) {
+                if (file.sha().equals(sha)) {
+                    return prerelease;
+                }
+            }
+        }
+        return null;
+    }
+
     /** @return maps revisions to prerelease directories */
     public List<Target> list() throws ListException, DirectoryNotFoundException {
         List<Target> result;

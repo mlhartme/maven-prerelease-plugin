@@ -335,4 +335,15 @@ public class Prerelease {
         }
         return result;
     }
+
+    public int hashCode() {
+        return (int) target.getRevision();
+    }
+
+    public boolean equals(Object obj) {
+        if (obj instanceof Prerelease) {
+            return checkout.equals(((Prerelease) obj).checkout);
+        }
+        return false;
+    }
 }

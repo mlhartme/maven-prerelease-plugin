@@ -16,6 +16,7 @@
 package net.oneandone.maven.plugins.prerelease.core;
 
 import net.oneandone.sushi.fs.Node;
+import net.oneandone.sushi.fs.World;
 import net.oneandone.sushi.fs.file.FileNode;
 import org.apache.maven.plugin.logging.Log;
 
@@ -29,7 +30,14 @@ public class Storages {
     private final List<FileNode> storages;
 
     public Storages(List<FileNode> storages) {
+        if (storages.isEmpty()) {
+            throw new IllegalArgumentException();
+        }
         this.storages = storages;
+    }
+
+    public World getWorld() {
+        return storages.get(0).getWorld();
     }
 
     //-- main methods

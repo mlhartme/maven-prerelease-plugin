@@ -10,7 +10,6 @@ import net.oneandone.sushi.fs.file.FileNode;
 import net.oneandone.sushi.util.Separator;
 import net.oneandone.sushi.xml.Selector;
 import net.oneandone.sushi.xml.XmlException;
-import org.apache.maven.model.Dependency;
 import org.apache.maven.project.MavenProject;
 import org.eclipse.aether.artifact.Artifact;
 import org.eclipse.aether.artifact.DefaultArtifact;
@@ -53,15 +52,21 @@ public class PrereleaseRepository implements WorkspaceReader {
 
     public static PrereleaseRepository forProject(MavenProject mavenProject, Storages storages) throws IOException {
         PrereleaseRepository result;
+        Target target;
+        Prerelease prerelease;
 
         // TODO: expensive
         // TODO: handle multiple revisions
         result = new PrereleaseRepository();
-        for (Dependency dependency : mavenProject.getDependencies()) {
-            if (Descriptor.isSnapshot(dependency.getVersion())) {
-                try (Archive archive = storages.open(new Project(dependency.getGroupId(), dependency.getArtifactId(), dependency.getVersion()), 1 /* TODO */, null)) {
-                    for (Target target : archive.list()) {
-                        result.add(Prerelease.load(target, storages));
+        for (org.apache.maven.artifact.Artifact artifact : mavenProject.getArtifacts()) {
+            if (Descriptor.isSnapshot(artifact.getVersion())) {
+                try (Archive archive = storages.open(new Project(artifact.getGroupId(), artifact.getArtifactId(), artifact.getVersion()), 1 /* TODO */, null)) {
+                    if (artifact.getFile() == null) {
+                        throw new IllegalStateException(artifact.toString());
+                    }
+                    prerelease = archive.lookupArtifact(storages.getWorld().file(artifact.getFile()), storages);
+                    if (prerelease != null) {
+                        result.add(prerelease);
                     }
                 }
             }
@@ -82,11 +87,19 @@ public class PrereleaseRepository implements WorkspaceReader {
         this.artifacts = new ArrayList<>();
     }
 
-    public void add(Prerelease prerelease) throws IOException {
+    public boolean add(Prerelease prerelease) throws IOException {
         FileNode file;
         String[] tmp;
         Artifact artifact;
 
+        for (Prerelease existing : prereleases) {
+            if (prerelease.descriptor.project.equals(existing.descriptor.project)) {
+                if (prerelease.target.getRevision() != existing.target.getRevision()) {
+                    throw new IOException("conflicting pre-releases: " + prerelease.target.getRevision() + " vs " + existing.target.getRevision());
+                }
+                return false;
+            }
+        }
         prereleases.add(prerelease);
         for (Map.Entry<FileNode, String[]> entry : prerelease.artifactFiles().entrySet()) {
             file = entry.getKey();
@@ -96,6 +109,7 @@ public class PrereleaseRepository implements WorkspaceReader {
             artifact = artifact.setFile(file.toPath().toFile());
             artifacts.add(artifact);
         }
+        return true;
     }
 
     @Override
