@@ -52,7 +52,6 @@ public class PrereleaseRepository implements WorkspaceReader {
 
     public static PrereleaseRepository forProject(MavenProject mavenProject, Storages storages) throws IOException {
         PrereleaseRepository result;
-        Target target;
         Prerelease prerelease;
 
         // TODO: expensive
