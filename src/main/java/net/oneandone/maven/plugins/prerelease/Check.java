@@ -15,12 +15,12 @@
  */
 package net.oneandone.maven.plugins.prerelease;
 
+import org.apache.maven.plugin.MojoExecutionException;
+import org.apache.maven.plugins.annotations.Mojo;
+
 import net.oneandone.maven.plugins.prerelease.core.Archive;
 import net.oneandone.maven.plugins.prerelease.core.Prerelease;
 import net.oneandone.maven.plugins.prerelease.core.WorkingCopy;
-import org.apache.maven.plugin.MojoExecutionException;
-import org.apache.maven.plugins.annotations.Mojo;
-import org.apache.maven.plugins.annotations.Parameter;
 
 /**
  * Runs the prerelease checks.
@@ -34,7 +34,7 @@ public class Check extends ProjectBase {
 
         workingCopy = checkedWorkingCopy();
         revision = workingCopy.revision();
-        setTarget(archive.target(revision));
+        setTarget(archive.target(revision, svnCredentials));
         prerelease = target.loadOpt();
         if (prerelease == null) {
             throw new MojoExecutionException("no prerelease for revision " + revision);

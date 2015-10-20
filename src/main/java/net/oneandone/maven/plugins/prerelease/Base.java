@@ -15,10 +15,13 @@
  */
 package net.oneandone.maven.plugins.prerelease;
 
-import net.oneandone.maven.plugins.prerelease.util.Maven;
-import net.oneandone.sushi.fs.World;
-import net.oneandone.sushi.fs.file.FileNode;
-import net.oneandone.sushi.util.Separator;
+import java.io.File;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 import org.apache.maven.artifact.repository.ArtifactRepository;
 import org.apache.maven.execution.MavenSession;
 import org.apache.maven.plugin.AbstractMojo;
@@ -28,12 +31,11 @@ import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.project.MavenProjectHelper;
 import org.apache.maven.project.ProjectBuilder;
 
-import java.io.File;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import net.oneandone.maven.plugins.prerelease.util.Maven;
+import net.oneandone.maven.plugins.prerelease.util.Subversion;
+import net.oneandone.sushi.fs.World;
+import net.oneandone.sushi.fs.file.FileNode;
+import net.oneandone.sushi.util.Separator;
 
 public abstract class Base extends AbstractMojo {
     /**
@@ -73,10 +75,25 @@ public abstract class Base extends AbstractMojo {
     @Parameter( defaultValue = "${localRepository}", readonly = true, required = true )
     private ArtifactRepository localRepository;
 
+
+    /**
+     * Svn Username to be used. Defaults back to subversion default authentication. Only usable with prerelease.svnpassword
+     */
+    @Parameter(property = "prerelease.svnusername", required = false)
+    private String svnUser;
+
+    /**
+     * Svn Password to be used. Defaults back to subversion default authentication. Only usable with prerelease.svnusername
+     */
+    @Parameter(property = "prerelease.svnpassword", required = false)
+    private String svnPassword;
+
+
     @Component
     protected MavenSession session;
 
     protected final World world;
+    protected Subversion.SvnCredentials svnCredentials;
 
     public Base() {
         this.world = new World();
@@ -84,6 +101,14 @@ public abstract class Base extends AbstractMojo {
 
     @Override
     public void execute() throws MojoExecutionException {
+        if (svnPassword == null && svnUser == null) {
+            svnCredentials = Subversion.SvnCredentials.NONE();
+        }
+        if ((svnUser == null && svnPassword != null) || (svnUser != null && svnPassword == null)) {
+            throw new MojoExecutionException("prerelease.svnusername and prerelease.svnpassword must be used in combination");
+        } else  {
+            svnCredentials = new Subversion.SvnCredentials(svnUser, svnPassword);
+        }
         getLog().debug("user-properties: " + session.getUserProperties());
         try {
             doExecute();

@@ -15,7 +15,19 @@
  */
 package net.oneandone.maven.plugins.prerelease.core;
 
+import java.io.IOException;
+import java.lang.management.ManagementFactory;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+import java.util.TreeMap;
+
+import org.apache.maven.plugin.logging.Log;
+import org.apache.maven.project.MavenProject;
+import org.xml.sax.SAXException;
+
 import net.oneandone.maven.plugins.prerelease.util.ChangesXml;
+import net.oneandone.maven.plugins.prerelease.util.Subversion;
 import net.oneandone.sushi.fs.DirectoryNotFoundException;
 import net.oneandone.sushi.fs.FileNotFoundException;
 import net.oneandone.sushi.fs.ListException;
@@ -23,22 +35,6 @@ import net.oneandone.sushi.fs.MkfileException;
 import net.oneandone.sushi.fs.OnShutdown;
 import net.oneandone.sushi.fs.file.FileNode;
 import net.oneandone.sushi.xml.XmlException;
-import org.apache.maven.plugin.logging.Log;
-import org.apache.maven.project.MavenProject;
-import org.xml.sax.SAXException;
-
-import java.io.IOException;
-import java.lang.management.ManagementFactory;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Comparator;
-import java.util.Date;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.SortedSet;
-import java.util.TreeMap;
-import java.util.TreeSet;
 
 /**
  * The archive stores prereleases for one given groupId/artifactId.
@@ -101,7 +97,7 @@ public class Archive implements AutoCloseable {
         this.directories = directories;
     }
 
-    public Target target(long revision) {
+    public Target target(long revision, Subversion.SvnCredentials svnCredentials) {
         String name;
         FileNode prerelease;
 
@@ -109,7 +105,7 @@ public class Archive implements AutoCloseable {
         for (int i = directories.size() - 1; i >= 0; i--) {
             prerelease = directories.get(i).join(name);
             if (i == 0 || prerelease.exists()) {
-                return new Target(prerelease, revision);
+                return new Target(prerelease, revision, svnCredentials);
             }
         }
         throw new IllegalStateException();

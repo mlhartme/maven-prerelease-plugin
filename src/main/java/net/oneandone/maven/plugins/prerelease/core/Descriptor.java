@@ -15,16 +15,6 @@
  */
 package net.oneandone.maven.plugins.prerelease.core;
 
-import net.oneandone.maven.plugins.prerelease.util.Subversion;
-import net.oneandone.sushi.fs.World;
-import net.oneandone.sushi.fs.file.FileNode;
-import net.oneandone.sushi.util.Strings;
-import org.apache.maven.artifact.Artifact;
-import org.apache.maven.model.Dependency;
-import org.apache.maven.model.DeploymentRepository;
-import org.apache.maven.model.Scm;
-import org.apache.maven.project.MavenProject;
-
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -33,6 +23,17 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
+
+import org.apache.maven.artifact.Artifact;
+import org.apache.maven.model.Dependency;
+import org.apache.maven.model.DeploymentRepository;
+import org.apache.maven.model.Scm;
+import org.apache.maven.project.MavenProject;
+
+import net.oneandone.maven.plugins.prerelease.util.Subversion;
+import net.oneandone.sushi.fs.World;
+import net.oneandone.sushi.fs.file.FileNode;
+import net.oneandone.sushi.util.Strings;
 
 /** Basically the prerelease.properties. Metadata about a prerelease. */
 public class Descriptor {
@@ -59,10 +60,10 @@ public class Descriptor {
                 new Project(get(properties, PROJECT_GROUP_ID), get(properties, PROJECT_ARTIFACT_ID), get(properties, PROJECT_VERSION)),
                 get(properties, DEPLOY_REPOSITORY), "true".equals(get(properties, DEPLOY_PLUGIN_METADATA)),
                 get(properties, PREVIOUS), get(properties, NEXT),
-                getProperties(properties, DEPLOY_PROPERTIES));
+                getProperties(properties, DEPLOY_PROPERTIES), target.getSvnCredentials());
     }
 
-    public static Descriptor create(String prerelease, MavenProject mavenProject, long revision)
+    public static Descriptor create(String prerelease, MavenProject mavenProject, long revision, Subversion.SvnCredentials svnCredentials)
             throws MissingScmTag, MissingDeveloperConnection, CannotBumpVersion, CannotDeterminTagBase {
         Project project;
         String svnOrig;
@@ -75,13 +76,14 @@ public class Descriptor {
         repo = mavenProject.getDistributionManagement().getRepository();
         return new Descriptor(prerelease, revision, svnOrig, svnTag, project, repo.getId() + "::" + repo.getUrl(),
                 "maven-plugin".equals(mavenProject.getPackaging()), mavenProject.getVersion(), next(project.version),
-                new HashMap<String, String>());
+                new HashMap<String, String>(), svnCredentials);
     }
 
-    public static Descriptor checkedCreate(World world, String prerelease, MavenProject mavenProject, long revision, boolean allowSnapshots, boolean allowPrereleaseSnapshots)
+    public static Descriptor checkedCreate(World world, String prerelease, MavenProject mavenProject, long revision, boolean allowSnapshots, boolean allowPrereleaseSnapshots,
+      Subversion.SvnCredentials svnCredentials)
             throws CannotDeterminTagBase,
             MissingScmTag, CannotBumpVersion, MissingDeveloperConnection, TagAlreadyExists, VersioningProblem {
-        return create(prerelease, mavenProject, revision).check(world, mavenProject, allowSnapshots, allowPrereleaseSnapshots);
+        return create(prerelease, mavenProject, revision, svnCredentials).check(world, mavenProject, allowSnapshots, allowPrereleaseSnapshots);
     }
 
     //--
@@ -97,9 +99,10 @@ public class Descriptor {
     public final String previous;
     public final String next;
     public final Map<String, String> deployProperties;
+    public final Subversion.SvnCredentials svnCredentials;
 
     public Descriptor(String prerelease, long revision, String svnOrig, String svnTag, Project project, String deployRepository,
-                      boolean deployPluginMetadata, String previous, String next, Map<String, String> deployProperties) {
+      boolean deployPluginMetadata, String previous, String next, Map<String, String> deployProperties, Subversion.SvnCredentials svnCredentials) {
         if (svnOrig.endsWith("/")) {
             throw new IllegalArgumentException(svnOrig);
         }
@@ -116,6 +119,7 @@ public class Descriptor {
         this.previous = previous;
         this.next = next;
         this.deployProperties = deployProperties;
+        this.svnCredentials = svnCredentials;
     }
 
     /** @return this */
@@ -143,7 +147,7 @@ public class Descriptor {
         if (problems.size() > 0 && !allowSnapshots) {
             throw new VersioningProblem(problems);
         }
-        if (Subversion.exists(world.getTemp(), svnTag)) {
+        if (Subversion.exists(world.getTemp(), svnCredentials, svnTag)) {
             throw new TagAlreadyExists(svnTag);
         }
         return this;

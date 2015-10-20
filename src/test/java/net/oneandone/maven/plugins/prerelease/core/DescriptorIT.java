@@ -15,16 +15,18 @@
  */
 package net.oneandone.maven.plugins.prerelease.core;
 
-import net.oneandone.maven.plugins.prerelease.util.IntegrationBase;
-import net.oneandone.maven.plugins.prerelease.util.Maven;
-import net.oneandone.sushi.fs.file.FileNode;
+import static org.junit.Assert.assertEquals;
+
+import java.net.URI;
+
 import org.apache.maven.project.MavenProject;
 import org.junit.Ignore;
 import org.junit.Test;
 
-import java.net.URI;
-
-import static org.junit.Assert.assertEquals;
+import net.oneandone.maven.plugins.prerelease.util.IntegrationBase;
+import net.oneandone.maven.plugins.prerelease.util.Maven;
+import net.oneandone.maven.plugins.prerelease.util.Subversion;
+import net.oneandone.sushi.fs.file.FileNode;
 
 public class DescriptorIT extends IntegrationBase {
     @Test
@@ -38,8 +40,8 @@ public class DescriptorIT extends IntegrationBase {
         dir = checkoutProject("minimal");
         maven = maven(WORLD);
         project = maven.loadPom(dir.join("pom.xml"));
-        revision = WorkingCopy.load(dir).revision();
-        descriptor = Descriptor.checkedCreate(WORLD, "foo", project, revision, false, true);
+        revision = WorkingCopy.load(dir, Subversion.SvnCredentials.NONE()).revision();
+        descriptor = Descriptor.checkedCreate(WORLD, "foo", project, revision, false, true, Subversion.SvnCredentials.NONE());
         assertEquals(revision, descriptor.revision);
         assertEquals("1.0.0-SNAPSHOT", descriptor.previous);
         assertEquals("minimal", descriptor.project.artifactId);
@@ -61,12 +63,12 @@ public class DescriptorIT extends IntegrationBase {
         dir = checkoutProject("minimal");
         maven = maven(WORLD);
         project = maven.loadPom(dir.join("pom.xml"));
-        revision = WorkingCopy.load(dir).revision();
-        Descriptor.checkedCreate(WORLD, "foo", project, revision, false, true);
+        revision = WorkingCopy.load(dir, Subversion.SvnCredentials.NONE()).revision();
+        Descriptor.checkedCreate(WORLD, "foo", project, revision, false, true, Subversion.SvnCredentials.NONE());
         tag = new URI(REPOSITORY_URL + "/minimal/tags/minimal-1.0.0");
         svnMkdir(tag);
         try {
-            Descriptor.checkedCreate(WORLD, "foo", project, revision, false, true);
+            Descriptor.checkedCreate(WORLD, "foo", project, revision, false, true, Subversion.SvnCredentials.NONE());
         } finally {
             svnRemove(tag);
         }
@@ -83,8 +85,8 @@ public class DescriptorIT extends IntegrationBase {
         dir = checkoutProject("parentSnapshot");
         maven = maven(WORLD);
         project = maven.loadPom(dir.join("pom.xml"));
-        revision = WorkingCopy.load(dir).revision();
-        Descriptor.checkedCreate(WORLD, "foo", project, revision, false, true);
+        revision = WorkingCopy.load(dir, Subversion.SvnCredentials.NONE()).revision();
+        Descriptor.checkedCreate(WORLD, "foo", project, revision, false, true, Subversion.SvnCredentials.NONE());
     }
 
     @Test(expected = VersioningProblem.class)
@@ -97,8 +99,8 @@ public class DescriptorIT extends IntegrationBase {
         dir = checkoutProject("dependencySnapshot");
         maven = maven(WORLD);
         project = maven.loadPom(dir.join("pom.xml"));
-        revision = WorkingCopy.load(dir).revision();
-        Descriptor.checkedCreate(WORLD, "foo", project, revision, false, true);
+        revision = WorkingCopy.load(dir, Subversion.SvnCredentials.NONE()).revision();
+        Descriptor.checkedCreate(WORLD, "foo", project, revision, false, true, Subversion.SvnCredentials.NONE());
     }
 
     @Test(expected = VersioningProblem.class)
@@ -111,7 +113,7 @@ public class DescriptorIT extends IntegrationBase {
         dir = checkoutProject("pluginSnapshot");
         maven = maven(WORLD);
         project = maven.loadPom(dir.join("pom.xml"));
-        revision = WorkingCopy.load(dir).revision();
-        Descriptor.checkedCreate(WORLD, "foo", project, revision, false, true);
+        revision = WorkingCopy.load(dir, Subversion.SvnCredentials.NONE()).revision();
+        Descriptor.checkedCreate(WORLD, "foo", project, revision, false, true, Subversion.SvnCredentials.NONE());
     }
 }
