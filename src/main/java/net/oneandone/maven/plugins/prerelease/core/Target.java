@@ -15,12 +15,13 @@
  */
 package net.oneandone.maven.plugins.prerelease.core;
 
+import java.io.IOException;
+
+import org.apache.maven.plugin.logging.Log;
+
 import net.oneandone.maven.plugins.prerelease.util.Subversion;
 import net.oneandone.sushi.fs.file.FileNode;
 import net.oneandone.sushi.launcher.Launcher;
-import org.apache.maven.plugin.logging.Log;
-
-import java.io.IOException;
 
 /**
  * Directory for a prerelease. The prerelease is not necessarily promotable (it might not exist (yet), or it may be broken, or it
@@ -31,10 +32,12 @@ public class Target {
 
     private FileNode directory;
     private final long revision;
+    private final Subversion.SvnCredentials svnCredentials;
 
-    public Target(FileNode directory, long revision) {
+    public Target(FileNode directory, long revision, Subversion.SvnCredentials svnCredentials) {
         this.directory = directory;
         this.revision = revision;
+        this.svnCredentials = svnCredentials;
     }
 
     public boolean exists() {
@@ -68,8 +71,11 @@ public class Target {
         directory.mkdirs();
     }
 
+    public Subversion.SvnCredentials getSvnCredentials() {
+        return svnCredentials;
+    }
     public Launcher svnLauncher(String ... args) {
-        return Subversion.launcher(directory, args);
+        return Subversion.launcher(directory, svnCredentials, args);
     }
 
     private FileNode removeDirectory() {

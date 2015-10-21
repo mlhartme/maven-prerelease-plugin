@@ -15,10 +15,11 @@
  */
 package net.oneandone.maven.plugins.prerelease;
 
+import org.apache.maven.plugins.annotations.Mojo;
+
 import net.oneandone.maven.plugins.prerelease.core.Archive;
 import net.oneandone.maven.plugins.prerelease.core.WorkingCopy;
 import net.oneandone.sushi.fs.file.FileNode;
-import org.apache.maven.plugins.annotations.Mojo;
 
 /**
  * Lists available prepreleases and display up-to-date information.
@@ -30,7 +31,7 @@ public class Lst extends ProjectBase {
         String revision;
         String name;
 
-        revision = Long.toString(WorkingCopy.load(basedir()).revision());
+        revision = Long.toString(WorkingCopy.load(basedir(), svnCredentials).revision());
         for (FileNode prerelease : archive.list().values()) {
             name = prerelease.getName();
             if (name.equals(revision)) {

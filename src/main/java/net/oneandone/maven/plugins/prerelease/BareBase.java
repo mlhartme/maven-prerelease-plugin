@@ -15,14 +15,15 @@
  */
 package net.oneandone.maven.plugins.prerelease;
 
+import java.util.HashMap;
+import java.util.Map;
+
+import org.apache.maven.plugins.annotations.Parameter;
+
 import net.oneandone.maven.plugins.prerelease.util.FilteringMojoExecutor;
 import net.oneandone.maven.plugins.prerelease.util.Maven;
 import net.oneandone.maven.plugins.prerelease.util.Subversion;
 import net.oneandone.sushi.fs.file.FileNode;
-import org.apache.maven.plugins.annotations.Parameter;
-
-import java.util.HashMap;
-import java.util.Map;
 
 /**
  * Perform update-promote without a working copy. Svn url and revision are passed as arguments, not determined from a working copy.
@@ -57,6 +58,7 @@ public abstract class BareBase extends Base {
     @Parameter(property = "prerelease.checkoutLink")
     private String checkoutLink;
 
+
     @Override
     public void doExecute() throws Exception {
         Maven maven;
@@ -81,7 +83,7 @@ public abstract class BareBase extends Base {
         FileNode result;
 
         result = ((FileNode) world.getWorking()).createTempDirectory();
-        Subversion.sparseCheckout(getLog(), result, svnurl, revisionForPomLoading(), false);
+        Subversion.sparseCheckout(getLog(), result, svnurl, revisionForPomLoading(), false, svnCredentials);
         return result;
     }
 

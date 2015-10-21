@@ -15,18 +15,6 @@
  */
 package net.oneandone.maven.plugins.prerelease.core;
 
-import net.oneandone.maven.plugins.prerelease.util.Subversion;
-import net.oneandone.sushi.fs.World;
-import net.oneandone.sushi.fs.file.FileNode;
-import net.oneandone.sushi.launcher.Failure;
-import net.oneandone.sushi.util.Strings;
-import net.oneandone.sushi.xml.Selector;
-import net.oneandone.sushi.xml.XmlException;
-import org.apache.maven.plugin.logging.Log;
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
-import org.xml.sax.SAXException;
-
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -35,9 +23,22 @@ import java.util.Map;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
+import org.apache.maven.plugin.logging.Log;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.xml.sax.SAXException;
+
+import net.oneandone.maven.plugins.prerelease.util.Subversion;
+import net.oneandone.sushi.fs.World;
+import net.oneandone.sushi.fs.file.FileNode;
+import net.oneandone.sushi.launcher.Failure;
+import net.oneandone.sushi.util.Strings;
+import net.oneandone.sushi.xml.Selector;
+import net.oneandone.sushi.xml.XmlException;
+
 public class WorkingCopy {
     /** TODO: memory consumption */
-    public static WorkingCopy load(FileNode workingCopy) throws IOException, SAXException, XmlException {
+    public static WorkingCopy load(FileNode workingCopy, Subversion.SvnCredentials credentials) throws IOException, SAXException, XmlException {
         World world;
         String output;
         Document doc;
@@ -54,7 +55,7 @@ public class WorkingCopy {
         long change;
         String props;
 
-        output = Subversion.launcher(workingCopy, "--xml", "-v", "--show-updates", "status").exec();
+        output = Subversion.launcher(workingCopy, credentials,"--xml", "-v", "--show-updates", "status").exec();
         world = workingCopy.getWorld();
         doc = world.getXml().getBuilder().parseString(output);
         selector = world.getXml().getSelector();
@@ -90,7 +91,7 @@ public class WorkingCopy {
         pendings = new ArrayList<>();
         for (Map.Entry<String, Long> entry : maybePendings.entrySet()) {
             if (entry.getValue() < revisions.last()) {
-                output = Subversion.launcher(workingCopy, "log", "--xml", "-q", "-r" + (entry.getValue() + 1) + ":" + revisions.last(),
+                output = Subversion.launcher(workingCopy, credentials, "log", "--xml", "-q", "-r" + (entry.getValue() + 1) + ":" + revisions.last(),
                         entry.getKey()).exec();
                 doc = world.getXml().getBuilder().parseString(output);
                 if (selector.elements(doc, "log/logentry").size() > 0) {
@@ -98,7 +99,7 @@ public class WorkingCopy {
                 }
             }
         }
-        return new WorkingCopy(workingCopy, modifications, revisions, changes, pendings);
+        return new WorkingCopy(workingCopy, modifications, revisions, changes, pendings, credentials);
     }
 
     //--
@@ -108,14 +109,16 @@ public class WorkingCopy {
     public final SortedSet<Long> revisions;
     public final SortedSet<Long> changes;
     public final List<String> pendingUpdates;
+    public final Subversion.SvnCredentials svnCredentials;
 
     public WorkingCopy(FileNode directory, List<FileNode> modifications, SortedSet<Long> revisions, SortedSet<Long> changes,
-                       List<String> pendingUpdates) {
+      List<String> pendingUpdates, Subversion.SvnCredentials svnCredentials) {
         this.directory = directory;
         this.modifications = modifications;
         this.revisions = revisions;
         this.changes = changes;
         this.pendingUpdates = pendingUpdates;
+        this.svnCredentials = svnCredentials;
     }
 
     public long revision() {
@@ -134,7 +137,7 @@ public class WorkingCopy {
     public Descriptor checkCompatibility(Descriptor descriptor) throws Exception {
         String svnurlWorkspace;
 
-        svnurlWorkspace = Subversion.workspaceUrl(directory);
+        svnurlWorkspace = Subversion.workspaceUrl(directory, svnCredentials);
         svnurlWorkspace = Strings.removeRightOpt(svnurlWorkspace, "/");
         if (!svnurlWorkspace.equals(descriptor.svnOrig)) {
             throw new SvnUrlMismatch(svnurlWorkspace, descriptor.svnOrig);
@@ -146,6 +149,6 @@ public class WorkingCopy {
     }
 
     public void update(Log log) throws Failure {
-        log.info(Subversion.launcher(directory, "update").exec());
+        log.info(Subversion.launcher(directory, svnCredentials, "update").exec());
     }
 }

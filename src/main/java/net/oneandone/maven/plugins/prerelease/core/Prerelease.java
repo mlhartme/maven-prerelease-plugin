@@ -15,6 +15,17 @@
  */
 package net.oneandone.maven.plugins.prerelease.core;
 
+import java.io.IOException;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
+
+import org.apache.maven.plugin.MojoExecutionException;
+import org.apache.maven.plugin.logging.Log;
+import org.apache.maven.project.MavenProject;
+import org.apache.maven.project.MavenProjectHelper;
+import org.xml.sax.SAXException;
+
 import net.oneandone.maven.plugins.prerelease.util.ChangesXml;
 import net.oneandone.maven.plugins.prerelease.util.FilteringMojoExecutor;
 import net.oneandone.maven.plugins.prerelease.util.Maven;
@@ -29,16 +40,6 @@ import net.oneandone.sushi.util.Strings;
 import net.oneandone.sushi.util.Substitution;
 import net.oneandone.sushi.util.SubstitutionException;
 import net.oneandone.sushi.xml.XmlException;
-import org.apache.maven.plugin.MojoExecutionException;
-import org.apache.maven.plugin.logging.Log;
-import org.apache.maven.project.MavenProject;
-import org.apache.maven.project.MavenProjectHelper;
-import org.xml.sax.SAXException;
-
-import java.io.IOException;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
 
 public class Prerelease {
     public static Prerelease load(Target target) throws IOException {
@@ -130,7 +131,7 @@ public class Prerelease {
         Launcher launcher;
 
         log.info("committing tag:");
-        launcher = Subversion.launcher(checkout, "commit", "-m", commitMessage);
+        launcher = Subversion.launcher(checkout, target.getSvnCredentials(), "commit", "-m", commitMessage);
         log.info(launcher.toString());
         log.info(launcher.exec());
     }
@@ -138,7 +139,7 @@ public class Prerelease {
     public void revertCommit(Log log, String by) throws Failure {
         Launcher launcher;
 
-        launcher = Subversion.launcher(checkout, "delete", "-m reverted promotion of prerelease " + descriptor.revision
+        launcher = Subversion.launcher(checkout, target.getSvnCredentials(), "delete", "-m reverted promotion of prerelease " + descriptor.revision
                 + " promoted by " + by, descriptor.svnTag);
         log.info(launcher.toString());
         log.info(launcher.exec());
@@ -149,7 +150,7 @@ public class Prerelease {
         ChangesXml changes;
 
         result = checkout.getWorld().getTemp().createTempDirectory();
-        Subversion.sparseCheckout(log, result, descriptor.svnOrig, "HEAD", true);
+        Subversion.sparseCheckout(log, result, descriptor.svnOrig, "HEAD", true, target.getSvnCredentials());
         try {
             changes = ChangesXml.load(result);
         } catch (FileNotFoundException e) {
@@ -157,14 +158,14 @@ public class Prerelease {
             changes = null;
         }
 
-        Subversion.launcher(result, "lock", "pom.xml");
+        Subversion.launcher(result, target.getSvnCredentials(), "lock", "pom.xml");
         if (changes != null) {
-            Subversion.launcher(result, "lock", ChangesXml.PATH);
+            Subversion.launcher(result, target.getSvnCredentials(), "lock", ChangesXml.PATH);
         }
 
         // make sure the version we've locked is what we will modify:
         // (or in other words: make sure we see possible changes that were committed between checkout and lock)
-        Subversion.launcher(result, "up");
+        Subversion.launcher(result, target.getSvnCredentials(), "up");
 
         Transform.adjustPom(result.join("pom.xml"), descriptor.previous, descriptor.next, null, null);
         if (changes != null) {
@@ -221,9 +222,9 @@ public class Prerelease {
     }
 
     private void origUnlock(FileNode origCommit) {
-        Subversion.launcher(origCommit, "unlock" , "pom.xml");
+        Subversion.launcher(origCommit, target.getSvnCredentials(), "unlock" , "pom.xml");
         if (origCommit.join(ChangesXml.PATH).exists()) {
-            Subversion.launcher(origCommit, "unlock" , ChangesXml.PATH);
+            Subversion.launcher(origCommit, target.getSvnCredentials(), "unlock" , ChangesXml.PATH);
         }
     }
 
@@ -249,7 +250,7 @@ public class Prerelease {
 
         try {
             log.info("Update pom and changes ...");
-            log.debug(Subversion.launcher(origCommit, "commit", "-m", renderMessage(commitNextMessage)).exec());
+            log.debug(Subversion.launcher(origCommit, target.getSvnCredentials(), "commit", "-m", renderMessage(commitNextMessage)).exec());
             origCommit.deleteTree();
             // Move prerelease directory into REMOVE directory because it's invalid now:
             // tag was committed, and artifacts have been deployed. It's not removed immediately to make
